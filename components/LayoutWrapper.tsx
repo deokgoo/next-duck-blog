@@ -1,6 +1,6 @@
 import siteMetadata from '@/data/siteMetadata'
 import headerNavLinks from '@/data/headerNavLinks'
-import Logo from '@/data/logo.svg'
+import Logo from '@/data/main-logo-no-bg.svg'
 import Link from './Link'
 import SectionContainer from './SectionContainer'
 import Footer from './Footer'
@@ -18,15 +18,14 @@ const LayoutWrapper = ({ children }: Props) => {
       <div className="flex flex-col justify-between h-screen">
         <header className="flex items-center justify-between py-10">
           <div>
-            <Link href="/" aria-label="Duck Blog">
+            <Link href="/" aria-label="duck blog">
               <div className="flex items-center justify-between">
                 <div className="mr-3" style={{ maxWidth: '192px' }}>
                   <Logo />
                 </div>
                 {typeof siteMetadata.headerTitle === 'string' ? (
-                  <div className="hidden h-6 text-2xl font-semibold sm:block">
-                    {siteMetadata.headerTitle}
-                  </div>
+                  // <div className="hidden h-6 text-2xl font-semibold sm:block">
+                  <div className="hidden">{siteMetadata.headerTitle}</div>
                 ) : (
                   siteMetadata.headerTitle
                 )}

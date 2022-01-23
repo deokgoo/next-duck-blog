@@ -15,7 +15,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    console.log(process.env.MAILCHIMP_AUDIENCE_ID)
+    console.info(`email: ${email} try to subscribe at ${new Date()}`)
     await mailchimp.lists.addListMember(process.env.MAILCHIMP_AUDIENCE_ID, {
       email_address: email,
       status: 'subscribed',
