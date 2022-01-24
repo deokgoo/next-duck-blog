@@ -1,0 +1,54 @@
+---
+title: "프로그래머스 베스트앨범 (hash)"
+date: "2021-07-28"
+tags: ['hash', 'algorithm', 'programmers']
+draft: false
+summary: "js로 풀어본 프로그래머스 hash 분류 베스트앨범"
+---
+
+# 문제 풀이
+
+hash 분류의 문제입니다. hash같은 정렬문제입니다<br/>
+문제의 난이도는 낮다고 생각합니다.<br/s>
+
+---
+<a href="https://programmers.co.kr/learn/courses/30/lessons/42579"
+style="color: orange;text-decoration: none;">
+[문제 링크]
+</a>
+
+```javascript
+function solution(genres, plays) {
+  const answer = [];
+  const summary = {};
+  // hash테이블 만들기
+  for(let i=0;i<genres.length;i++) {
+    if(!summary[genres[i]]) summary[genres[i]] = [];
+    summary[genres[i]].push({
+      play: plays[i],
+      num: i
+    })
+  }
+  // 장르 순서 찾기
+  const sortedGenres = Object.keys(summary).sort((a, b) => {
+    const sumA = summary[a].reduce((x, y) => x + y.play, 0);
+    const sumB = summary[b].reduce((x, y) => x + y.play, 0);
+    return sumA>sumB? -1:1;
+  });
+  // play로 정렬시키기
+  sortedGenres.forEach(x => {
+    summary[x] = summary[x].sort((a,b) => {
+      if(a.play === b.play) return 1;
+      return a.play>b.play?-1:1;
+    });
+  });
+  // 각 장르별 두개씩 뽑아내기
+  sortedGenres.forEach(x => {
+    answer.push(summary[x][0].num);
+    if(summary[x].length >= 2) answer.push(summary[x][1].num);
+  })
+
+  return answer;
+}
+
+```
