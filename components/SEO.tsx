@@ -39,6 +39,10 @@ const CommonSEO = ({ title, description, ogType, ogImage, twImage }: CommonSEOPr
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={twImage} />
+      <meta
+        httpEquiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self'; "
+      />
     </Head>
   )
 }
