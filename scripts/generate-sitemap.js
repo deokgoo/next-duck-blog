@@ -3,6 +3,8 @@ const globby = require('globby')
 const prettier = require('prettier')
 const siteMetadata = require('../data/siteMetadata')
 
+const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml';
+
 ;(async () => {
   const prettierConfig = await prettier.resolveConfig('./.prettierrc.js')
   const pages = await globby([
@@ -48,4 +50,6 @@ const siteMetadata = require('../data/siteMetadata')
 
   // eslint-disable-next-line no-sync
   fs.writeFileSync('public/sitemap.xml', formatted, 'utf8')
+
+  await fetch(`https://google.com/ping?sitemap=${siteUrl}`)
 })()
