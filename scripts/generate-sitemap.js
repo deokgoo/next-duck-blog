@@ -7,14 +7,17 @@ const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
 
 ;(async () => {
   const prettierConfig = await prettier.resolveConfig('./.prettierrc.js')
-  const pages = await globby([
+  const pages = ['/', '/blog']
+  const siteData = await globby([
     'pages/*.js',
-    'data/blog/**/*.mdx',
-    'data/blog/**/*.md',
+    'data/blog/algorithm/*.mdx',
+    'data/blog/daily/*.mdx',
+    'data/blog/web/*.mdx',
     'public/tags/**/*.xml',
     '!pages/_*.js',
     '!pages/api',
   ])
+  pages.push(siteData)
 
   const sitemap = `
         <?xml version="1.0" encoding="UTF-8"?>
