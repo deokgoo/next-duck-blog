@@ -7,7 +7,6 @@ const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
 
 ;(async () => {
   const prettierConfig = await prettier.resolveConfig('./.prettierrc.js')
-  const pages = ['/', '/blog']
   const siteData = await globby([
     'pages/*.js',
     'data/blog/algorithm/*.mdx',
@@ -17,7 +16,7 @@ const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
     '!pages/_*.js',
     '!pages/api',
   ])
-  pages.push(siteData)
+  const pages = ['/', '/blog', ...siteData]
 
   const sitemap = `
         <?xml version="1.0" encoding="UTF-8"?>
