@@ -3,7 +3,7 @@ const globby = require('globby')
 const prettier = require('prettier')
 const siteMetadata = require('../data/siteMetadata')
 
-const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml';
+const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
 
 ;(async () => {
   const prettierConfig = await prettier.resolveConfig('./.prettierrc.js')
