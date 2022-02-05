@@ -1,0 +1,29 @@
+---
+title: "yarn3 사용법 (berry)"
+date: "2022-02-05"
+tags: ['yarn3', 'web']
+draft: false
+summary: '뒷북치듯 뒤늦게 사용하는 yarn3 자세히 파보자'
+---
+
+왜 몰랐지라고 반성하며 자료를 정리하고 내 기존 프로젝트들에도 적용하고
+실제 어떤 점이 좋았고 CI설정하다가 실수 했던 점을 정리하고자 합니다.
+
+<br/>
+
+# yarn berry란?
+yarn berry는 yarn 패키지 매니저의 2번째 버전으로
+2018년 9월 yarn의 RFC 저장소에서(yarnpkg/rfcs) 시작되었다고 합니다.
+
+Javascript로 만들어져 있던 yarn을 berry에서는 Typescript로 만들었으며
+Yarn v1의 주요 개발자인 Mael Nison이 개발하셨고, 2020년 1월 25일부터 정식 버전(v2)이 출시되었습니다. <br/>
+(yarn github 페이지에서는 더 이상 yarn의 유지보수는 이루어지지 않는다고 합니다.) <br/>
+
+작성당시 berry의 latest 버전은 3.1.1 입니다.
+
+
+# NPM 문제점
+먼저 yarn berry의 등장 이유를 알아야한다.
+
+- 비효율적인 의존성 목록 검색
+  
