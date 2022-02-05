@@ -1,9 +1,9 @@
 ---
-title: "yarn3 사용법 (berry)"
+title: "yarn berry 사용법 (yarn3)"
 date: "2022-02-05"
 tags: ['yarn3', 'web']
 draft: false
-summary: '뒷북치듯 뒤늦게 사용하는 yarn3 자세히 파보자'
+summary: '뒷북치듯 뒤늦게 사용하는 yarn berry 자세히 파보자'
 ---
 
 왜 몰랐지라고 반성하며 자료를 정리하고 내 기존 프로젝트들에도 적용하고
@@ -17,13 +17,83 @@ yarn berry는 yarn 패키지 매니저의 2번째 버전으로
 
 Javascript로 만들어져 있던 yarn을 berry에서는 Typescript로 만들었으며
 Yarn v1의 주요 개발자인 Mael Nison이 개발하셨고, 2020년 1월 25일부터 정식 버전(v2)이 출시되었습니다. <br/>
-(yarn github 페이지에서는 더 이상 yarn의 유지보수는 이루어지지 않는다고 합니다.) <br/>
 
+yarn github 페이지에서는 더 이상 yarn의 유지보수는 이루어지지 않는다고 합니다.
 작성당시 berry의 latest 버전은 3.1.1 입니다.
 
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![재택](/static/images/yarn-berry/repo.png)
+  </div>
+  <span>▲현제 yarn repo</span>
+</div>
+
+<br/>
 
 # NPM 문제점
 먼저 yarn berry의 등장 이유를 알아야한다.
 
 - 비효율적인 의존성 목록 검색
-  
+- 중복제거를 못함
+- 최적화 하려다 유령 의존성(Phantom dependencies) 발생
+
+(https://academy.realm.io/posts/mobilization-konstantin-raev-taming-node-modules-at-facebook/)
+
+# yarn berry 기능
+Plug n Play 라는 개념을 사용하여 기존 문제점을 해결한다. pnp는 버전, 위치, 의존성 등을 담고 있다.  
+node_modules를 생성하지 않고 기본 캐시 폴더에 zip파일로 저장해서 경로를 .pnp.js에 명시
+
+- pnp제공하는 자료구조를 이용하여 위치를 찾는다
+- 패키지 중복설치가 되지 않는다.
+- zero-install을 사용하면 라이브러리 설치 없이 사용가능 <br/>
+  Yarn Berry에서 의존성을 버전 관리에 포함하는 것을 Zero-Install, 용량과 파일의 숫자가 적기 때문에 의존성을 git으로 관리 가능 
+
+  (https://yarnpkg.com/features/zero-installs)
+
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![재택](/static/images/yarn-berry/pnp.png)
+  </div>
+  <span>▲플러그앤 플레이(게임)</span>
+</div>
+
+<br/>
+
+
+# 그래서 어떻게?
+```node
+# 세팅
+yarn set version berry # yarn berry로 변경
+yarn # install
+
+# 실행
+yarn node # require()동작 overwrite
+```
+
+# ETC
+.gitignore에 추가해야할 것들
+```node
+### yarn ###
+# used Zero-Install
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# unused Zero-Install
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+```
+
+다음 포스트에서는 리엑트에 직접 적용하는 과정을 담아 보고자 합니다. 
+
+### 참고했던 자료
+(https://toss.tech/article/node-modules-and-yarn-berry)

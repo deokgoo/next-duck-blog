@@ -2,7 +2,7 @@ const siteMetadata = {
   title: 'duck 블로그',
   author: 'deokgoo',
   headerTitle: 'duck 블로그',
-  description: '개발 기록 기술 블로그',
+  description: 'duck의 개발 기록 블로그',
   language: 'ko',
   theme: 'system', // system, dark or light
   siteUrl: 'https://duck-blog.vercel.app',
