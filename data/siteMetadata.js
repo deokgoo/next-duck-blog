@@ -23,6 +23,7 @@ const siteMetadata = {
     simpleAnalytics: false, // true or false
     umamiWebsiteId: '', // e.g. 123e4567-e89b-12d3-a456-426614174000
     googleAnalyticsId: 'UA-217395751-1', // e.g. UA-000000-2 or G-XXXXXXX
+    naverWebMasterId: '3884d7b87ded12a75e3e2ba6a101a34bebcf4715', // naver web master verification code
   },
   newsletter: {
     // supports mailchimp, buttondown, convertkit, klaviyo
