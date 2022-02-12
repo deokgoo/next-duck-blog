@@ -2,6 +2,7 @@ const fs = require('fs')
 const globby = require('globby')
 const prettier = require('prettier')
 const siteMetadata = require('../data/siteMetadata')
+const axios = require('axios')
 
 const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
 
@@ -36,10 +37,12 @@ const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
                   return
                 }
                 return `
-                        <url>
-                            <loc>${siteMetadata.siteUrl}${route}</loc>
-                        </url>
-                    `
+                  <url>
+                    <loc>${siteMetadata.siteUrl}${route}</loc>
+                    <changefreq>${route === '/' ? 'weekly' : 'monthly'}</changefreq> 
+                    <priority>${route === '/' ? '1.0' : '0.8'}</priority>
+                  </url>
+                `
               })
               .join('')}
         </urlset>
@@ -53,5 +56,5 @@ const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
   // eslint-disable-next-line no-sync
   fs.writeFileSync('public/sitemap.xml', formatted, 'utf8')
 
-  await fetch(`https://google.com/ping?sitemap=${siteUrl}`)
+  await axios.get(`https://google.com/ping?sitemap=${siteUrl}`)
 })()
