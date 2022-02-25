@@ -21,7 +21,6 @@ const CommonSEO = ({ title, description, ogType, ogImage, twImage }: CommonSEOPr
   return (
     <Head>
       <title>{title}</title>
-      <link rel="canonical" href={siteMetadata.siteUrl} />
       <meta name="robots" content="follow, index" />
       <meta name="description" content={description} />
       <meta property="og:url" content={`${siteMetadata.siteUrl}${router.asPath}`} />
