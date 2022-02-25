@@ -21,7 +21,11 @@ const CommonSEO = ({ title, description, ogType, ogImage, twImage }: CommonSEOPr
   return (
     <Head>
       <title>{title}</title>
-      <meta name="robots" content="follow, index" />
+      {process.env.NODE_ENV === 'production' ? (
+        <meta name="robots" content="follow, index" />
+      ) : (
+        <meta name="robots" content="noindex" />
+      )}
       <meta name="description" content={description} />
       <meta property="og:url" content={`${siteMetadata.siteUrl}${router.asPath}`} />
       <meta property="og:type" content={ogType} />
