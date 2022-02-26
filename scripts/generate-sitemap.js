@@ -12,12 +12,12 @@ const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
     'pages/*.js',
     'data/blog/algorithm/*.mdx',
     'data/blog/daily/*.mdx',
+    'data/blog/nextjs/*.mdx',
     'data/blog/web/*.mdx',
-    'public/tags/**/*.xml',
     '!pages/_*.js',
     '!pages/api',
   ])
-  const pages = ['/', '/blog', ...siteData]
+  const pages = ['/', '/blog', '/projects', '/about', ...siteData]
 
   const sitemap = `
         <?xml version="1.0" encoding="UTF-8"?>
