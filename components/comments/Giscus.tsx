@@ -35,6 +35,8 @@ const Giscus = ({ mapping }: Props) => {
     script.async = true
 
     const comments = document.getElementById(COMMENTS_ID)
+
+    console.log(script)
     if (comments) comments.appendChild(script)
 
     return () => {
