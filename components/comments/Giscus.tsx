@@ -36,7 +36,6 @@ const Giscus = ({ mapping }: Props) => {
 
     const comments = document.getElementById(COMMENTS_ID)
 
-    console.log(script)
     if (comments) comments.appendChild(script)
 
     return () => {
@@ -47,8 +46,8 @@ const Giscus = ({ mapping }: Props) => {
 
   // Reload on theme change
   useEffect(() => {
-    const iframe = document.querySelector('iframe.giscus-frame')
-    if (!iframe) return
+    // const iframe = document.querySelector('iframe.giscus-frame')
+    // if (!iframe) return
     LoadComments()
   }, [LoadComments])
 

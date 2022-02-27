@@ -32,7 +32,7 @@ const Comments = ({ frontMatter }: Props) => {
     siteMetadata.comment.utterancesConfig.issueTerm
   ) {
     case 'pathname':
-      term = frontMatter.slug
+      term = `blog/${frontMatter.slug}`
       break
     case 'url':
       term = window.location.href
