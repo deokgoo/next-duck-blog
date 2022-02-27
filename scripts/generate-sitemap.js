@@ -56,5 +56,5 @@ const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
   // eslint-disable-next-line no-sync
   fs.writeFileSync('public/sitemap.xml', formatted, 'utf8')
 
-  await axios.get(`https://google.com/ping?sitemap=${siteUrl}`)
+  // await axios.get(`https://google.com/ping?sitemap=${siteUrl}`)
 })()
