@@ -1,16 +1,17 @@
 ---
 title: "자바스크립트 지연 검색 delay search"
 date: "2022-03-13"
-tags: ['js', 'lazy', 'search']
+tags: ['js', 'delay', 'search']
 draft: false
 summary: '자바스크립트로 지연 검색을 구현해보자'
 ---
 
 최근 프로젝트를 보고 느낀점이 무의미한 API호출이 쌓여
 
-재앙으로 닥치는것을 보아 이러한 작은 성능개선 사항을 정리하고자 합니다.
+재앙으로 닥치는것을 보아 이러한 작은 성능개선 한가지 정리하고자 합니다.
 
-이번 post에서는 검색엔진을 구현할때 API호출을 줄이는 방법으로서 지연 호출을
+검색엔진을 구현할때 API호출을 줄이는 방법으로서 지연 호출을
+
 하는 방법에 대해서 알아보겠습니다.
 
 <br/>
@@ -19,7 +20,7 @@ summary: '자바스크립트로 지연 검색을 구현해보자'
 1. setTimeout
 2. clearTimeout
 
-setTimeout은 비동기적으로 설정한 delay 이후에 실행할 수 있도록 하는 함수이다.
+setTimeout은 비동기적으로 설정한 delay 이후에 실행할 수 있도록 하는 함수입니다.
 
 clearTimeout은 setTimeout을 취소할 수 있습니다. [MDN 참고](https://developer.mozilla.org/ko/docs/Web/API/setTimeout)
 
@@ -28,8 +29,8 @@ clearTimeout은 setTimeout을 취소할 수 있습니다. [MDN 참고](https://d
 <br/>
 
 # 구현
-구현 방법은 싱글톤과 유사하다. setTimeout으로 delay 이후에 API 호출 하는데
-도중에 입력이 들어오면 기존 setTimeout을 죽이고 새로운 setTimeout을 만드는 것입니다 (클로저 사용해서 구현할겁니다).
+구현 방법은 싱글톤과 유사합니다. setTimeout으로 delay 이후에 API 호출 하는데
+도중에 입력이 들어오면 기존 setTimeout을 죽이고 새로운 setTimeout을 만드는 것입니다. (클로저 사용해서 구현할겁니다)
 
 ```javascript
 const createDelay = (__callback, ms) => {
