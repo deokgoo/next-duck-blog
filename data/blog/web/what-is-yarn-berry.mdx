@@ -3,13 +3,29 @@ title: "yarn berry 사용법 (yarn3)"
 date: "2022-02-05"
 tags: ['yarn3', 'web']
 draft: false
-summary: '뒷북치듯 뒤늦게 사용하는 yarn berry 자세히 파보자'
+summary: 'yarn berry, yarn2, yarn 버전3, 자세히 파보자'
 ---
 
-왜 몰랐지라고 반성하며 자료를 정리하고 내 기존 프로젝트들에도 적용하고
-실제 어떤 점이 좋았고 CI설정하다가 실수 했던 점을 정리하고자 합니다.
+(2022. 04. 13. 업데이트) <br/>
+yarn berry로 유입될 것이라고 생각했던 예상과 다르게 yarn3로 유입되는 경우가 많아
+내용들을 업데이트하였습니다.
 
-<br/>
+---
+
+# yarn의 버전
+
+`yarn version 3`, `yarn2`, `yarn berry` 은 같은 표현입니다?! <br/>
+현재 yarn은 버전이 3.x 이며 사람들이 yarn1 이후 메이저 버전으로 yarn2로 불려지며 berry는 코드이름이라고 합니다. <br/>
+yarn berry라는것은 v.2 이상의 버전이라고 생각하시면 될것 같습니다.
+
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![why yarn3](/static/images/yarn-berry/why_yarn3.png)
+  </div>
+  <span>▲ https://github.com/yarnpkg/berry/discussions/3385 참고</span>
+</div>
+
+<br/><br/>
 
 # yarn berry란?
 yarn berry는 yarn 패키지 매니저의 2번째 버전으로
@@ -23,9 +39,9 @@ yarn github 페이지에서는 더 이상 yarn의 유지보수는 이루어지�
 
 <div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
   <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
-    ![재택](/static/images/yarn-berry/repo.png)
+    ![레포](/static/images/yarn-berry/repo.png)
   </div>
-  <span>▲현제 yarn repo</span>
+  <span>▲현재 yarn repo</span>
 </div>
 
 <br/>
@@ -39,6 +55,8 @@ yarn github 페이지에서는 더 이상 yarn의 유지보수는 이루어지�
 
 (https://academy.realm.io/posts/mobilization-konstantin-raev-taming-node-modules-at-facebook/)
 
+<br/>
+
 # yarn berry 기능
 Plug n Play 라는 개념을 사용하여 기존 문제점을 해결한다. pnp는 버전, 위치, 의존성 등을 담고 있다.  
 node_modules를 생성하지 않고 기본 캐시 폴더에 zip파일로 저장해서 경로를 .pnp.js에 명시
@@ -47,28 +65,49 @@ node_modules를 생성하지 않고 기본 캐시 폴더에 zip파일로 저장�
 - 패키지 중복설치가 되지 않는다.
 - zero-install을 사용하면 라이브러리 설치 없이 사용가능 <br/>
   Yarn Berry에서 의존성을 버전 관리에 포함하는 것을 Zero-Install, 용량과 파일의 숫자가 적기 때문에 의존성을 git으로 관리 가능 
-
   (https://yarnpkg.com/features/zero-installs)
-
-<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
-  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
-    ![재택](/static/images/yarn-berry/pnp.png)
-  </div>
-  <span>▲플러그앤 플레이(게임)</span>
-</div>
 
 <br/>
 
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![pnp](/static/images/yarn-berry/pnp.png)
+  </div>
+  <span>▲ 플러그앤 플레이(게임)</span>
+</div>
 
-# 그래서 어떻게?
+<br/><br/>
+
+
+# 그래서 프로젝트에 어떻게 적용시켜 (마이그레이션)?
+
+## yarn berry로 변경
+먼저 yarn의 버전을 변경을 해야합니다. 버전을 확인하면 3.x로 확인할 수 있을것입니다.
 ```node
-# 세팅
-yarn set version berry # yarn berry로 변경
-yarn # install
-
-# 실행
-yarn node # require()동작 overwrite
+yarn set version berry
+yarn --version
 ```
+
+버전이 변경이되면 `.yarnrc.yml`, `.yarn` 이 생성되는걸 볼 수 있을것입니다.
+- `.yarnrc` 에서는 pnpMode, yarnPath, cacheFolder등을 설정 할 수 있습니다.
+- `.yarn` 에서는 cache folder에 의존성 정보를 저장하며, releases 
+
+## install
+package를 설치하고 `.pnp.cjs`에 의존성을 찾을 수 있는 정보가 저장됩니다.
+```node
+yarn
+```
+
+## 실행
+PnP가 환경에 올바르게 주입 ( require() overwrite )
+
+```node
+yarn node
+```
+
+참고: (https://yarnpkg.com/cli/node)
+
+<br/>
 
 # ETC
 .gitignore에 추가해야할 것들
@@ -92,8 +131,3 @@ yarn node # require()동작 overwrite
 !.yarn/versions
 .pnp.*
 ```
-
-다음 포스트에서는 리엑트에 직접 적용하는 과정을 담아 보고자 합니다. 
-
-### 참고했던 자료
-(https://toss.tech/article/node-modules-and-yarn-berry)
