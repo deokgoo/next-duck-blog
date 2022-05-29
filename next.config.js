@@ -1,5 +1,4 @@
 const withPlugins = require('next-compose-plugins')
-const images = require('next-images')
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -14,7 +13,7 @@ const ContentSecurityPolicy = `
   media-src 'none';
   connect-src *;
   font-src 'self' fonts.gstatic.com cdn.jsdelivr.net;
-  frame-src giscus.app https://codepen.io/;
+  frame-src 'self' giscus.app https://codepen.io/ https://codesendbox.io/;
 `
 
 const securityHeaders = [
