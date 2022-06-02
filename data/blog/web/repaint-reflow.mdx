@@ -1,0 +1,72 @@
+---
+title: "Repaint Reflow (리플로우, 리페인트)"
+date: "2022-06-02"
+tags: ['repaint', 'reflow']
+draft: false
+summary: '최적화 해보자 repaint reflow'
+---
+
+프론트엔드 개발자라면 항상 염두에 둬야 하는 내용이 바로 `reflow`, `repaint`가 아닐까 합니다. 
+
+언젠가 이 글을 보고 복습하고자 기록합니다.
+
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![study](https://media.giphy.com/media/l2Je66zG6mAAZxgqI/giphy.gif)
+  </div>
+</div>
+
+---
+
+# Pixel Pipeline
+
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![study](/static/images/web/paint-flow.png)
+  </div>
+</div>
+
+화면을 구성할 때 중요한 Pixel Pipeline 5가지의 주요 영역에 대해서 알아봅시다.
+
+- **JS**: DOM 요소 추가 삭제와 상관없이 시각적 변경을 초래하는 작업을 처리하는 데 사용합니다.
+- **Style**: 선택자를 기반으로 어떤 요소에 CSS 규칙이 적용되는지를 파악합니다.
+- **Layout**: 브라우저가 Style 규칙이 적용되고 나면 요소가 차지하는 공간과 화면의 위치를 계산합니다. (css에 %를 이용한다면 pixel로 변경하는 작업을 포함합니다.)
+- **Paint**: 시각적인 부분 텍스트, 색상, 이미지, 테두리, 그림자를 그리는 작업을 합니다
+- **Composite**: 페인트가 완료된 후 합치는 과정을 거칩니다
+
+<br/><br/>
+
+# Reflow
+Pixel Pipeline에 Layout에 해당되며 생성된 DOM 노드의 레이아웃 사이즈(너비, 높이, 위치 등) 변경이 되면
+노드의 사이즈를 계산하여 렌더 트리를 재생성하는 과정
+
+### Reflow가 발생하는 경우
+- window 리사이즈
+- elment 위치 변경
+- element 크기 변경
+- node 추가 제거
+- font 변경, image 리사이즈
+
+<br/>
+
+### Reflow 최적화 시키기
+- 애니메이션은 position을 fixed or absolute로
+- inline style을 없애기
+- style 변경이 필요하다면 최하위 노드를 변경하도록 (부모는 reflow 일어나지 않게)
+- CSS 표현식, 하위 선택자 줄이기
+
+<br/><br/>
+
+# Repaint
+Pixel Pipeline에 Paint에 해당되며 Reflow가 끝난 후 재 생성된 렌더 트리를 그리는 과정
+
+### Repaint가 발생하는 경우
+- 배경 이미지 변경
+- 텍스트, 색상 변경을
+- 그림자 추가 삭제
+
+(참고: reflow가 일어나면 repaint가 발생한다. but 반대의 경우는 없다.)
+
+
+https://web.dev/rendering-performance/
+https://csstriggers.com/
