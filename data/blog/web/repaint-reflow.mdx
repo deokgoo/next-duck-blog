@@ -37,7 +37,7 @@ summary: '최적화 해보자 repaint reflow'
 <br/><br/>
 
 # Reflow
-Pixel Pipeline에 Layout에 해당되며 생성된 DOM 노드의 레이아웃 사이즈(너비, 높이, 위치 등) 변경이 되면
+Pixel Pipeline에 Layout에 해당하며 생성된 DOM 노드의 레이아웃 사이즈(너비, 높이, 위치 등) 변경이 되면
 노드의 사이즈를 계산하여 렌더 트리를 재생성하는 과정
 
 ### Reflow가 발생하는 경우
@@ -58,7 +58,7 @@ Pixel Pipeline에 Layout에 해당되며 생성된 DOM 노드의 레이아웃 �
 <br/><br/>
 
 # Repaint
-Pixel Pipeline에 Paint에 해당되며 Reflow가 끝난 후 재 생성된 렌더 트리를 그리는 과정
+Pixel Pipeline에 Paint에 해당하며 Reflow가 끝난 후 재생성된 렌더 트리를 그리는 과정
 
 ### Repaint가 발생하는 경우
 - 배경 이미지 변경
@@ -67,6 +67,24 @@ Pixel Pipeline에 Paint에 해당되며 Reflow가 끝난 후 재 생성된 렌�
 
 (참고: reflow가 일어나면 repaint가 발생한다. but 반대의 경우는 없다.)
 
+---
 
-https://web.dev/rendering-performance/
-https://csstriggers.com/
+(참고 내용들)
+pixel pipeline 과정들이 항상 전부 일어나는 건 아니다
+> 1. JS/CSS > Style > Layout > Paint > Composite
+> Layout 변경이 되면 전부 일어난다.
+> 2. JS/CSS > Style > Paint > Compsite
+> Paint만 일어나는 경우에는 Layout 부분이 스킵이 된다.
+> 3. JS/CSS > Style > Composite
+> Layout, Paint 모두 필요하지 않는다면 Compsite 만 일어난다.
+
+# 결론
+작업을 할때 reflow, repaint를 염두하며 코스트가 적게들어가는 방향으로 구현하여
+성능을 극대화 해봅시다!
+
+(참고: css가 어떤 단계가 일어나는지 모르겠다면 사이트 참고 https://csstriggers.com/)
+
+
+
+참고자료: https://web.dev/rendering-performance/
+
