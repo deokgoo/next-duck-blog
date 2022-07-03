@@ -1,22 +1,16 @@
 ---
-title: "React18 start transition"
-date: "2022-05-28"
-tags: ['react', 'react18', 'automatic batching']
+title: "React18 useTransition"
+date: "2022-06-05"
+tags: ['react', 'react18', 'useTransition']
 draft: true
-summary: 'React18 대비하자 automatic batching'
+summary: 'React18 대비하자 useTransition'
 ---
 
-# Automatic Batching 이란?
-개인적으로 react18에서 핵심 기능 중 하나가 automatic batching 이라고 생각된다.
+# useTransition 이란?
+> 새 화면을 위한 콘텐츠를 불러오는 동안 화면 전환을 생략할 수 있다면 좋을 것입니다.
+> (https://ko.reactjs.org/docs/concurrent-mode-patterns.html)
 
-내부소스, 외부 소스 상관없이 state 업데이트를 일괄처리하여 render가 한번에 이루어 질 수 있도록 하게 한다.
-
-성능을 위해서 state변경을 묶어서 한번에 처리 해주며 render가 한번만 수행 할 수 있도록 도와준다.
-우리는 React17 이전 버전에서는 일괄 처리하기 위해 `ReactDOM.unstable_batchedUpdates` 를 통해 무의미한 렌더링을 피하려고 노력하였고
-
-React17 버전에서는 자동으로 내부 소스(클릭 이벤트 등) 한에서 batch 처리를 해주었다. 
-
-하지만 브라우저 이벤트의 업데이트 외 외부 소스(fetch, setTimeout 등)에 대해서는 일괄 처리하지 않았다.
+React18 Concurrent를 키워드를 들고 
 
 ---
 

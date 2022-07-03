@@ -1,0 +1,42 @@
+---
+title: "oauth2.0 이란? (인증 전지적 개발자 시점)"
+date: "2022-07-02"
+tags: ['oauth2', 'web', 'oidc-client']
+draft: true
+summary: 'oauth2.0 접근 방법을 알아보자'
+---
+
+# 들어가기전
+언젠가는 블로그에 글을 쓰고 싶었는데 너무 깊게 들어갈까봐 두서가 없을까 겁이 나서 정리를 못하고 있었습니다. <br/>
+교과서적인 내용을 가볍게 정리하고 역할별로 필수로 구현하여야 하는 요소와 활용하는 방법에 대해서 기록하고자 합니다. <br/>
+또 직접 개발을 하거나 테스트를 한다면 유용한 사이트, 라이브러리를 소개하고자 합니다.
+
+1년 반 정도 OAuth2를 기반으로 인증서버, 리소스서버, 클라이언트 어뎁터를 작업한 경험이 있습니다. <br/>
+👇아래는 제가 개발하면서 사용한 스펙과 참고자료입니다.
+
+- 인증서버, 리소스서버 <br/>
+SpringSecurity로 구성, Auth0 APIC Document 참고, RFC 참고 및 커스텀 <br/>
+&nbsp;&nbsp;&nbsp;[spring-project repo 참고](https://github.com/spring-projects/spring-security-samples/tree/main/servlet/spring-boot/java/oauth2/authorization-server)<br/>
+&nbsp;&nbsp;&nbsp;[Auth0 API docs](https://auth0.com/docs/api/authentication) <br/>
+&nbsp;&nbsp;&nbsp;[RFC-6749](https://datatracker.ietf.org/doc/html/rfc6749)
+
+- 클라이언트 구성 및 어뎁터 <br/>
+oidc-client.js, keycloak adapter js 참고 <br/>
+&nbsp;&nbsp;&nbsp;[spring-project repo 참고]
+
+
+<br/><br/>
+
+# OAuth 이란
+> 2006년 11월 블레인 쿡은 트위터에 OpenID를 탑재하는 작업을 하고 있었다. 
+> 같은 시기, 소셜 북마크 사이트인 Ma.gnolia는, 회원이 OpenID를 사용하여 대시보드 위젯으로 서비스에 접속할 수 있는 인증 방법을 필요로 하고 있었다. 
+> 이에 쿡, 크리스 메시나, 래리 하프(Ma.gnolia)는 데이비드 리코던(당시 베리사인)과 만나 OpenID를 활용해 트위터나 Ma.gnolia의 API로 인증을 위임하는 방법을 논의했다. 
+> 그 결과, API 접근 위임에 대한 공개 표준이 아직 존재하지 않는다는 결론에 이르렀다.
+> (출처: wiki)
+
+요약하자면 믿을 만한 Third Party에게 인증 부분을 맡기는게 어떨까 라는 아이디어로 부터 출발했습니다.
+
+즉, 접근 권한을 위임하여 인증을 처리합니다. 인증 서버는 OAuth2.0 스펙에 맞게 제공하고 클라이언트들은 인증서버가 요구하는 스펙을 구성하여 통신을 합니다.
+(OAuth2.0 을 활용한 서비스들을 보면 기본 틀은 비슷합니다 e.g. Auth0...)
+
+
