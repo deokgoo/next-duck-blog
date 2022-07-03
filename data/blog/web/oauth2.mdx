@@ -2,9 +2,11 @@
 title: "oauth2.0 이란? (인증 전지적 개발자 시점)"
 date: "2022-07-02"
 tags: ['oauth2', 'web', 'oidc-client']
-draft: true
+draft: false
 summary: 'oauth2.0 접근 방법을 알아보자'
 ---
+
+TL;DR 바쁘시면 핵심으로 이동하자 [이동하기](#oauth-flow)
 
 # 들어가기전
 언젠가는 블로그에 글을 쓰고 싶었는데 너무 깊게 들어갈까봐 두서가 없을까 겁이 나서 정리를 못하고 있었습니다. <br/>
@@ -20,9 +22,10 @@ SpringSecurity로 구성, Auth0 APIC Document 참고, RFC 참고 및 커스텀 <
 &nbsp;&nbsp;&nbsp;[Auth0 API docs](https://auth0.com/docs/api/authentication) <br/>
 &nbsp;&nbsp;&nbsp;[RFC-6749](https://datatracker.ietf.org/doc/html/rfc6749)
 
-- 클라이언트 구성 및 어뎁터 <br/>
+- 클라이언트 구성 및 어댑터(Vue 사내 라이브러리) <br/>
 oidc-client.js, keycloak adapter js 참고 <br/>
-&nbsp;&nbsp;&nbsp;[spring-project repo 참고]
+&nbsp;&nbsp;&nbsp;[spring-project repo 참고](https://github.com/IdentityModel/oidc-client-js/wiki) <br/>
+&nbsp;&nbsp;&nbsp;[keycloak adapter 참고](https://github.com/keycloak/keycloak-documentation/blob/main/securing_apps/topics/oidc/javascript-adapter.adoc)
 
 
 <br/><br/>
@@ -39,4 +42,4 @@ oidc-client.js, keycloak adapter js 참고 <br/>
 즉, 접근 권한을 위임하여 인증을 처리합니다. 인증 서버는 OAuth2.0 스펙에 맞게 제공하고 클라이언트들은 인증서버가 요구하는 스펙을 구성하여 통신을 합니다.
 (OAuth2.0 을 활용한 서비스들을 보면 기본 틀은 비슷합니다 e.g. Auth0...)
 
-
+# OAuth Flow
