@@ -1,72 +1,51 @@
 ---
 title: "React suspense"
-date: "2022-06-05"
+date: "2022-07-10"
 tags: ['react', 'react18', 'suspense']
 draft: true
 summary: 'React18 대비하자 suspense'
 ---
 
 # 들어가기전에
-React18로 들어서면서 concurrent
-
-# Suspense 이란?
-> React 16.6 버전에서는 코드를 불러오는 동안 “기다릴 수 있고”, 기다리는 동안 로딩 상태(스피너와 같은 것)를 선언적으로 지정할 수 있도록 `<Suspense>` 컴포넌트가 추가되었습니다.
-> 데이터 로딩에 초점을 두지만, 이 기능은 이미지, 스크립트, 그 밖의 비동기 작업을 기다리는 데에도 사용될 수 있습니다.
-> (https://ko.reactjs.org/docs/concurrent-mode-suspense.html)
-
-사실 
-
----
-
-# 기존 batching 은
-React17 에서도 batching을 지원하지 않은 것이 아니다. 하지만 react18과 다른 점이 있다면
-외부 소스(fetch, setTimeout 등)에 대해서는 일괄처리를 해주지 않았다.
-그래서 성능 개선을 위하여 외부 소스 코드를 사용할때는 `ReactDOM.unstable_batchedUpdates`를 사용해줬었다.
-
-아래 예시는 option을 선택하면 서버에 알리고 옵션 상태를 변경하는 예시가 있다고 가정하자
-option1은 내부 소스이기 때문에 React 17 에서는 자동으로 state를 모아서 한번에 렌더링 한다.
-하지만 option2는 외부 소스이기에 렌더가 두 번 일어난다.
-
-<iframe src="https://codesandbox.io/embed/charming-poitras-mgcnci?fontsize=14&hidenavigation=1&theme=dark&view=editor"
-     style={{width: '100%', height: '500px', border: 'none', borderRadius: '4px', overflow: 'hidden'}}
-     title="charming-poitras-mgcnci"
-     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-   ></iframe>
+React18 Suspense에 관해 공부하다가 discussions에 있는 글을 읽고 정리하고 한 번에 기억할 수 있도록 요약하고자 합니다. <br/>
+[New Suspense SSR Archietecure in React18](https://github.com/reactwg/react-18/discussions/37)
 
 <br/><br/>
 
-# React 18 에서는
-`ReactDOM.createRoot`을 사용하게 되면 내부 소스, 외부 소스 Automatic Batching이 적용되어 있어 신경 쓰지 않아도 된다.
+# SSR의 문제점
+오늘날의 많은 서비스들이 SSR방식을 사용합니다. 
 
-React18 automatic batching이 적용 안 됨
-```javascript
-const rootElement = document.getElementById("root");
-ReactDOM.render(<App />, rootElement);
-```
+> fetch data (server) → render to HTML (server) → load code (client) → hydrate (client)
 
-React18 automatic batching이 적용됨
+`SSR`은 위 와 같은 방식으로 진행되며 이전 단계가 끝나기전에 다음 단계로 나가지 못 하여 문제점들이 발생한다.
+- HTML을 내보내기 전에 서버에서 데이터들을 모아놔야한다 (서버 내에서 API호출, 데이터 접근 등)
+- 하이드레이션을 시작하기 전에 모든 컴포넌트를 대상으로한 JS가 클라이언트상에 불러와져야 한다.
+- 일부 컴포넌트만 하이드레이션을 할 수 없다.
+
+해결방법은 각각의 부분들에 대해 특정 단계를 수행할 수 있게하면 좋겠다라는 아이디어에서 `Suspense`가 활약을 합니다.
+
+<br/><br/>
+
+# Suspense란?
+- React 16.6 버전에서는 코드를 불러오는 동안 “기다릴 수 있고”, 기다리는 동안 로딩 상태(스피너와 같은 것)를 선언적으로 지정할 수 있도록 `<Suspense>` 컴포넌트가 추가되었습니다.
+- 데이터 로딩에 초점을 두지만, React18 부터 `<Suspense>`는 이미지, 스크립트, 그 밖의 비동기 작업을 기다리는 데에도 사용될 수 있습니다.
+
+(https://ko.reactjs.org/docs/concurrent-mode-suspense.html)
+
+## Suspense를 사용하기 위해서는
+1. render stream 방식을 `renderToPipeableStream` 로 변경 <br/>
+&nbsp;&nbsp;renderToString: Keeps working (with limited Suspense support) <br/>
+&nbsp;&nbsp;renderToNodeStream: Deperecated (with full Suspense support, but without streaming) <br/>
+&nbsp;&nbsp;renderToPipeableStream: New and recommended (with full Suspense support and streaming) <br/>
+
+2. 아래와 같이 createRoot로 변경
 ```javascript
 const rootElement = document.getElementById("root");
 ReactDOM.createRoot(rootElement).render(<App />);
 ```
 
-<br/><br/>
-
-# Automatic Batching을 피하는 방법
-경우에 따라 Batching이 필요 없을 때가 존재 할 것 이다. Batching을 피하기 위해서는 `ReactDOM.flushSync()` 을 사용해야한다.
-
-```javascript
-const selectedOption2 = async () => {
-  await updateOptionFromServer();
-  ReactDOM.flushSync(() => {
-    setOption1(false);
-  })
-  ReactDOM.flushSync(() => {
-    setOption2(true);
-  })
-};
-```
+## Suspense의 장점
+### HTML 스트리밍과 선택적 하이드레이션
 
 <div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
   <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
