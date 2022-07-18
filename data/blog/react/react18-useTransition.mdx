@@ -6,66 +6,47 @@ draft: true
 summary: 'React18 대비하자 useTransition'
 ---
 
+import PostAccordian from '@/components/PostAccordian';
+
 # useTransition 이란?
-> 새 화면을 위한 콘텐츠를 불러오는 동안 화면 전환을 생략할 수 있다면 좋을 것입니다.
-> (https://ko.reactjs.org/docs/concurrent-mode-patterns.html)
-
-React18 Concurrent를 키워드를 들고 
-
----
-
-# 기존 batching 은
-React17 에서도 batching을 지원하지 않은 것이 아니다. 하지만 react18과 다른 점이 있다면
-외부 소스(fetch, setTimeout 등)에 대해서는 일괄처리를 해주지 않았다.
-그래서 성능 개선을 위하여 외부 소스 코드를 사용할때는 `ReactDOM.unstable_batchedUpdates`를 사용해줬었다.
-
-아래 예시는 option을 선택하면 서버에 알리고 옵션 상태를 변경하는 예시가 있다고 가정하자
-option1은 내부 소스이기 때문에 React 17 에서는 자동으로 state를 모아서 한번에 렌더링 한다.
-하지만 option2는 외부 소스이기에 렌더가 두 번 일어난다.
-
-<iframe src="https://codesandbox.io/embed/charming-poitras-mgcnci?fontsize=14&hidenavigation=1&theme=dark&view=editor"
-     style={{width: '100%', height: '500px', border: 'none', borderRadius: '4px', overflow: 'hidden'}}
-     title="charming-poitras-mgcnci"
-     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-   ></iframe>
+우리는 종종 새로운 데이터를 리패치해서 보여줄 때가 있습니다. 허나 리패치하는 과정에서 데이터가 사라졌다가
+새로운 데이터를 보여주는 페이지를 종종 보게 되어지는데 이러한 '화면 전환을 생략'하게 만들어줍니다.
 
 <br/><br/>
 
-# React 18 에서는
-`ReactDOM.createRoot`을 사용하게 되면 내부 소스, 외부 소스 Automatic Batching이 적용되어 있어 신경 쓰지 않아도 된다.
-
-React18 automatic batching이 적용 안 됨
+# 사전준비
+<PostAccordian title="useTransition 사용하기 위해서는 아래의 세팅이 필요합니다.">
 ```javascript
 const rootElement = document.getElementById("root");
-ReactDOM.render(<App />, rootElement);
-```
-
-React18 automatic batching이 적용됨
-```javascript
-const rootElement = document.getElementById("root");
+// 컨커런트 모드로 설정
 ReactDOM.createRoot(rootElement).render(<App />);
 ```
+</PostAccordian>
 
 <br/><br/>
 
-# Automatic Batching을 피하는 방법
-경우에 따라 Batching이 필요 없을 때가 존재 할 것 이다. Batching을 피하기 위해서는 `ReactDOM.flushSync()` 을 사용해야한다.
-
+# 사용하는 방법
 ```javascript
-const selectedOption2 = async () => {
-  await updateOptionFromServer();
-  ReactDOM.flushSync(() => {
-    setOption1(false);
-  })
-  ReactDOM.flushSync(() => {
-    setOption2(true);
-  })
-};
+import { useTransition } from 'react';
+
+const App = () => {
+  const [isPending, startTransition] = useTransition({ timeoutMs: 3000 });
+  const [filterTerm, setFilterTerm] = useState('');
+  
+  const filteredProducts = filterProducts(filterTerm);
+  
+  function updateFilterHandler(event) {
+    startTransition(() => {
+      setFilterTerm(event.target.value);
+    });
+  }
+
+  return (
+    <div id="app">
+      <input type="text" onChange={updateFilterHandler} />
+      <ProductList products={filteredProducts} />
+    </div>
+  );
+}
 ```
 
-<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
-  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
-    ![focus](https://media3.giphy.com/media/yoJC2D22ruCQKUM1bi/giphy.gif?cid=ecf05e47brp60ybkq5m31xoopnlb0w9p0g71adxefhfyc0j9&rid=giphy.gif&ct=g)
-  </div>
-</div>
