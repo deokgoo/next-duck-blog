@@ -26,8 +26,9 @@ const DietBattleForm = () => {
           name,
           sha256(originWeight).toString(),
           parseInt(todayWeight) - parseInt(originWeight)
-        )
-        window.location.reload()
+        ).then(() => {
+          window.location.reload()
+        })
       } catch {
         setIsSetWeight(true)
       }
