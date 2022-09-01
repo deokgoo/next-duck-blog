@@ -1,8 +1,10 @@
 import ThinkIcon from '@/components/icos/think'
 import { useEffect } from 'react'
-import ApexCharts from '@/components/ApexChart'
+import dynamic from 'next/dynamic'
 
 const DietBattle = () => {
+  const ApexCharts = dynamic(() => import('@/components/ApexChart'), { ssr: false })
+
   useEffect(() => {
     console.log('asdf')
   }, [])
