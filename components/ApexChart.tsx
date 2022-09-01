@@ -1,18 +1,31 @@
 import ApexCharts from 'react-apexcharts'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ApexOptions } from 'apexcharts'
+import { getAllData } from 'service/firebase'
 
 const DietChart = () => {
-  const [series, setSeries] = useState<ApexAxisChartSeries>([
-    {
-      name: '덕구',
-      data: [-1, -2, -3, -1],
-    },
-    {
-      name: '지선',
-      data: [-1, -1, -1, -1],
-    },
-  ])
+  // Queries
+  const [dietDate, setDietDate] = useState<any>([])
+  useEffect(() => {
+    ;(async () => {
+      const data = await getAllData()
+      if (data) {
+        setDietDate(data)
+      }
+    })()
+  }, [])
+
+  const filterDate = () => {
+    if (!dietDate) return
+    if (dietDate.length === 0) return []
+    return Object.keys(dietDate).map((x) => {
+      return {
+        name: x === 'deokgoo' ? '덕구' : '지선',
+        // @ts-ignore
+        data: dietDate[x].filter((y) => y).map((y) => y.todayWeight),
+      }
+    })
+  }
   const options: ApexOptions = {
     chart: {
       height: '1500',
@@ -37,10 +50,41 @@ const DietChart = () => {
       },
     },
     xaxis: {
-      categories: ['1', '2', '3', '4', '5', '6', '7'],
+      categories: [
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19',
+        '20',
+        '21',
+        '22',
+        '23',
+        '24',
+        '25',
+        '26',
+        '27',
+        '28',
+        '29',
+        '30',
+      ],
     },
   }
-  return <ApexCharts series={series} options={options} />
+  return <ApexCharts series={filterDate()} options={options} />
 }
 
 export default DietChart

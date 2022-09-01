@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getDatabase, ref, set, onValue } from 'firebase/database'
+import { getDatabase, ref, set, get } from 'firebase/database'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDPgtveIcbEmBczxIUBGHBcnOWfJtDtPJY',
@@ -13,19 +13,23 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
 
-export const registerRootWeight = (uuid: string, rootWeight: string) => {
+export const registerWeight = (
+  uuid: string,
+  date: number,
+  originWeight: string,
+  todayWeight: number
+) => {
   const db = getDatabase(app)
 
-  set(ref(db, `users/${uuid}`), {
-    root: rootWeight,
+  set(ref(db, `users/${uuid}/${date}`), {
+    root: originWeight,
+    todayWeight: todayWeight,
   })
 }
 
-export const getRootWeight = (uuid: string) => {
+export const getAllData = () => {
   const db = getDatabase(app)
-  const starCountRef = ref(db, `users/${uuid}`)
+  const starCountRef = ref(db, `users`)
 
-  onValue(starCountRef, (snapshot) => {
-    const data = snapshot.val()
-  })
+  return get(starCountRef).then((x) => x.val())
 }

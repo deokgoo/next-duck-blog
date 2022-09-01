@@ -1,11 +1,15 @@
 import { ChangeEvent, useState } from 'react'
-import { existName } from './api/registerBattle'
+import { existName, registerWeight } from './api/registerBattle'
+import sha256 from 'crypto-js/sha256'
 
 type FormStatus = 'success' | 'fail' | 'default'
 
 const DietBattleForm = () => {
   const [name, setName] = useState<string>()
   const [formStatus, setFormStatus] = useState<FormStatus>('default')
+  const [isSetWeight, setIsSetWeight] = useState<boolean>(false)
+  const [originWeight, setOriginWeight] = useState<string>('')
+  const [todayWeight, setTodayWeight] = useState<string>('')
 
   const nameChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setName(e.currentTarget.value)
@@ -13,13 +17,29 @@ const DietBattleForm = () => {
       setFormStatus('default')
     }
   }
+
   const submitHandler = async () => {
-    try {
-      await existName(name)
-      setFormStatus('success')
-    } catch {
-      setFormStatus('fail')
-      console.warn('invalid name')
+    if (formStatus === 'success') {
+      if (!originWeight || !todayWeight) return
+      try {
+        registerWeight(
+          name,
+          sha256(originWeight).toString(),
+          parseInt(todayWeight) - parseInt(originWeight)
+        )
+        window.location.reload()
+      } catch {
+        setIsSetWeight(true)
+      }
+    }
+    if (formStatus === 'default') {
+      try {
+        await existName(name)
+        setFormStatus('success')
+      } catch {
+        setFormStatus('fail')
+        console.warn('invalid name')
+      }
     }
   }
 
@@ -52,6 +72,49 @@ const DietBattleForm = () => {
         {formStatus === 'fail' && (
           <p className="mt-2 text-sm text-red-600 dark:text-red-500">
             관리자에게 문의해주시기 바랍니다.
+          </p>
+        )}
+        {formStatus === 'success' && (
+          <>
+            <form className="w-full mt-5">
+              <div className="flex flex-wrap -mx-3 mb-6 justify-center">
+                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                  <label
+                    className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    htmlFor="grid-first-name"
+                  >
+                    처음 몸 무게
+                  </label>
+                  <input
+                    className="appearance-none block w-full rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                    id="grid-first-name"
+                    type="text"
+                    placeholder="몸 무게"
+                    onChange={(e) => setOriginWeight(e.currentTarget.value)}
+                  />
+                </div>
+                <div className="w-full md:w-1/2 px-3">
+                  <label
+                    className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                    htmlFor="grid-last-name"
+                  >
+                    오늘 몸 무게
+                  </label>
+                  <input
+                    className="appearance-none block w-full rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                    id="grid-last-name"
+                    type="text"
+                    placeholder="몸 무게"
+                    onChange={(e) => setTodayWeight(e.currentTarget.value)}
+                  />
+                </div>
+              </div>
+            </form>
+          </>
+        )}
+        {isSetWeight && (
+          <p className="mt-2 text-sm text-green-600 dark:text-green-500">
+            오늘자 몸무게가 등록되었습니다. (오늘일자는 언제든지 재등록 가능합니다.)
           </p>
         )}
         <button
