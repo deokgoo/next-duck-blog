@@ -1,9 +1,6 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app'
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getDatabase, ref, set, onValue } from 'firebase/database'
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: 'AIzaSyDPgtveIcbEmBczxIUBGHBcnOWfJtDtPJY',
   authDomain: 'diet-battle-ea0be.firebaseapp.com',
@@ -15,3 +12,20 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
+
+export const registerRootWeight = (uuid: string, rootWeight: string) => {
+  const db = getDatabase(app)
+
+  set(ref(db, `users/${uuid}`), {
+    root: rootWeight,
+  })
+}
+
+export const getRootWeight = (uuid: string) => {
+  const db = getDatabase(app)
+  const starCountRef = ref(db, `users/${uuid}`)
+
+  onValue(starCountRef, (snapshot) => {
+    const data = snapshot.val()
+  })
+}

@@ -6,11 +6,11 @@ const DietChart = () => {
   const [series, setSeries] = useState<ApexAxisChartSeries>([
     {
       name: '덕구',
-      data: [10, 20, 30, 50, 100],
+      data: [-1, -2, -3, -5],
     },
     {
       name: '지선',
-      data: [10, 30, 50, 80, 100],
+      data: [-1, -1, -1, -1],
     },
   ])
   const options: ApexOptions = {
