@@ -16,10 +16,10 @@ const DietBattle = () => {
         </div>
         <div className="col-start-2 col-span-4 text-center">Instructions</div>
         <div className="col-start-2 col-span-4 text-center" style={{ fontSize: '18px' }}>
-          CryptoJS의 SHA256의 암호화를 사용하고 있으며 길이 256으로 저장하고 있습니다. <br/>
+          CryptoJS의 SHA256의 암호화를 사용하고 있으며 길이 256 사이즈로 저장하고 있습니다. <br/>
           서버도 별도의 로그를 남기고있지 않으니 안심해주세요!!
         </div>
-        <div className="col-start-2 col-span-4 text-center">
+        <div className="col-start-1 col-span-6 text-center">
           <ApexCharts />
         </div>
         <div className="col-start-2 col-span-4 text-center">

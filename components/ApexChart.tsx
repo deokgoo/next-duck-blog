@@ -15,6 +15,7 @@ const DietChart = () => {
   ])
   const options: ApexOptions = {
     chart: {
+      height: '1500',
       zoom: {
         enabled: false,
       },
@@ -26,7 +27,7 @@ const DietChart = () => {
       curve: 'straight',
     },
     title: {
-      text: 'Product Trends by Month',
+      text: '다이어트 대결',
       align: 'left',
     },
     grid: {
