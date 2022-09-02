@@ -26,7 +26,7 @@ const DietBattleForm = ({ refetch }: { refetch: () => void }) => {
         await registerWeight(
           name,
           sha256(originWeight).toString(),
-          parseFloat(diffWeight.toFixed(1))
+          parseFloat(diffWeight.toFixed(2))
         )
         refetch()
         alert('입력이 완료되었습니다.')
