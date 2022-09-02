@@ -1,9 +1,23 @@
 import ThinkIcon from '@/components/icos/think'
 import dynamic from 'next/dynamic'
 import DietBattleForm from '@/components/diet-battle/form'
+import { useEffect, useState } from 'react'
+import { getAllData } from 'service/firebase'
 
 const DietBattle = () => {
   const ApexCharts = dynamic(() => import('@/components/ApexChart'), { ssr: false })
+  const [dietDate, setDietDate] = useState<any>({})
+
+  useEffect(() => {
+    refetchDate()
+  }, [])
+
+  const refetchDate = async () => {
+    const data = await getAllData()
+    if (data) {
+      setDietDate(data)
+    }
+  }
 
   return (
     <div className="mt-3 text-4xl">
@@ -20,10 +34,10 @@ const DietBattle = () => {
           서버도 별도의 로그를 남기고있지 않으니 안심해주세요!!
         </div>
         <div className="col-start-1 col-span-6 text-center">
-          <ApexCharts />
+          <ApexCharts dietDate={dietDate} />
         </div>
         <div className="col-start-2 col-span-4 text-center">
-          <DietBattleForm />
+          <DietBattleForm refetch={refetchDate} />
         </div>
       </div>
     </div>

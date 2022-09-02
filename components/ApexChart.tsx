@@ -1,23 +1,11 @@
 import ApexCharts from 'react-apexcharts'
-import { useEffect, useState } from 'react'
 import { ApexOptions } from 'apexcharts'
-import { getAllData } from 'service/firebase'
 
-const DietChart = () => {
-  // Queries
-  const [dietDate, setDietDate] = useState<any>([])
-  useEffect(() => {
-    ;(async () => {
-      const data = await getAllData()
-      if (data) {
-        setDietDate(data)
-      }
-    })()
-  }, [])
-
+const DietChart = ({ dietDate }: any) => {
   const filterDate = () => {
     if (!dietDate) return
-    if (dietDate.length === 0) return []
+    if (dietDate?.keys?.length === 0) return []
+    console.log(dietDate)
     return Object.keys(dietDate).map((x) => {
       return {
         name: x === 'deokgoo' ? '덕구' : '지선',

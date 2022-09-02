@@ -4,7 +4,7 @@ import sha256 from 'crypto-js/sha256'
 
 type FormStatus = 'success' | 'fail' | 'default'
 
-const DietBattleForm = () => {
+const DietBattleForm = ({ refetch }: { refetch: () => void }) => {
   const [name, setName] = useState<string>()
   const [formStatus, setFormStatus] = useState<FormStatus>('default')
   const [isSetWeight, setIsSetWeight] = useState<boolean>(false)
@@ -21,14 +21,15 @@ const DietBattleForm = () => {
   const submitHandler = async () => {
     if (formStatus === 'success') {
       if (!originWeight || !todayWeight) return
+      const diffWeight = parseFloat(todayWeight) - parseFloat(originWeight);
       try {
-        registerWeight(
+        await registerWeight(
           name,
           sha256(originWeight).toString(),
-          parseInt(todayWeight) - parseInt(originWeight)
-        ).then(() => {
-          window.location.reload()
-        })
+          parseFloat(diffWeight.toFixed(1))
+        )
+        refetch()
+        alert('입력이 완료되었습니다.')
       } catch {
         setIsSetWeight(true)
       }
