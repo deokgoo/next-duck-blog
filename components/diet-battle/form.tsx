@@ -21,7 +21,7 @@ const DietBattleForm = ({ refetch }: { refetch: () => void }) => {
   const submitHandler = async () => {
     if (formStatus === 'success') {
       if (!originWeight || !todayWeight) return
-      const diffWeight = parseFloat(todayWeight) - parseFloat(originWeight);
+      const diffWeight = parseFloat(todayWeight) - parseFloat(originWeight)
       try {
         await registerWeight(
           name,
