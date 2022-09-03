@@ -13,7 +13,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
 
-export const registerWeight = (
+export const registerWeight = async (
   uuid: string,
   date: number,
   originWeight: string,
@@ -21,7 +21,7 @@ export const registerWeight = (
 ) => {
   const db = getDatabase(app)
 
-  set(ref(db, `users/${uuid}/${date}`), {
+  await set(ref(db, `users/${uuid}/${date}`), {
     root: originWeight,
     todayWeight: todayWeight,
   })
