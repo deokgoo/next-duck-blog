@@ -2,7 +2,12 @@ import fs from 'fs'
 import PageTitle from '@/components/PageTitle'
 import generateRss from '@/lib/generate-rss'
 import { MDXLayoutRenderer } from '@/components/MDXComponents'
-import { formatSlug, getAllFilesFrontMatter, getFileBySlug, getFiles } from '@/lib/mdx'
+import {
+  formatSlug,
+  getAllFilesFrontMatter,
+  getFileBySlug,
+  getFiles
+} from '@/lib/mdx'
 import { GetStaticProps, InferGetStaticPropsType } from 'next'
 import { AuthorFrontMatter } from 'types/AuthorFrontMatter'
 import { PostFrontMatter } from 'types/PostFrontMatter'
@@ -15,10 +20,10 @@ export async function getStaticPaths() {
   return {
     paths: posts.map((p) => ({
       params: {
-        slug: formatSlug(p).split('/'),
-      },
+        slug: formatSlug(p).split('/')
+      }
     })),
-    fallback: false,
+    fallback: false
   }
 }
 
@@ -38,7 +43,9 @@ export const getStaticProps: GetStaticProps<{
   // @ts-ignore
   const authorList = post.frontMatter.authors || ['default']
   const authorPromise = authorList.map(async (author) => {
-    const authorResults = await getFileBySlug<AuthorFrontMatter>('authors', [author])
+    const authorResults = await getFileBySlug<AuthorFrontMatter>('authors', [
+      author
+    ])
     return authorResults.frontMatter
   })
   const authorDetails = await Promise.all(authorPromise)
@@ -54,8 +61,8 @@ export const getStaticProps: GetStaticProps<{
       post,
       authorDetails,
       prev,
-      next,
-    },
+      next
+    }
   }
 }
 
@@ -63,7 +70,7 @@ export default function Blog({
   post,
   authorDetails,
   prev,
-  next,
+  next
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   const { mdxSource, toc, frontMatter } = post
 

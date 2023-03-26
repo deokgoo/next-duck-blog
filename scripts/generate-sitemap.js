@@ -7,7 +7,7 @@ const axios = require('axios')
 const siteUrl = 'https://duck-blog.vercel.app/sitemap.xml'
 
 ;(async () => {
-  const prettierConfig = await prettier.resolveConfig('./.prettierrc.js')
+  const prettierConfig = await prettier.resolveConfig('./.prettier.config.js')
   const siteData = await globby([
     'pages/*.js',
     'data/blog/algorithm/*.mdx',
