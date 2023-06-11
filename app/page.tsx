@@ -1,25 +1,22 @@
 import Link from '@/components/Link'
 import { PageSEO } from '@/components/SEO'
 import Tag from '@/components/Tag'
+import NewsletterForm from '@/components/NewsletterForm'
+
 import siteMetadata from '@/data/siteMetadata'
 import { getAllFilesFrontMatter } from '@/lib/mdx'
 import formatDate from '@/lib/utils/formatDate'
-import { GetStaticProps, InferGetStaticPropsType } from 'next'
-import { PostFrontMatter } from 'types/PostFrontMatter'
-import NewsletterForm from '@/components/NewsletterForm'
 
 const MAX_DISPLAY = 5
 
-export const getStaticProps: GetStaticProps<{ posts: PostFrontMatter[] }> = async () => {
+export default async function Page() {
   const posts = await getAllFilesFrontMatter('blog')
-
-  return { props: { posts } }
-}
-
-export default function Home({ posts }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <>
-      <PageSEO title={siteMetadata.title} description={siteMetadata.description} />
+      <PageSEO
+        title={siteMetadata.title}
+        description={siteMetadata.description}
+      />
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="pt-3 pb-8 space-y-2 md:space-y-5">
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
@@ -45,12 +42,7 @@ export default function Home({ posts }: InferGetStaticPropsType<typeof getStatic
                         <div className="space-y-6">
                           <div>
                             <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                              <Link
-                                href={`/blog/${slug}`}
-                                className="text-gray-900 dark:text-gray-100"
-                              >
-                                {title}
-                              </Link>
+                              {title}
                             </h2>
                             <div className="flex flex-wrap mt-3">
                               {tags.map((tag) => (

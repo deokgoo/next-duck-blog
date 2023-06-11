@@ -27,7 +27,9 @@ export function getFiles(type: 'blog' | 'authors') {
   const prefixPaths = path.join(root, 'data', type)
   const files = getAllFilesRecursively(prefixPaths)
   // Only want to return blog/path and ignore root, replace is needed to work on Windows
-  return files.map((file) => file.slice(prefixPaths.length + 1).replace(/\\/g, '/'))
+  return files.map((file) =>
+    file.slice(prefixPaths.length + 1).replace(/\\/g, '/')
+  )
 }
 
 export function formatSlug(slug: string) {
@@ -40,7 +42,10 @@ export function dateSortDesc(a: string, b: string) {
   return 0
 }
 
-export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | string[]) {
+export async function getFileBySlug<T>(
+  type: 'authors' | 'blog',
+  slug: string | string[]
+) {
   const mdxPath = path.join(root, 'data', type, `${slug}.mdx`)
   const mdPath = path.join(root, 'data', type, `${slug}.md`)
   const source = fs.existsSync(mdxPath)
@@ -49,9 +54,20 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
 
   // https://github.com/kentcdodds/mdx-bundler#nextjs-esbuild-enoent
   if (process.platform === 'win32') {
-    process.env.ESBUILD_BINARY_PATH = path.join(root, 'node_modules', 'esbuild', 'esbuild.exe')
+    process.env.ESBUILD_BINARY_PATH = path.join(
+      root,
+      'node_modules',
+      'esbuild',
+      'esbuild.exe'
+    )
   } else {
-    process.env.ESBUILD_BINARY_PATH = path.join(root, 'node_modules', 'esbuild', 'bin', 'esbuild')
+    process.env.ESBUILD_BINARY_PATH = path.join(
+      root,
+      'node_modules',
+      'esbuild',
+      'bin',
+      'esbuild'
+    )
   }
 
   const toc: Toc = []
@@ -62,7 +78,7 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
     source,
     // mdx imports can be automatically source from the components directory
     cwd: path.join(root, 'components'),
-    xdmOptions(options) {
+    mdxOptions(options) {
       // this is the recommended way to add custom remark/rehype plugins:
       // The syntax might look weird, but it protects you in case we add/remove
       // plugins in the future.
@@ -73,7 +89,7 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
         remarkCodeTitles,
         [remarkFootnotes, { inlineNotes: true }],
         remarkMath,
-        remarkImgToJsx,
+        remarkImgToJsx
       ]
       options.rehypePlugins = [
         ...(options.rehypePlugins ?? []),
@@ -82,19 +98,22 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
         rehypeKatex,
         [
           rehypeCitation,
-          { bibliography: frontmatter?.bibliography, path: path.join(root, 'data') },
+          {
+            bibliography: frontmatter?.bibliography,
+            path: path.join(root, 'data')
+          }
         ],
-        [rehypePrismPlus, { ignoreMissing: true }],
+        [rehypePrismPlus, { ignoreMissing: true }]
       ]
       return options
     },
     esbuildOptions: (options) => {
       options.loader = {
         ...options.loader,
-        '.js': 'jsx',
+        '.js': 'jsx'
       }
       return options
-    },
+    }
   })
 
   return {
@@ -105,8 +124,8 @@ export async function getFileBySlug<T>(type: 'authors' | 'blog', slug: string | 
       slug: slug || null,
       fileName: fs.existsSync(mdxPath) ? `${slug}.mdx` : `${slug}.md`,
       ...frontmatter,
-      date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
-    },
+      date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null
+    }
   }
 }
 
@@ -128,10 +147,10 @@ export async function getAllFilesFrontMatter(folder: 'blog') {
     const matterFile = matter(source)
     const frontmatter = matterFile.data as AuthorFrontMatter | PostFrontMatter
     if ('draft' in frontmatter && frontmatter.draft !== true) {
-      allFrontMatter.push({
+      allFrontMatter.push(<PostFrontMatter>{
         ...frontmatter,
         slug: formatSlug(fileName),
-        date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
+        date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null
       })
     }
   })

@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useRef, ReactNode } from 'react'
 
 interface Props {
@@ -18,14 +20,20 @@ const Pre = ({ children }: Props) => {
   }
   const onCopy = () => {
     setCopied(true)
-    navigator.clipboard.writeText(textInput.current.textContent)
+    // @ts-ignore
+    navigator.clipboard.writeText(textInput?.current?.textContent)
     setTimeout(() => {
       setCopied(false)
     }, 2000)
   }
 
   return (
-    <div ref={textInput} onMouseEnter={onEnter} onMouseLeave={onExit} className="relative">
+    <div
+      ref={textInput}
+      onMouseEnter={onEnter}
+      onMouseLeave={onExit}
+      className="relative"
+    >
       {hovered && (
         <button
           aria-label="Copy code"

@@ -8,6 +8,7 @@ import Comments from '@/components/comments'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import { ReactNode } from 'react'
 import { PostFrontMatter } from 'types/PostFrontMatter'
+import SEOandScroll from '@/layouts/SEOandScroll'
 
 interface Props {
   frontMatter: PostFrontMatter
@@ -16,13 +17,20 @@ interface Props {
   prev?: { slug: string; title: string }
 }
 
-export default function PostLayout({ frontMatter, next, prev, children }: Props) {
+export default function PostLayout({
+  frontMatter,
+  next,
+  prev,
+  children
+}: Props) {
   const { slug, date, title } = frontMatter
 
   return (
     <SectionContainer>
-      <BlogSEO url={`${siteMetadata.siteUrl}/blog/${slug}`} {...frontMatter} />
-      <ScrollTopAndComment />
+      <SEOandScroll
+        url={`${siteMetadata.siteUrl}/blog/${slug}`}
+        {...frontMatter}
+      ></SEOandScroll>
       <article>
         <div>
           <header>
@@ -45,7 +53,9 @@ export default function PostLayout({ frontMatter, next, prev, children }: Props)
             style={{ gridTemplateRows: 'auto 1fr' }}
           >
             <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:pb-0 xl:col-span-3 xl:row-span-2">
-              <div className="pt-10 pb-8 prose dark:prose-dark max-w-none">{children}</div>
+              <div className="pt-10 pb-8 prose dark:prose-dark max-w-none">
+                {children}
+              </div>
             </div>
             <Comments frontMatter={frontMatter} />
             <footer>

@@ -8,33 +8,44 @@ import {
   getFileBySlug,
   getFiles
 } from '@/lib/mdx'
-import { GetStaticProps, InferGetStaticPropsType } from 'next'
-import { AuthorFrontMatter } from 'types/AuthorFrontMatter'
-import { PostFrontMatter } from 'types/PostFrontMatter'
-import { Toc } from 'types/Toc'
+import { AuthorFrontMatter } from '../../../../types/AuthorFrontMatter'
+import { PostFrontMatter } from '../../../../types/PostFrontMatter'
+import { Toc } from '../../../../types/Toc'
 
 const DEFAULT_LAYOUT = 'PostLayout'
 
-export async function getStaticPaths() {
+export async function generateStaticParams() {
   const posts = getFiles('blog')
-  return {
-    paths: posts.map((p) => ({
-      params: {
-        slug: formatSlug(p).split('/')
-      }
-    })),
-    fallback: false
-  }
+
+  return posts.map((p) => {
+    const postPath = formatSlug(p).split('/')
+
+    return {
+      slug: postPath[0],
+      post: postPath[1]
+    }
+  })
 }
 
-// @ts-ignore
-export const getStaticProps: GetStaticProps<{
-  post: { mdxSource: string; toc: Toc; frontMatter: PostFrontMatter }
-  authorDetails: AuthorFrontMatter[]
-  prev?: { slug: string; title: string }
-  next?: { slug: string; title: string }
-}> = async ({ params }) => {
-  const slug = (params.slug as string[]).join('/')
+const getBlogDetailDataFromGraphQL = async (
+  params
+): Promise<{
+  next: { slug: string; title: string }
+  post: {
+    mdxSource: string
+    toc: { value: string; depth: number; url: string }[]
+    frontMatter: {
+      [p: string]: any
+      date: string | null
+      readingTime: any
+      fileName: string
+      slug: string | string[] | null
+    }
+  }
+  authorDetails: Awaited<unknown>[]
+  prev: { slug: string; title: string }
+}> => {
+  const slug = params?.slug + '/' + params?.post
   const allPosts = await getAllFilesFrontMatter('blog')
   const postIndex = allPosts.findIndex((post) => formatSlug(post.slug) === slug)
   const prev: { slug: string; title: string } = allPosts[postIndex + 1] || null
@@ -57,21 +68,20 @@ export const getStaticProps: GetStaticProps<{
   }
 
   return {
-    props: {
-      post,
-      authorDetails,
-      prev,
-      next
-    }
+    post,
+    authorDetails,
+    prev,
+    next
   }
 }
 
-export default function Blog({
-  post,
-  authorDetails,
-  prev,
-  next
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+export default async function Blog({ params }) {
+  const {
+    prev,
+    next,
+    post,
+    authorDetails
+  } = await getBlogDetailDataFromGraphQL(params)
   const { mdxSource, toc, frontMatter } = post
 
   return (

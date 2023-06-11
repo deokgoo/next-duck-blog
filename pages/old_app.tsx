@@ -10,7 +10,7 @@ import { ClientReload } from '@/components/ClientReload'
 
 import '@/css/tailwind.css'
 import '@/css/prism.css'
-import './notionstyle.css'
+// import './notionstyle.css'
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 const isSocket = process.env.SOCKET

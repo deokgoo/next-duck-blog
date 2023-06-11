@@ -1,9 +1,12 @@
+'use client'
+
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import { ComponentProps, useState } from 'react'
 import Pagination from '@/components/Pagination'
 import formatDate from '@/lib/utils/formatDate'
 import { PostFrontMatter } from 'types/PostFrontMatter'
+
 interface Props {
   posts: PostFrontMatter[]
   title: string
@@ -11,16 +14,24 @@ interface Props {
   pagination?: ComponentProps<typeof Pagination>
 }
 
-export default function ListLayout({ posts, title, initialDisplayPosts = [], pagination }: Props) {
+export default function ListLayout({
+  posts,
+  title,
+  initialDisplayPosts = [],
+  pagination
+}: Props) {
   const [searchValue, setSearchValue] = useState('')
   const filteredBlogPosts = posts.filter((frontMatter) => {
-    const searchContent = frontMatter.title + frontMatter.summary + frontMatter.tags.join(' ')
+    const searchContent =
+      frontMatter.title + frontMatter.summary + frontMatter.tags.join(' ')
     return searchContent.toLowerCase().includes(searchValue.toLowerCase())
   })
 
   // If initialDisplayPosts exist, display it if no searchValue is specified
   const displayPosts =
-    initialDisplayPosts.length > 0 && !searchValue ? initialDisplayPosts : filteredBlogPosts
+    initialDisplayPosts.length > 0 && !searchValue
+      ? initialDisplayPosts
+      : filteredBlogPosts
 
   return (
     <>
@@ -69,7 +80,10 @@ export default function ListLayout({ posts, title, initialDisplayPosts = [], pag
                   <div className="space-y-3 xl:col-span-3">
                     <div>
                       <h3 className="text-2xl font-bold leading-8 tracking-tight">
-                        <Link href={`/blog/${slug}`} className="text-gray-900 dark:text-gray-100">
+                        <Link
+                          href={`/blog/${slug}`}
+                          className="text-gray-900 dark:text-gray-100"
+                        >
                           {title}
                         </Link>
                       </h3>
@@ -90,7 +104,10 @@ export default function ListLayout({ posts, title, initialDisplayPosts = [], pag
         </ul>
       </div>
       {pagination && pagination.totalPages > 1 && !searchValue && (
-        <Pagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} />
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+        />
       )}
     </>
   )

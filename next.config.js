@@ -1,20 +1,8 @@
 const withPlugins = require('next-compose-plugins')
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
+  enabled: process.env.ANALYZE === 'true'
 })
-
-// You might need to insert additional domains in script-src if you are using external services
-const ContentSecurityPolicy = `
-  default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app *.googletagmanager.com *.google-analytics.com https://cpwebassets.codepen.io/assets/embed/ei.js;
-  style-src 'self' 'unsafe-inline' *.googleapis.com cdn.jsdelivr.net;
-  img-src * blob: data:;
-  media-src 'none';
-  connect-src *;
-  font-src 'self' fonts.gstatic.com cdn.jsdelivr.net;
-  frame-src giscus.app https://codepen.io/ https://codesendbox.io/;
-`
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
@@ -25,33 +13,33 @@ const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
   {
     key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin',
+    value: 'strict-origin-when-cross-origin'
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
   {
     key: 'X-Frame-Options',
-    value: 'DENY',
+    value: 'DENY'
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
   {
     key: 'X-Content-Type-Options',
-    value: 'nosniff',
+    value: 'nosniff'
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-DNS-Prefetch-Control
   {
     key: 'X-DNS-Prefetch-Control',
-    value: 'on',
+    value: 'on'
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
   {
     key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains; preload',
+    value: 'max-age=31536000; includeSubDomains; preload'
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
   {
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()',
-  },
+    value: 'camera=(), microphone=(), geolocation=()'
+  }
 ]
 
 /**
@@ -62,14 +50,14 @@ module.exports = withPlugins([
     reactStrictMode: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
-      dirs: ['pages', 'components', 'lib', 'layouts', 'scripts'],
+      dirs: ['pages', 'components', 'lib', 'layouts', 'scripts']
     },
     async headers() {
       return [
         {
           source: '/(.*)',
-          headers: securityHeaders,
-        },
+          headers: securityHeaders
+        }
       ]
     },
     webpack: (config, { dev, isServer }) => {
@@ -80,15 +68,15 @@ module.exports = withPlugins([
             loader: 'file-loader',
             options: {
               publicPath: '/_next',
-              name: 'static/media/[name].[hash].[ext]',
-            },
-          },
-        ],
+              name: 'static/media/[name].[hash].[ext]'
+            }
+          }
+        ]
       })
 
       config.module.rules.push({
         test: /\.svg$/,
-        use: ['@svgr/webpack'],
+        use: ['@svgr/webpack']
       })
 
       if (!dev && !isServer) {
@@ -97,16 +85,16 @@ module.exports = withPlugins([
           'react/jsx-runtime.js': 'preact/compat/jsx-runtime',
           react: 'preact/compat',
           'react-dom/test-utils': 'preact/test-utils',
-          'react-dom': 'preact/compat',
+          'react-dom': 'preact/compat'
         })
       }
 
       return config
-    },
+    }
   }),
   {
     images: {
-      domains: ['media.giphy.com'],
-    },
-  },
+      domains: ['media.giphy.com']
+    }
+  }
 ])

@@ -17,11 +17,17 @@ const ScrollTopAndComment = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   const handleScrollToComment = () => {
-    document.getElementById('comment').scrollIntoView()
+    if (document) {
+      // @ts-ignore
+      document?.getElementById('comment').scrollIntoView()
+    }
   }
+
   return (
     <div
-      className={`fixed flex-col hidden gap-3 right-8 bottom-8 ${show ? 'md:flex' : 'md:hidden'}`}
+      className={`fixed flex-col hidden gap-3 right-8 bottom-8 ${
+        show ? 'md:flex' : 'md:hidden'
+      }`}
     >
       <button
         aria-label="Scroll To Comment"
