@@ -1,4 +1,4 @@
-const withPlugins = require('next-compose-plugins')
+const { withContentlayer } = require('next-contentlayer2')
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -7,21 +7,21 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app *.googletagmanager.com *.google-analytics.com https://cpwebassets.codepen.io/assets/embed/ei.js;
-  style-src 'self' 'unsafe-inline' *.googleapis.com cdn.jsdelivr.net;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is;
+  style-src 'self' 'unsafe-inline';
   img-src * blob: data:;
-  media-src 'none';
+  media-src *.s3.amazonaws.com;
   connect-src *;
-  font-src 'self' fonts.gstatic.com cdn.jsdelivr.net;
-  frame-src giscus.app https://codepen.io/ https://codesendbox.io/;
+  font-src 'self';
+  frame-src giscus.app
 `
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
-  // {
-  //   key: 'Content-Security-Policy',
-  //   value: ContentSecurityPolicy.replace(/\n/g, ''),
-  // },
+  {
+    key: 'Content-Security-Policy',
+    value: ContentSecurityPolicy.replace(/\n/g, ''),
+  },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
   {
     key: 'Referrer-Policy',
@@ -45,7 +45,7 @@ const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
   {
     key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains; preload',
+    value: 'max-age=31536000; includeSubDomains',
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
   {
@@ -57,12 +57,21 @@ const securityHeaders = [
 /**
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
-module.exports = withPlugins([
-  withBundleAnalyzer({
+module.exports = () => {
+  const plugins = [withContentlayer, withBundleAnalyzer]
+  return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
-      dirs: ['pages', 'components', 'lib', 'layouts', 'scripts'],
+      dirs: ['app', 'components', 'layouts', 'scripts'],
+    },
+    images: {
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'picsum.photos',
+        },
+      ],
     },
     async headers() {
       return [
@@ -72,41 +81,13 @@ module.exports = withPlugins([
         },
       ]
     },
-    webpack: (config, { dev, isServer }) => {
-      config.module.rules.push({
-        test: /\.(png|jpe?g|gif|mp4)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              publicPath: '/_next',
-              name: 'static/media/[name].[hash].[ext]',
-            },
-          },
-        ],
-      })
-
+    webpack: (config, options) => {
       config.module.rules.push({
         test: /\.svg$/,
         use: ['@svgr/webpack'],
       })
 
-      if (!dev && !isServer) {
-        // Replace React with Preact only in client production build
-        Object.assign(config.resolve.alias, {
-          'react/jsx-runtime.js': 'preact/compat/jsx-runtime',
-          react: 'preact/compat',
-          'react-dom/test-utils': 'preact/test-utils',
-          'react-dom': 'preact/compat',
-        })
-      }
-
       return config
     },
-  }),
-  {
-    images: {
-      domains: ['media.giphy.com'],
-    },
-  },
-])
+  })
+}

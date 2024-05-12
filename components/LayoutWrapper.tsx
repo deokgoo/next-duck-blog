@@ -1,53 +1,22 @@
-import siteMetadata from '@/data/siteMetadata'
-import headerNavLinks from '@/data/headerNavLinks'
-import Logo from '@/data/main-logo-no-bg.svg'
-import Link from './Link'
+import { Inter } from 'next/font/google'
 import SectionContainer from './SectionContainer'
 import Footer from './Footer'
-import MobileNav from './MobileNav'
-import ThemeSwitch from './ThemeSwitch'
 import { ReactNode } from 'react'
+import Header from './Header'
 
 interface Props {
   children: ReactNode
 }
 
+const inter = Inter({
+  subsets: ['latin'],
+})
+
 const LayoutWrapper = ({ children }: Props) => {
   return (
     <SectionContainer>
-      <div className="flex flex-col justify-between h-screen">
-        <header className="flex items-center justify-between pt-10 pb-3">
-          <div>
-            <Link href="/" aria-label="duck blog">
-              <div className="flex items-center justify-between">
-                <div className="mr-3" style={{ maxWidth: '192px' }}>
-                  <Logo />
-                </div>
-                {typeof siteMetadata.headerTitle === 'string' ? (
-                  // <div className="hidden h-6 text-2xl font-semibold sm:block">
-                  <div className="hidden">{siteMetadata.headerTitle}</div>
-                ) : (
-                  siteMetadata.headerTitle
-                )}
-              </div>
-            </Link>
-          </div>
-          <div className="flex items-center text-base leading-5">
-            <div className="hidden sm:block">
-              {headerNavLinks.map((link) => (
-                <Link
-                  key={link.title}
-                  href={link.href}
-                  className="p-1 font-medium text-gray-900 sm:p-4 dark:text-gray-100"
-                >
-                  {link.title}
-                </Link>
-              ))}
-            </div>
-            <ThemeSwitch />
-            <MobileNav />
-          </div>
-        </header>
+      <div className={`${inter.className} flex h-screen flex-col justify-between font-sans`}>
+        <Header />
         <main className="mb-auto">{children}</main>
         <Footer />
       </div>
