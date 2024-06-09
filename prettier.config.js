@@ -1,15 +1,10 @@
-const prettierConfig = require('prettier-config-standard')
 module.exports = {
-  ...prettierConfig,
-  // mdx 파일에 대한 설정을 추가합니다.
-  overrides: [
-    {
-      files: ['*.mdx'],
-      options: {
-        parser: 'mdx',
-        printWidth: '80'
-        // 필요한 설정을 추가합니다.
-      }
-    }
-  ]
+  semi: false,
+  singleQuote: true,
+  printWidth: 100,
+  tabWidth: 2,
+  useTabs: false,
+  trailingComma: 'es5',
+  bracketSpacing: true,
+  plugins: ['prettier-plugin-tailwindcss'],
 }
