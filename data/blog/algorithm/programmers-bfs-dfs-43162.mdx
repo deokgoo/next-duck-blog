@@ -1,0 +1,49 @@
+---
+title: '프로그래머스 네트워크 (bfs/dfs)'
+date: '2021-07-17'
+tags: ['dfs', 'bfs', 'algorithm', 'programmers']
+draft: false
+summary: 'js로 풀어본 프로그래머스 bfs/dfs 분류 네트워크'
+---
+
+# 문제 풀이
+
+bfs/dfs 분류의 문제입니다. 코멘트에서도 언급하지만 <br/>
+테스트케이스에 비대칭으로 주어지는것 같습니다. <br/>
+난이도는 낮다고 생각합니다.
+
+```javascript
+function solution(n, computers) {
+  let answer = 0;
+  let networkMap = new Array(n);
+
+  // 주어진 computers를 대칭적으로 만듭니다.
+  for(let y=0;y<n;y++) {
+    for(let x=0;x<n;x++) {
+      if(computers[y][x] || computers[x][y]) {
+        computers[y][x] = 1;
+        computers[x][y] = 1;
+      }
+    }
+  }
+
+  const dfs = (target) => {
+    networkMap[target] = 1;
+    for(let z=0;z<n;z++) {
+      if(target === z) continue;
+      if(computers[target][z] && !networkMap[z]) {
+        dfs(z);
+      }
+    }
+  }
+
+  for(let i=0;i<n;i++) {
+    if(networkMap[i]) continue;
+    answer++;
+    dfs(i);
+  }
+
+  return answer;
+}
+
+```

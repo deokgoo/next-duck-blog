@@ -1,0 +1,35 @@
+---
+title: "프로그래머스 카펫 (brute force)"
+date: "2021-07-29"
+tags: ['brute force', 'algorithm', 'programmers']
+draft: false
+summary: "js로 풀어본 프로그래머스 brute force 분류 카펫"
+---
+
+# 문제 풀이
+
+완전탐색 분류 문제입니다.<br/>
+시뮬레이션 문제입니다. <br/>
+문제의 난이도는 낮다고 생각합니다.<br/>
+노랑을 몇줄로 표시할것인지 정하고 그에맞게 브라운을 도출하여 맞는가 틀리는가를 반복합니다. <br/>
+
+---
+
+[문제 링크]("https://programmers.co.kr/learn/courses/30/lessons/42842")
+
+```javascript
+function solution(brown, yellow) {
+  let answer = [];
+  let i = 0;
+  while(true) {
+    i++;
+    if((yellow % i)) continue;
+    if(yellow/i*2+(2+i)*2 === brown) {
+      answer.push(yellow/i+2);
+      answer.push(2+i);
+      break;
+    }
+  }
+  return answer;
+}
+```

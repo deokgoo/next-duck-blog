@@ -1,0 +1,42 @@
+---
+title: "npm ci란? 그렇다면 yarn은?"
+date: "2021-12-14"
+tags: ['web', 'node', 'yarn', 'npm', 'ci']
+draft: false
+summary: 'npm ci에 대한 설명과 yarn에서는 어떻게 사용되어지는지 정리하였습니다.'
+---
+
+# 들어가기전
+
+알게 모르게 `npm ci`를 많이 사용해왔으며, 이번 기회에 정리를 하고자 한다. (npm, yarn)
+
+<br/><br/>
+
+# 본론으로
+## npm ci
+
+ci환경이나 여러 환경에서 clean install을 할때 lock파일에 의존하여 설치한다고한다.
+`npm install` 차이점이 5가지 존재한다고한다 npm 도큐멘트를 확인해보자
+
+  - `package-lock.json` or `npm-shrinkwrap.json` 이 무조건 존재해야한다.
+  - `package-lock.json` and `package.json` dependencies가 맞지 않으면 lock파일을 업데이트하지 않고 에러를 발생한다.
+  - `npm ci`는 전체를 대상으로 install하며 개별적으로는 불가능하다
+  - 이미 `node_modules`가 존재하는 경우에는 `npm ci` 실행전에 node_modules를 지우고 실행한다고 한다.
+  - `package-lock.json` and `package.json`에 어떤 기록도 하지 않는다.
+
+[# npm Docs](https://docs.npmjs.com/cli/v8/commands/npm-ci) [# yarn Docs](https://yarnpkg.com/cli/install)
+
+
+### yarn 에서는 어떻게 사용할까
+👇 아래라고 생각하고 있었는데 오래되었고 없어질것이라고 한다.
+```node
+yarn install --frozen-lockfile
+```
+
+
+얼마 전만해도 --frozen-lockfile을 사용 했었는데 포스팅 당시에 확인해보니
+
+👇 아래와 같다고 한다.
+```node
+yarn install --immutable --immutable-cache --check-cache
+```

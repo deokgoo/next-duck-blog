@@ -1,0 +1,55 @@
+---
+title: "canonical URL 통합"
+date: "2022-02-26"
+tags: ['seo', 'canonical']
+draft: false
+summary: '중복 URL을 canonical 관리해보자'
+---
+
+# 들어가기전
+마케팅이 중요한 시대에서 SEO의 점수는 매출에 직결 된다. 그걸 수치로 본 입장에서는 항상 의식해서 코드를 작성하고있습니다.
+이번 포스트는 중복된 URL 관리에 관련된 canonicial 알아보고자 한다.
+
+# 본론으로
+## canonical 왜 필요해?
+> 서로 다른 페이지에 유사한 콘텐츠가 있는 경우(예: 한 페이지에 모바일 버전과 데스크톱 버전이 모두 있는 경우), 
+Google은 이러한 페이지를 같은 페이지의 중복 버전으로 간주합니다. Google은 URL 중 하나를 표준 버전으로 선택하여 크롤링하고, 
+나머지 모든 URL은 중복 URL로 간주하여 크롤링 빈도를 줄입니다.
+<span style={{textAlign: "right"}}>
+    (출처: 구글 개발문서 [이동](https://developers.google.com/search/docs/advanced/crawling/consolidate-duplicate-urls))
+</span>
+
+위의 설명을 해석을하면 유사한 페이지를 크롤링할때는 SEO점수가 떨어지고 집중하기 어렵다는 것입니다.
+그래서 필요한 것이 `canonical`입니다.
+
+`canonical`를 사용하면 대표 url을 명시하여 중복 페이지에 크롤링 시간을 낭비하지 않도록 방지하며, 
+GA나 기타 마케팅 툴을 이용했을때 좀 더 정확한 데이터를 남길 수 있습니다.
+
+## canonical 사용법
+`canonical`을 사용하는 방법은 두가지이다.
+|방법|예시|
+|--|------|
+|link 태그|`<link rel="canonical" href="https://example.com"/>`|
+|header|`Link: <https://example.com>; rel="canonical"`|
+
+서버를 이용한다면 response header에 `canonical`을 추가하면됩니다.
+허나 일부 페이지에만 적용한다면 link태그를 사용해도 무방해 보입니다. 
+다만 html페이지가 아닌 파일(image, pdf 등) 이라면 header를 사용해야합니다.
+
+추가적으로 sitemap을 사용해서 url을 명시할 수 없을까 생각했지만 `canonical`보다 효과가 약하다고 합니다.
+
+# 결론
+- 중복된 페이지가 SEO에 악영향을 준다면 `canonical`로 해결할 수 있다. 
+- 방법은 link 태그를 활용하거나, response header에 추가하자
+
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![happy](https://media3.giphy.com/media/CAxbo8KC2A0y4/giphy.gif?cid=ecf05e47zy2pq2ya6myp74wxl9kvgww4siastc0cm4ukdr16&rid=giphy.gif&ct=g)
+  </div>
+</div>
+
+이러한 셋팅은 당하고 설정하기 보다는 미리 설계를 하는게 중요하다고 생각됩니다. 
+이미 수집한 결과를 원하는 결과로 돌리기 까지 시간이 너무 많이 소요됩니다.
+저는 이전 netlify로 블로그를 운영했을때 여러 환경이 노출되어 노출을 원하는 페이지가
+탐색이 안되는 경험을 하여 주의하고 있습니다. <br/>(참고로 vercel에서는 noindex로 이 문제를 해결을 하더군요 [discussion](https://github.com/vercel/vercel/discussions/5038))
+

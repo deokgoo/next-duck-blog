@@ -1,0 +1,77 @@
+---
+title: "React18 automatic batching (자동 일괄처리)"
+date: "2022-05-28"
+tags: ['react', 'react18', 'automatic batching', '자동 배칭']
+draft: false
+summary: 'React18 대비하자 automatic batching'
+---
+
+# Automatic Batching 이란?
+개인적으로 react18에서 핵심 기능 중 하나가 automatic batching 이라고 생각된다.
+
+내부소스, 외부 소스 상관없이 state 업데이트를 일괄처리하여 render가 한번에 이루어 질 수 있도록 하게 한다.
+
+성능을 위해서 state변경을 묶어서 한번에 처리 해주며 render가 한번만 수행 할 수 있도록 도와준다.
+우리는 React17 이전 버전에서는 일괄 처리하기 위해 `ReactDOM.unstable_batchedUpdates` 를 통해 무의미한 렌더링을 피하려고 노력하였고
+
+React17 버전에서는 자동으로 내부 소스(클릭 이벤트 등) 한에서 batch 처리를 해주었다. 
+
+하지만 브라우저 이벤트의 업데이트 외 외부 소스(fetch, setTimeout 등)에 대해서는 일괄 처리하지 않았다.
+
+---
+
+# 기존 batching 은
+React17 에서도 batching을 지원하지 않은 것이 아니다. 하지만 react18과 다른 점이 있다면
+외부 소스(fetch, setTimeout 등)에 대해서는 일괄처리를 해주지 않았다.
+그래서 성능 개선을 위하여 외부 소스 코드를 사용할때는 `ReactDOM.unstable_batchedUpdates`를 사용해줬었다.
+
+아래 예시는 option을 선택하면 서버에 알리고 옵션 상태를 변경하는 예시가 있다고 가정하자
+option1은 내부 소스이기 때문에 React 17 에서는 자동으로 state를 모아서 한번에 렌더링 한다.
+하지만 option2는 외부 소스이기에 렌더가 두 번 일어난다.
+
+<iframe src="https://codesandbox.io/embed/charming-poitras-mgcnci?fontsize=14&hidenavigation=1&theme=dark&view=editor"
+     style={{width: '100%', height: '500px', border: 'none', borderRadius: '4px', overflow: 'hidden'}}
+     title="charming-poitras-mgcnci"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+<br/><br/>
+
+# React 18 에서는
+`ReactDOM.createRoot`을 사용하게 되면 내부 소스, 외부 소스 Automatic Batching이 적용되어 있어 신경 쓰지 않아도 된다.
+
+React18 automatic batching이 적용 안 됨
+```javascript
+const rootElement = document.getElementById("root");
+ReactDOM.render(<App />, rootElement);
+```
+
+React18 automatic batching이 적용됨
+```javascript
+const rootElement = document.getElementById("root");
+ReactDOM.createRoot(rootElement).render(<App />);
+```
+
+<br/><br/>
+
+# Automatic Batching을 피하는 방법
+경우에 따라 Batching이 필요 없을 때가 존재 할 것 이다. Batching을 피하기 위해서는 `ReactDOM.flushSync()` 을 사용해야한다.
+
+```javascript
+const selectedOption2 = async () => {
+  await updateOptionFromServer();
+  ReactDOM.flushSync(() => {
+    setOption1(false);
+  })
+  ReactDOM.flushSync(() => {
+    setOption2(true);
+  })
+};
+```
+
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![focus](https://media3.giphy.com/media/yoJC2D22ruCQKUM1bi/giphy.gif?cid=ecf05e47brp60ybkq5m31xoopnlb0w9p0g71adxefhfyc0j9&rid=giphy.gif&ct=g)
+  </div>
+</div>

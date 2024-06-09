@@ -1,0 +1,39 @@
+---
+title: "[이슈] safari invalid date"
+date: "2022-08-10"
+tags: ['js', 'safari', 'date', 'issue']
+draft: false
+summary: 'safari invalid date issue'
+---
+
+# issue 발견 배경
+프로젝트내에서 AOS, iOS에 웹뷰를 띄워 사용하는데 iOS에서만 일부 화면이
+노출되지 않아 디버깅을 해보니 date에서 가져온 값이 `NaN` 이었다. 디버깅해본 결과
+아래와 같이 Date를 정의하는 과정이 이슈가 되었다. (chrome, aos 에서는 발생하지 않음)
+
+```javascript
+const saleDate = new Date('2022.08.11. 20:30:00');
+```
+
+<br/>
+
+# 이유
+safari 에서는 해당 포맷 `yyyy.MM.dd. HH:mm:ss`를 지원하지 않는다고 한다.
+
+<br/>
+
+# 해결방법
+`yyyy.MM.dd.THH:mm:ss` 로 변경
+
+<br/>
+
+# TL;TR
+api에서 date를 string으로 response를 받게 되는데 backend에서는 <br/> 
+`SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd. HH:mm:ss");` 형식으로 넘겨 문제가 발생했기에
+backend를 수정하였다.
+
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![budlebudle](https://media.giphy.com/media/WoF3yfYupTt8mHc7va/giphy.gif)
+  </div>
+</div>

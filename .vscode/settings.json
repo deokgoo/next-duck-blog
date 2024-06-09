@@ -1,0 +1,75 @@
+{
+  "git.autofetch": true,
+  "editor.tokenColorCustomizations": {
+    "comments": "#f3ada6"
+  },
+  "editor.mouseWheelZoom": true,
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#3d529f"
+  },
+  "window.titleBarStyle": "custom",
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "git.enableSmartCommit": true,
+  "workbench.startupEditor": "newUntitledFile",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "workbench.iconTheme": "material-icon-theme",
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "Wscats.vue"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "workbench.colorTheme": "Community Material Theme Palenight",
+  "bracket-pair-colorizer-2.depreciation-notice": false,
+  "editor.tabSize": 2,
+  "workbench.tree.indent": 4,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {},
+  "prettier.configPath": "prettier.config.js",
+  "security.workspace.trust.untrustedFiles": "open",
+  "powermode.enabled": true,
+  "powermode.shake.intensity": 0,
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.list.horizontalScrolling": true,
+  "editor.formatOnSave": true,
+  "prettier.prettierPath": "prettier.config.js",
+  "window.zoomLevel": 2,
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "editor.inlineSuggest.enabled": true,
+  "githubPullRequests.pullBranch": "never",
+  "files.associations": {
+    "*.mdx": "markdown"
+  },
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false,
+    "javascript": true
+  },
+  "github.copilot.advanced": {}
+}

@@ -1,0 +1,65 @@
+---
+title: "nextjs script strategy"
+date: "2022-02-20"
+tags: ['nextjs', 'script', 'ready event']
+draft: false
+summary: 'nextjs에서 사용하는 Script 태그를 이용하자'
+---
+
+## 들어가기전
+최근 개인 프로젝트 성능 개선을 위해 리소스를 lazyload를 고려하다 next/script에 strategy라는
+속성을 알게되어 공부하고 정리하였습니다.
+
+## 본론으로
+### Script Tag 속성 defer, async
+script 태그에서 속성으로 `async` `defer`이 존재한다. 외부에서 파일을 가져올떄 사용하게되며 로드하는 시점, 실행하는 시점이 다르다.
+따라서 `defer` 또는 `async`를 사용하는 것만으로도 시간단축의 효과를 볼 수 있다.
+
+(다른 훌륭한 자료들이 많기 때문에 그림으로 대체)
+
+<div className="flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2">
+  <div className="my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4">
+    ![실행순서](/static/images/script_async_defer.png)
+  </div>
+  <span>▲실행 순서</span>
+</div>
+
+### NextJS에서는
+nextjs에서 제공하는 next/Script는 script의 호출을 자유롭게 만들었습니다.
+특히나 strategy라는 전략을 사용하게되면 Component 어디에서 호출을 하더라도 명시적으로
+타이밍을 결정할 수 있습니다.
+
+strategy의 선택지는 아래와 같이 3가지를 공식문서에서 다음과 같이 설명합니다.
+> - beforeInteractive: Load before the page is interactive
+> - afterInteractive: (default) Load immediately after the page becomes interactive
+> - lazyOnload: Load during idle time
+
+(https://nextjs.org/docs/basic-features/script#strategy)
+
+`beforeInteractive`는 head에 위치하게 되며 속성으로 defer을 사용합니다. (inline script 사용안됩니다.)
+```javascript
+  <!-- beforeInteractive -->
+  <head>
+    <script src="./script.js" defer data-nscript="beforeInteractive"></script>
+  </head>
+```
+`afterInteractive`는 head에 위치하며 기본 script태그를 사용합니다. (inline script 사용가능)
+```javascript
+  <!-- afterInteractive -->
+  <head>
+    <script src="./script.js" data-nscript="afterInteractive"></script>
+  </head>
+```
+`lazyOnload`는 페이지 라이프사이클 load 이후에 발생하며 body태그 마지막에 추가되어집니다. (inline script 사용가능)
+```javascript
+  <!-- lazyOnload -->
+  <body>
+    ...
+    ...
+    <script src="./script.js" data-nscript="lazyOnload"></script>
+  </body>
+```
+
+## 마무리
+NextJS에서 제공하는 Script를 사용해서 간편하고 명확하게 script를 로드 할 수 있습니다. 특히나 analytics관련 cdn 호출, 각종 플러그인, 소셜미디어 등
+잘 고려해서 사용하면 좋을것 같습니다.
