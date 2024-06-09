@@ -26,6 +26,9 @@ dependencies:
   contentlayer2:
     specifier: 0.4.6
     version: 0.4.6(esbuild@0.20.2)
+  cross-env:
+    specifier: ^7.0.3
+    version: 7.0.3
   esbuild:
     specifier: 0.20.2
     version: 0.20.2
@@ -118,9 +121,6 @@ devDependencies:
   '@typescript-eslint/parser':
     specifier: ^6.21.0
     version: 6.21.0(eslint@8.57.0)(typescript@5.4.5)
-  cross-env:
-    specifier: ^7.0.3
-    version: 7.0.3
   eslint:
     specifier: ^8.57.0
     version: 8.57.0
@@ -4149,7 +4149,7 @@ packages:
     hasBin: true
     dependencies:
       cross-spawn: 7.0.3
-    dev: true
+    dev: false
 
   /cross-fetch@4.0.0:
     resolution: {integrity: sha512-e4a5N8lVvuLgAWgnCrLr2PP0YyDOTHa9H/Rj54dirp61qXnNq46m82bRhNqIA5VccJtWBvPTFRV3TtvHUKPB1g==}
