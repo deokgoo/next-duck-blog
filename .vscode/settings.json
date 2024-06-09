@@ -11,15 +11,43 @@
   "emmet.includeLanguages": {
     "javascript": "javascriptreact"
   },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+  "workbench.startupEditor": "newUntitledFile",
+  "git.enableSmartCommit": true,
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "Community Material Theme Palenight",
+  "editor.tabSize": 2,
+  "workbench.tree.indent": 4,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.inlineSuggest.enabled": true,
+  "powermode.enabled": true,
+  "powermode.shake.intensity": 0,
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.list.horizontalScrolling": true,
+  "window.zoomLevel": 2,
+  "prettier.configPath": "prettier.config.js",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
   },
-  "[html]": {
+  "files.associations": {
+    "*.mdx": "markdown"
+  },
+  "githubPullRequests.pullBranch": "never",
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false,
+    "javascript": true
+  },
+  "github.copilot.advanced": {},
+  "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "git.enableSmartCommit": true,
-  "workbench.startupEditor": "newUntitledFile",
-  "[javascript]": {
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[json]": {
@@ -31,7 +59,6 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.iconTheme": "material-icon-theme",
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -41,35 +68,7 @@
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.colorTheme": "Community Material Theme Palenight",
-  "bracket-pair-colorizer-2.depreciation-notice": false,
-  "editor.tabSize": 2,
-  "workbench.tree.indent": 4,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.codeActionsOnSave": {},
-  "prettier.configPath": "prettier.config.js",
-  "security.workspace.trust.untrustedFiles": "open",
-  "powermode.enabled": true,
-  "powermode.shake.intensity": 0,
-  "workbench.editor.highlightModifiedTabs": true,
-  "workbench.list.horizontalScrolling": true,
-  "editor.formatOnSave": true,
-  "prettier.prettierPath": "prettier.config.js",
-  "window.zoomLevel": 2,
   "[python]": {
     "editor.formatOnType": true
-  },
-  "editor.inlineSuggest.enabled": true,
-  "githubPullRequests.pullBranch": "never",
-  "files.associations": {
-    "*.mdx": "markdown"
-  },
-  "github.copilot.enable": {
-    "*": true,
-    "plaintext": false,
-    "markdown": false,
-    "scminput": false,
-    "javascript": true
-  },
-  "github.copilot.advanced": {}
+  }
 }
