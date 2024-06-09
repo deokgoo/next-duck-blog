@@ -15,8 +15,20 @@ const PostAccordian = ({ title, children }: Props) => {
 
   return (
     <Fragment>
-      <Accordion open={open === 1} onClick={() => handleOpen(1)}>
-        <AccordionHeader>{title}</AccordionHeader>
+      <Accordion
+        open={open === 1}
+        onClick={() => handleOpen(1)}
+        placeholder={undefined}
+        onPointerEnterCapture={undefined}
+        onPointerLeaveCapture={undefined}
+      >
+        <AccordionHeader
+          placeholder={undefined}
+          onPointerEnterCapture={undefined}
+          onPointerLeaveCapture={undefined}
+        >
+          {title}
+        </AccordionHeader>
         <AccordionBody>{children}</AccordionBody>
       </Accordion>
     </Fragment>

@@ -1,0 +1,56 @@
+{
+  "title": "프로그래머스 프론트엔드 dev matching",
+  "date": "2021-10-08T00:00:00.000Z",
+  "tags": [
+    "daily",
+    "2021",
+    "dev matching",
+    "programmers"
+  ],
+  "draft": false,
+  "summary": "프로그래머스 2021 하반기 프론트엔드 dev matching",
+  "body": {
+    "raw": "\n## 후기\n\n시험을 치뤄지는 환경은 웹 visual code에서 진행되어진다. \n\n기본적인 서버 세팅은 갖춰져있으며 API도 준비가 되어있다. (심지어 css도...)\n\n시험은 싱글페이지 어플리케이션을 vanilajs로 구현하는 것이다.\n\n문제는 필수 구현과 보너스 구현으로 나뉘어져있다.\n\n난이도는 중간 정도였다고 생각한다. 구현에 있어서 제약이 없는편이라 \n\njs에 자신이 있다면 누구나 구현 할 수 있다.\n\n다만 시간 싸움이 존재하기에 평소에 얼마나 js를 자유롭게 사용하느냐가 중요한 것 같다.\n\n\n## 결과\n\n오랜만에 vanilajs를 사용하여 구현하는것이 재미는 있었으나,\n\n보너스 구현은 일부 시간 부족으로 미구현 하였습니다만...\n\n어쨌거나 결과는 합격\n\n<div className=\"flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2\">\n  <div className=\"my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4\">\n    ![재택](/static/images/2021-dev-matching-result.png)\n  </div>\n  <span>▲ 통과 메일</span>\n</div>\n\nPS: 시험을 치는 개발자도 컨텍하는 회사도 사실 큰 흥미가 없는게 아닐까? 라는 생각이든다.\n\n가볍게 본인 js실력으로 웹 구현을 얼마나 할 수 있는지를 가늠해보고 싶다면 추천한다.\n\n허나 회사랑 컨텍을하는 목적이라면 가볍게 하는것이 좋을 것 같다.\n\n<br/>\n\n지원한 회사에서는 다시 회사 지원절차 대로 다시 지원 부탁한다고 해서 \n\n이 시험의 무게는 적구나 라고 느꼈다.\n\n---\n\n혹시 궁금한 것이 있다면 질문 받습니다~\n",
+    "code": "var Component=(()=>{var p=Object.create;var i=Object.defineProperty;var m=Object.getOwnPropertyDescriptor;var x=Object.getOwnPropertyNames;var g=Object.getPrototypeOf,v=Object.prototype.hasOwnProperty;var f=(a,e)=>()=>(e||a((e={exports:{}}).exports,e),e.exports),w=(a,e)=>{for(var l in e)i(a,l,{get:e[l],enumerable:!0})},d=(a,e,l,t)=>{if(e&&typeof e==\"object\"||typeof e==\"function\")for(let r of x(e))!v.call(a,r)&&r!==l&&i(a,r,{get:()=>e[r],enumerable:!(t=m(e,r))||t.enumerable});return a};var u=(a,e,l)=>(l=a!=null?p(g(a)):{},d(e||!a||!a.__esModule?i(l,\"default\",{value:a,enumerable:!0}):l,a)),j=a=>d(i({},\"__esModule\",{value:!0}),a);var h=f((b,c)=>{c.exports=_jsx_runtime});var _={};w(_,{default:()=>o,frontmatter:()=>M});var n=u(h()),M={title:\"\\uD504\\uB85C\\uADF8\\uB798\\uBA38\\uC2A4 \\uD504\\uB860\\uD2B8\\uC5D4\\uB4DC dev matching\",date:\"2021-10-08\",tags:[\"daily\",\"2021\",\"dev matching\",\"programmers\"],draft:!1,summary:\"\\uD504\\uB85C\\uADF8\\uB798\\uBA38\\uC2A4 2021 \\uD558\\uBC18\\uAE30 \\uD504\\uB860\\uD2B8\\uC5D4\\uB4DC dev matching\"};function s(a){let e={a:\"a\",div:\"div\",h2:\"h2\",hr:\"hr\",p:\"p\",path:\"path\",span:\"span\",svg:\"svg\",...a.components},{Image:l}=e;return l||N(\"Image\",!0),(0,n.jsxs)(n.Fragment,{children:[(0,n.jsxs)(e.h2,{className:\"content-header\",id:\"\\uD6C4\\uAE30\",children:[(0,n.jsx)(e.a,{\"aria-hidden\":\"true\",href:\"#\\uD6C4\\uAE30\",tabIndex:\"-1\",children:(0,n.jsx)(n.Fragment,{children:(0,n.jsx)(e.span,{className:\"content-header-link\",children:(0,n.jsxs)(e.svg,{className:\"h-5 linkicon w-5\",fill:\"currentColor\",viewBox:\"0 0 20 20\",xmlns:\"http://www.w3.org/2000/svg\",children:[(0,n.jsx)(e.path,{d:\"M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z\"}),(0,n.jsx)(e.path,{d:\"M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z\"})]})})})}),\"\\uD6C4\\uAE30\"]}),(0,n.jsx)(e.p,{children:\"\\uC2DC\\uD5D8\\uC744 \\uCE58\\uB904\\uC9C0\\uB294 \\uD658\\uACBD\\uC740 \\uC6F9 visual code\\uC5D0\\uC11C \\uC9C4\\uD589\\uB418\\uC5B4\\uC9C4\\uB2E4.\"}),(0,n.jsx)(e.p,{children:\"\\uAE30\\uBCF8\\uC801\\uC778 \\uC11C\\uBC84 \\uC138\\uD305\\uC740 \\uAC16\\uCDB0\\uC838\\uC788\\uC73C\\uBA70 API\\uB3C4 \\uC900\\uBE44\\uAC00 \\uB418\\uC5B4\\uC788\\uB2E4. (\\uC2EC\\uC9C0\\uC5B4 css\\uB3C4...)\"}),(0,n.jsx)(e.p,{children:\"\\uC2DC\\uD5D8\\uC740 \\uC2F1\\uAE00\\uD398\\uC774\\uC9C0 \\uC5B4\\uD50C\\uB9AC\\uCF00\\uC774\\uC158\\uC744 vanilajs\\uB85C \\uAD6C\\uD604\\uD558\\uB294 \\uAC83\\uC774\\uB2E4.\"}),(0,n.jsx)(e.p,{children:\"\\uBB38\\uC81C\\uB294 \\uD544\\uC218 \\uAD6C\\uD604\\uACFC \\uBCF4\\uB108\\uC2A4 \\uAD6C\\uD604\\uC73C\\uB85C \\uB098\\uB258\\uC5B4\\uC838\\uC788\\uB2E4.\"}),(0,n.jsx)(e.p,{children:\"\\uB09C\\uC774\\uB3C4\\uB294 \\uC911\\uAC04 \\uC815\\uB3C4\\uC600\\uB2E4\\uACE0 \\uC0DD\\uAC01\\uD55C\\uB2E4. \\uAD6C\\uD604\\uC5D0 \\uC788\\uC5B4\\uC11C \\uC81C\\uC57D\\uC774 \\uC5C6\\uB294\\uD3B8\\uC774\\uB77C\"}),(0,n.jsx)(e.p,{children:\"js\\uC5D0 \\uC790\\uC2E0\\uC774 \\uC788\\uB2E4\\uBA74 \\uB204\\uAD6C\\uB098 \\uAD6C\\uD604 \\uD560 \\uC218 \\uC788\\uB2E4.\"}),(0,n.jsx)(e.p,{children:\"\\uB2E4\\uB9CC \\uC2DC\\uAC04 \\uC2F8\\uC6C0\\uC774 \\uC874\\uC7AC\\uD558\\uAE30\\uC5D0 \\uD3C9\\uC18C\\uC5D0 \\uC5BC\\uB9C8\\uB098 js\\uB97C \\uC790\\uC720\\uB86D\\uAC8C \\uC0AC\\uC6A9\\uD558\\uB290\\uB0D0\\uAC00 \\uC911\\uC694\\uD55C \\uAC83 \\uAC19\\uB2E4.\"}),(0,n.jsxs)(e.h2,{className:\"content-header\",id:\"\\uACB0\\uACFC\",children:[(0,n.jsx)(e.a,{\"aria-hidden\":\"true\",href:\"#\\uACB0\\uACFC\",tabIndex:\"-1\",children:(0,n.jsx)(n.Fragment,{children:(0,n.jsx)(e.span,{className:\"content-header-link\",children:(0,n.jsxs)(e.svg,{className:\"h-5 linkicon w-5\",fill:\"currentColor\",viewBox:\"0 0 20 20\",xmlns:\"http://www.w3.org/2000/svg\",children:[(0,n.jsx)(e.path,{d:\"M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z\"}),(0,n.jsx)(e.path,{d:\"M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z\"})]})})})}),\"\\uACB0\\uACFC\"]}),(0,n.jsx)(e.p,{children:\"\\uC624\\uB79C\\uB9CC\\uC5D0 vanilajs\\uB97C \\uC0AC\\uC6A9\\uD558\\uC5EC \\uAD6C\\uD604\\uD558\\uB294\\uAC83\\uC774 \\uC7AC\\uBBF8\\uB294 \\uC788\\uC5C8\\uC73C\\uB098,\"}),(0,n.jsx)(e.p,{children:\"\\uBCF4\\uB108\\uC2A4 \\uAD6C\\uD604\\uC740 \\uC77C\\uBD80 \\uC2DC\\uAC04 \\uBD80\\uC871\\uC73C\\uB85C \\uBBF8\\uAD6C\\uD604 \\uD558\\uC600\\uC2B5\\uB2C8\\uB2E4\\uB9CC...\"}),(0,n.jsx)(e.p,{children:\"\\uC5B4\\uCA0C\\uAC70\\uB098 \\uACB0\\uACFC\\uB294 \\uD569\\uACA9\"}),(0,n.jsxs)(\"div\",{className:\"flex flex-col items-center flex-wrap -mx-2 overflow-hidden xl:-mx-2\",children:[(0,n.jsx)(\"div\",{className:\"my-1 px-2 w-1/4 overflow-hidden xl:my-1 xl:px-2 xl:w-1/4\",children:(0,n.jsx)(e.div,{children:(0,n.jsx)(l,{alt:\"\\uC7AC\\uD0DD\",src:\"/static/images/2021-dev-matching-result.png\",width:\"1228\",height:\"1308\"})})}),(0,n.jsx)(\"span\",{children:\"\\u25B2 \\uD1B5\\uACFC \\uBA54\\uC77C\"})]}),(0,n.jsx)(e.p,{children:\"PS: \\uC2DC\\uD5D8\\uC744 \\uCE58\\uB294 \\uAC1C\\uBC1C\\uC790\\uB3C4 \\uCEE8\\uD14D\\uD558\\uB294 \\uD68C\\uC0AC\\uB3C4 \\uC0AC\\uC2E4 \\uD070 \\uD765\\uBBF8\\uAC00 \\uC5C6\\uB294\\uAC8C \\uC544\\uB2D0\\uAE4C? \\uB77C\\uB294 \\uC0DD\\uAC01\\uC774\\uB4E0\\uB2E4.\"}),(0,n.jsx)(e.p,{children:\"\\uAC00\\uBCCD\\uAC8C \\uBCF8\\uC778 js\\uC2E4\\uB825\\uC73C\\uB85C \\uC6F9 \\uAD6C\\uD604\\uC744 \\uC5BC\\uB9C8\\uB098 \\uD560 \\uC218 \\uC788\\uB294\\uC9C0\\uB97C \\uAC00\\uB2A0\\uD574\\uBCF4\\uACE0 \\uC2F6\\uB2E4\\uBA74 \\uCD94\\uCC9C\\uD55C\\uB2E4.\"}),(0,n.jsx)(e.p,{children:\"\\uD5C8\\uB098 \\uD68C\\uC0AC\\uB791 \\uCEE8\\uD14D\\uC744\\uD558\\uB294 \\uBAA9\\uC801\\uC774\\uB77C\\uBA74 \\uAC00\\uBCCD\\uAC8C \\uD558\\uB294\\uAC83\\uC774 \\uC88B\\uC744 \\uAC83 \\uAC19\\uB2E4.\"}),(0,n.jsx)(\"br\",{}),(0,n.jsx)(e.p,{children:\"\\uC9C0\\uC6D0\\uD55C \\uD68C\\uC0AC\\uC5D0\\uC11C\\uB294 \\uB2E4\\uC2DC \\uD68C\\uC0AC \\uC9C0\\uC6D0\\uC808\\uCC28 \\uB300\\uB85C \\uB2E4\\uC2DC \\uC9C0\\uC6D0 \\uBD80\\uD0C1\\uD55C\\uB2E4\\uACE0 \\uD574\\uC11C\"}),(0,n.jsx)(e.p,{children:\"\\uC774 \\uC2DC\\uD5D8\\uC758 \\uBB34\\uAC8C\\uB294 \\uC801\\uAD6C\\uB098 \\uB77C\\uACE0 \\uB290\\uAF08\\uB2E4.\"}),(0,n.jsx)(e.hr,{}),(0,n.jsx)(e.p,{children:\"\\uD639\\uC2DC \\uAD81\\uAE08\\uD55C \\uAC83\\uC774 \\uC788\\uB2E4\\uBA74 \\uC9C8\\uBB38 \\uBC1B\\uC2B5\\uB2C8\\uB2E4~\"})]})}function o(a={}){let{wrapper:e}=a.components||{};return e?(0,n.jsx)(e,{...a,children:(0,n.jsx)(s,{...a})}):s(a)}function N(a,e){throw new Error(\"Expected \"+(e?\"component\":\"object\")+\" `\"+a+\"` to be defined: you likely forgot to import, pass, or provide it.\")}return j(_);})();\n;return Component;"
+  },
+  "_id": "blog/daily/programmers-2021-2-dev-matching.mdx",
+  "_raw": {
+    "sourceFilePath": "blog/daily/programmers-2021-2-dev-matching.mdx",
+    "sourceFileName": "programmers-2021-2-dev-matching.mdx",
+    "sourceFileDir": "blog/daily",
+    "contentType": "mdx",
+    "flattenedPath": "blog/daily/programmers-2021-2-dev-matching"
+  },
+  "type": "Blog",
+  "readingTime": {
+    "text": "3 min read",
+    "minutes": 2.12,
+    "time": 127200,
+    "words": 424
+  },
+  "slug": "daily/programmers-2021-2-dev-matching",
+  "path": "blog/daily/programmers-2021-2-dev-matching",
+  "filePath": "blog/daily/programmers-2021-2-dev-matching.mdx",
+  "toc": [
+    {
+      "value": "후기",
+      "url": "#후기",
+      "depth": 2
+    },
+    {
+      "value": "결과",
+      "url": "#결과",
+      "depth": 2
+    }
+  ],
+  "structuredData": {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "프로그래머스 프론트엔드 dev matching",
+    "datePublished": "2021-10-08T00:00:00.000Z",
+    "dateModified": "2021-10-08T00:00:00.000Z",
+    "description": "프로그래머스 2021 하반기 프론트엔드 dev matching",
+    "image": "/static/images/main-logo-no-bg.png",
+    "url": "https://duck-blog.netlify.app/blog/daily/programmers-2021-2-dev-matching"
+  }
+}
