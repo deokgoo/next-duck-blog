@@ -41,7 +41,7 @@ const siteMetadata = {
     //   posthogProjectApiKey: '', // e.g. 123e4567-e89b-12d3-a456-426614174000
     // },
     googleAnalytics: {
-      googleAnalyticsId: 'UA-217395751-1', // e.g. G-XXXXXXX
+      googleAnalyticsId: 'G-PN28LVMCKG',
     },
     plausibleDataDomain: '', // e.g. tailwind-nextjs-starter-blog.vercel.app
     simpleAnalytics: false, // true or false
