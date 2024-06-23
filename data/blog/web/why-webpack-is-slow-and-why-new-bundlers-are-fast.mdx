@@ -1,0 +1,186 @@
+---
+slug: why-Webpack-is-slow-and-why-new-bundlers-are-fast
+title: 왜 Webpack은 느릴까? 최신 번들러들이 빠른 이유
+description: 이 글에서는 Webpack이 느린 이유와 Vite, Snowpack, esbuild와 같은 최신 번들러들이 빠른 이유를 탐구합니다. 각 번들러의 특징과 장점을 비교하여 더 나은 선택을 할 수 있도록 도와드립니다.
+tags: [Webpack, 번들러, Vite, Snowpack, esbuild, 웹 개발]
+date: 2024-06-20
+---
+
+<div className="flex flex-col items-center flex-wrap overflow-hidden">
+  <div className="my-1 px-2 overflow-hidden xl:px-2 w-2/4">
+    ![change Webpack](/static/images/why-webpack-is-slow/change-Webpack.webp)
+  </div>
+</div>
+
+## 서론
+
+Webpack은 프론트엔드 개발에서 가장 널리 사용되는 번들러 중 하나입니다. 코드 스플리팅, 로더, 플러그인 등을 통해 다양한 기능을 제공하여 복잡한 웹 애플리케이션을 효과적으로 관리할 수 있게 해줍니다. 그러나 많은 개발자들이 Webpack의 속도 문제로 인해 어려움을 겪고 있습니다. 이 글에서는 Webpack이 느린 이유를 분석하고, Vite와 비교하여 어떻게 더 빠른 성능을 제공하는지 알아보겠습니다.
+
+## Webpack의 느린 이유
+
+### 복잡한 설정 및 구성
+
+Webpack의 강력한 기능성은 복잡한 설정 파일에서 비롯됩니다. 이는 유연성을 제공하지만, 초기 설정 및 유지 보수가 어려워질 수 있습니다. 특히 대규모 프로젝트에서는 설정 파일이 매우 복잡해져 빌드 시간이 길어질 수 있습니다.
+
+- Webpack.config.js
+```javascript
+const path = require('path');
+
+module.exports = {
+  entry: './src/index.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
+      }
+    ]
+  }
+};
+```
+- Vite.config.js
+```javascript
+import { defineConfig } from 'vite';
+export default defineConfig({
+  plugins: []
+});
+```
+- **Entry Point**: Vite는 기본적으로 `index.html` 파일을 진입점으로 사용합니다. `index.html` 파일에서 JavaScript 파일을 포함하면, Vite는 이를 자동으로 인식하고 처리합니다.
+- **Output**: Vite는 개발 모드에서는 브라우저에서 바로 로딩할 수 있도록 설정하며, 프로덕션 빌드 시에는 `/dist` 디렉토리에 번들된 파일을 생성합니다.
+- **Loaders**: Vite는 JavaScript, TypeScript, JSX, TSX, CSS, JSON 등의 파일을 기본적으로 처리합니다. 추가적인 파일 형식이 필요한 경우 플러그인을 통해 확장할 수 있습니다.
+
+<div className="flex flex-col items-center flex-wrap overflow-hidden">
+  <div className="my-1 px-2 overflow-hidden xl:px-2 w-2/4">
+    ![large application](/static/images/why-webpack-is-slow/large-application.webp)
+  </div>
+</div>
+
+### 큰 규모의 프로젝트에서의 한계
+
+`Webpack` 큰 규모의 프로젝트에서 빌드 속도가 느려지는 경향이 있습니다. 수많은 모듈과 의존성을 처리해야 하므로 빌드 과정이 오래 걸릴 수 있습니다. 중요한 점은, 개발 환경에서 Vite는 ES 모듈을 직접 브라우저에서 로드하기 때문에, `Webpack`과 달리 초기 빌드 시 전체 번들링 과정을 생략할 수 있어 매우 빠릅니다.
+
+그러나 `Vite`는 프로덕션 환경에서는 `Rollup`을 사용하여 번들링을 수행합니다. `Rollup`은 ES 모듈에 최적화된 설계와 효율적인 트리 셰이킹, 간단한 플러그인 시스템을 통해 빠른 빌드 속도를 제공합니다. 이는 불필요한 오버헤드가 적고, 초기 빌드와 최적화 과정이 매우 효율적입니다.
+
+이러한 이유로, `Vite`와 `Webpack`을 비교할 때 `Rollup`도 함께 고려해야 합니다. Vite는 개발 중에는 빠른 속도로 작업할 수 있도록 설계되었고, 프로덕션 빌드에서는 `Rollup`의 최적화 기능을 활용하여 성능을 극대화합니다. 반면, Webpack은 개발 환경과 프로덕션 환경 모두에서 전체 번들링을 수행하기 때문에, 대규모 프로젝트에서는 빌드 시간이 길어질 수 있습니다.
+
+**요약**
+
+- `Webpack`: 큰 규모의 프로젝트에서 빌드 속도가 느려질 수 있으며, 개발 환경과 프로덕션 환경 모두에서 전체 번들링을 수행합니다.
+- `Vite`: 개발 환경에서는 ES 모듈을 직접 로드하여 빠른 속도를 제공하며, 프로덕션 빌드에서는 Rollup을 사용하여 최적화된 번들을 생성합니다.
+- `Rollup`: ES 모듈에 최적화된 설계와 효율적인 트리 셰이킹, 간단한 플러그인 시스템을 통해 빠른 빌드 속도를 제공합니다.
+
+이러한 차이점들 때문에, 대규모 프로젝트에서는 Vite가 개발 속도와 빌드 최적화 측면에서 더 유리할 수 있습니다.
+
+### 파일 크기 및 로딩 시간 문제
+
+Webpack은 모든 자원을 번들링하여 하나의 파일로 만들기 때문에 초기 로딩 시간이 길어질 수 있습니다. 이는 사용자 경험에 부정적인 영향을 미칠 수 있으며, 특히 모바일 환경에서 문제가 될 수 있습니다. Webpack과 Vite는 각각 이러한 문제를 해결하는 접근 방식이 다릅니다.
+
+#### Webpack
+- **전체 번들링**: Webpack은 모든 모듈을 하나의 번들 파일로 묶는 방식을 기본으로 합니다. 이는 로딩 시점에 모든 코드를 한 번에 가져와야 하기 때문에, 번들 파일이 커질수록 초기 로딩 시간이 길어질 수 있습니다.
+- **코드 스플리팅**: Webpack은 코드 스플리팅을 통해 번들을 여러 개의 청크로 나누어 로딩 시간을 최적화할 수 있습니다. 그러나 설정이 복잡할 수 있으며, 제대로 구현하지 않으면 성능 최적화 효과가 제한적일 수 있습니다.
+- **트리 셰이킹**: Webpack은 트리 셰이킹을 지원하여 사용되지 않는 코드를 제거합니다. 하지만 트리 셰이킹이 완벽하지 않을 수 있으며, 의존성 관리가 복잡할 수 있습니다.
+
+#### Vite
+- **ES 모듈 기반 개발**: Vite는 개발 환경에서 ES 모듈을 직접 로드하여 필요한 모듈만 가져옵니다. 이는 초기 로딩 시간을 크게 단축시킬 수 있습니다.
+- **프로덕션 빌드**: Vite는 프로덕션 빌드 시 Rollup을 사용하여 최적화된 번들을 생성합니다. Rollup은 ES 모듈에 최적화되어 있으며, 효율적인 트리 셰이킹과 코드 스플리팅을 통해 파일 크기를 최소화합니다.
+- **지연 로딩(Lazy Loading)**: Vite와 Rollup은 지연 로딩을 통해 필요한 시점에만 모듈을 로드할 수 있도록 지원하여 초기 로딩 시간을 더욱 단축할 수 있습니다.
+
+<div className="flex flex-col items-center flex-wrap overflow-hidden">
+  <div className="my-1 px-2 overflow-hidden xl:px-2 w-2/4">
+    ![plugin](/static/images/why-webpack-is-slow/plugin.webp)
+  </div>
+</div>
+
+### 플러그인 및 로더 사용의 복잡성
+
+`Webpack`과 `Vite`는 각각 플러그인과 로더를 사용하여 기능을 확장하고 프로젝트를 최적화합니다. 그러나 두 도구의 플러그인 및 로더 사용 방식은 복잡성에서 큰 차이를 보입니다.
+
+#### Webpack
+- **다양한 플러그인 및 로더**: Webpack은 매우 풍부한 플러그인과 로더 생태계를 가지고 있습니다. 이를 통해 파일 형식을 변환하고, 코드 압축, 트리 셰이킹, 코드 스플리팅, 환경 변수 설정 등 다양한 기능을 구현할 수 있습니다.
+- **복잡한 설정**: Webpack의 플러그인 및 로더 시스템은 강력하지만 설정이 복잡할 수 있습니다. 각 플러그인과 로더는 특정 설정을 요구하며, 여러 플러그인과 로더를 함께 사용할 때 설정 충돌이 발생할 수 있습니다.
+- **의존성 관리**: 복잡한 프로젝트에서는 플러그인과 로더 간의 의존성을 관리하는 것이 어렵고, 설정 파일이 복잡해질 수 있습니다.
+
+```javascript
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+module.exports = {
+  entry: './src/index.js',
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: 'babel-loader',
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({ template: './src/index.html' }),
+    new MiniCssExtractPlugin(),
+    new CleanWebpackPlugin(),
+  ],
+};
+```
+
+#### Vite
+- **간단하고 직관적인 플러그인 시스템**: Vite의 플러그인 시스템은 Rollup의 플러그인 인터페이스를 기반으로 하며, Rollup 플러그인을 그대로 사용할 수 있습니다. Vite 전용 플러그인도 쉽게 작성할 수 있습니다.
+- **빠른 설정**: Vite의 플러그인과 로더 설정은 간단하고 직관적입니다. 플러그인 간의 충돌이 적고, 설정 파일이 간결하여 관리하기 쉽습니다.
+- **모듈 방식**: Vite는 기본적으로 ES 모듈을 사용하여 모듈 간의 의존성을 효율적으로 관리합니다.
+
+```javascript
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import alias from '@rollup/plugin-alias';
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    alias({
+      entries: [
+        { find: '@', replacement: '/src' },
+      ],
+    }),
+  ],
+});
+```
+
+### 주요 차이점
+
+1. **설정 복잡성**
+   - **Webpack**: 다양한 기능을 제공하지만, 설정이 복잡하고 시간이 많이 소요될 수 있습니다. 플러그인 및 로더 간의 의존성 및 충돌 문제를 해결해야 할 때가 많습니다.
+   - **Vite**: 설정이 간단하고 직관적입니다. 플러그인 사용이 간편하며, Rollup의 플러그인 생태계를 그대로 활용할 수 있습니다.
+
+2. **생태계**
+   - **Webpack**: 풍부한 플러그인 및 로더 생태계를 가지고 있으며, 다양한 기능을 구현할 수 있습니다.
+   - **Vite**: Rollup 플러그인과 Vite 전용 플러그인을 모두 사용할 수 있어, 플러그인 선택의 폭이 넓습니다.
+
+3. **사용 편의성**
+   - **Webpack**: 설정이 복잡할 수 있지만, 강력한 커스터마이징이 가능합니다.
+   - **Vite**: 설정이 간단하여 빠르게 플러그인과 로더를 추가하고 사용할 수 있습니다.
+
+## 결론
+
+Webpack은 강력한 기능성과 유연성을 제공하지만, 복잡한 설정과 긴 빌드 시간으로 인해 대규모 프로젝트에서 성능 문제가 발생할 수 있습니다. 반면, Vite는 ES 모듈 기반의 빠른 개발 환경을 제공하며, Rollup을 사용한 최적화된 프로덕션 빌드로 인해 성능을 극대화합니다. 프로젝트의 요구 사항에 따라 적합한 번들러를 선택하는 것이 중요합니다.
+
+대규모 프로젝트에서는 Vite가 개발 속도와 빌드 최적화 측면에서 더 유리할 수 있으며, Webpack은 다양한 기능과 강력한 커스터마이징이 필요한 경우에 적합합니다. 각 도구의 장단점을 잘 이해하고, 프로젝트의 특성에 맞는 도구를 선택하여 최상의 개발 경험과 성능을 얻을 수 있습니다.
