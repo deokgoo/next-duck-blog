@@ -6,7 +6,7 @@ const siteMetadata = {
   description: 'Frontend developer duck blog',
   language: 'ko-KR',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://duck-blog.netlify.app',
+  siteUrl: 'https://duck-blog.vercel.app',
   siteRepo: 'https://github.com/deokgoo/next-duck-blog',
   siteLogo: '/static/images/logo.png',
   image: '/static/images/avatar.jpg',
