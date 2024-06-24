@@ -1,9 +1,10 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Duck blog',
+  title: 'duck blog | 기술 블로그',
   author: 'Deokgoo',
   headerTitle: 'duck blog',
-  description: 'Frontend developer duck blog',
+  description:
+    'duck blog는 최신 웹 개발, 소프트웨어 엔지니어링, 그리고 다양한 취미생활에 관한 깊이 있는 정보와 유용한 팁을 공유합니다. 기술 트렌드, 실용적인 개발 팁, 엔지니어링 이슈, 흥미로운 취미 이야기까지 한 곳에서 만나보세요!"',
   language: 'ko-KR',
   theme: 'system', // system, dark or light
   siteUrl: 'https://duck-blog.vercel.app',
