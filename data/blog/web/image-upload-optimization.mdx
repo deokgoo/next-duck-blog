@@ -1,0 +1,112 @@
+---
+slug: image-upload-optimization
+title: 이미지 업로드 최적화 웹 성능 개선 사례
+description: SNS 프로젝트에서 이미지 업로드 최적화와 웹 성능 개선을 위한 실전 경험을 공유합니다.
+tags: [이미지 업로드, 웹 성능, 최적화, 웹 개발, SNS]
+draft: false
+date: "2024-06-26"
+images: [image-upload-optimization-example, webp-vs-jpeg, image-compression-techniques]
+---
+
+## 이미지 업로드 최적화: 웹 성능 개선 사례
+
+어쩌다 보니 현재 회사에서 SNS를 만들게 되었는데, 게시물 업로드 영역을 만들면서 겪었던 시행착오와 어떻게 해결했는지에 대해 경험을 공유하고자 합니다. 또한 앞으로 이미지 업로드를 효과적으로 처리하는 방법에 대해 얘기해보겠습니다.
+
+### 1. 초기 문제 상황
+
+이미지 업로드 요구 사항은 최대 10개까지 가능해야 했습니다. 요즘 스마트폰의 이미지 크기를 살펴보면, 한 장에 보통 3-5MB 정도 나갑니다. 따라서 10개의 이미지를 업로드하면 총 30-50MB에 달합니다. 이는 웹 특성상 매우 답답한 상황을 초래합니다. 업로드가 완료되지 않으면 게시물 업로드 자체가 불가능해지므로, 이를 해결할 필요가 있었습니다.
+
+### 2. 이미지 업로드 병렬 처리
+
+처음에는 업로드 속도가 느린 것을 UX로 풀어볼까 생각했지만, UX로도 해결할 수 없는 속도 문제를 해결하기 위해 먼저 HTTP 2.0을 사용하고 있는 우리의 웹페이지에서 API 하나로 이미지를 동시에 올리지 말고 병렬로 올리기 시작했습니다. 이를 통해 업로드 속도는 개선되었으나, 드라마틱하게 감소하지는 않았습니다.
+
+```javascript
+const uploadImages = async (images) => {
+  const uploadPromises = images.map(image => {
+    const formData = new FormData();
+    formData.append('file', image);
+
+    return fetch('/upload', {
+      method: 'POST',
+      body: formData
+    });
+  });
+
+  await Promise.all(uploadPromises);
+};
+```
+
+### 3. 이미지 압축 방식 변경 및 최적화
+
+클라이언트 측에서 JavaScript로 할 수 있는 이미지 최적화 방법 중 하나는 `canvas`를 활용하는 것입니다. `canvas` API는 공식적으로 `service worker`를 지원하기에 이를 이용하여 최적화를 진행했습니다. 여기서 좀 더 향상된 방법으로 `OffscreenCanvas`를 통해 `worker`를 사용하여 성능을 최적화할 수 있었습니다. `OffscreenCanvas`는 메인 스레드가 아닌 별도의 워커 스레드에서 `canvas` 작업을 처리할 수 있게 해줍니다. 이를 통해 메인 스레드의 부하를 줄이고, 보다 빠른 이미지 처리를 가능하게 했습니다.
+
+이미지 압축 방식을 JPEG에서 WebP로 전환하여 파일 크기를 크게 줄였습니다. WebP 포맷은 같은 화질을 유지하면서도 JPEG보다 파일 크기를 줄이는 데 매우 효과적입니다. 이렇게 변환된 이미지는 파일 크기가 줄어들어 업로드 시간이 단축되고, 서버와 클라이언트 모두에서의 부담을 줄일 수 있었습니다.
+
+또한, 이미지 압축을 간편하게 적용하려면 [browser-image-compression](https://www.npmjs.com/package/browser-image-compression) 라이브러리를 사용하는 것도 좋은 방법입니다. 이 라이브러리는 브라우저 환경에서 이미지 압축을 쉽게 처리할 수 있는 도구를 제공합니다.
+
+이미지 크기를 줄이기 위해 압축을 시도했지만, 여전히 1~3MB의 크기를 유지하는 경우가 많았습니다. 이에 따라 크기 조정을 통한 최적화가 필요했습니다. 업로드 테스트 중, 아이폰 이미지 크기가 4032x3024로 4000px를 초과하는 것을 확인했습니다. 이를 1700~1800px로 줄였더니 파일 크기가 1MB 이하로 감소하여 만족할 만한 속도가 나왔습니다.
+
+#### OffscreenCanvas를 이용한 WebP 변환 예제
+Step 1: Web Worker 파일 생성 (optimizeImageWorker.js)
+
+```javascript
+self.onmessage = (event) => {
+  const file = event.data;
+  
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = (event) => {
+    const img = new Image();
+    img.src = event.target.result;
+    img.onload = () => {
+      const offscreenCanvas = new OffscreenCanvas(img.width, img.height);
+      const ctx = offscreenCanvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      offscreenCanvas.convertToBlob({
+        type: 'image/webp',
+        quality: 0.8
+      }).then((blob) => {
+        self.postMessage(blob);
+      });
+    };
+  };
+};
+```
+
+Step 2: 메인 스레드에서 Web Worker를 사용하여 이미지 최적화
+```javascript
+const optimizeImage = (file) => {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker('optimizeImageWorker.js');
+
+    worker.onmessage = (event) => {
+      resolve(event.data);
+    };
+
+    worker.onerror = (error) => {
+      reject(error);
+    };
+
+    worker.postMessage(file);
+  });
+};
+```
+
+위 코드에서는 `OffscreenCanvas`를 사용하여 이미지 크기를 최적화하고, WebP 포맷으로 변환하는 과정을 보여줍니다. 이 방법을 통해 메인 스레드의 부하를 줄이고, 빠른 이미지 처리를 할 수 있었습니다.
+
+### 4. 서버 측 최적화
+
+프로젝트가 Next.js를 기반으로 했기 때문에 `next/image`를 많이 사용했습니다. 그러나 서버 인스턴스가 많아지면서 `next/image`의 캐싱 메리트가 떨어졌습니다. 특히, 각 서버 인스턴스가 개별적으로 캐싱을 하기 때문에 비효율적이며, 캐시 히트 확률이 낮았습니다. 이를 해결하기 위해 이미지 최적화 솔루션을 도입하고, AWS S3에 이미지를 저장하며 CloudFront를 통해 제공했습니다. 초기에는 보안상의 이유로 백엔드 서버를 통해 S3로 업로드했지만, 이후 `presignedUrl`을 사용하여 클라이언트에서 직접 업로드하도록 변경했습니다.
+
+### 5. UI/UX 개선
+
+### 6. 최종 결과 및 교훈
+
+위의 최적화 작업을 통해 이미지 업로드 속도는 크게 개선되었고, 사용자 경험도 향상되었습니다. 이 경험을 통해 배운 점은 다음과 같습니다:
+
+- 병렬 처리와 HTTP 2.0의 활용은 속도 개선에 도움을 주지만, 큰 변화는 없었습니다. (그래도 기존대비 5초이상은 줄었습니다...)
+- 클라이언트 측과 서버 측에서의 압축 및 최적화 작업이 중요했습니다.
+- 최신 이미지 포맷(WebP)의 사용은 파일 크기를 줄이는 데 효과적이었습니다.
+- 이미지 크기 조정을 통한 최적화는 업로드 속도를 크게 향상시켰습니다.
+
+이미지 업로드 최적화는 사용자 경험을 개선하고, 서버 자원을 효율적으로 사용하는 데 중요한 요소입니다. 앞으로도 다양한 최적화 방법을 지속적으로 연구하고 적용해 나가야 할 것입니다.
