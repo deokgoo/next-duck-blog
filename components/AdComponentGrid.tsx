@@ -1,18 +1,18 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
-const AdComponent = () => {
+const AdComponentGrid = () => {
   useEffect(() => {
     setTimeout(() => {
       try {
         // @ts-ignore
-        ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch {
-        console.log('AdBlocker detected')
+        console.log('AdBlocker detected');
       }
-    }, 1000)
-  }, [])
+    }, 1000);
+  }, []);
 
   return (
     <div className="ad-container" style={{ textAlign: 'center', margin: '20px 0' }}>
@@ -31,7 +31,7 @@ const AdComponent = () => {
       ></ins>
       <script></script>
     </div>
-  )
-}
+  );
+};
 
-export default AdComponent
+export default AdComponentGrid;

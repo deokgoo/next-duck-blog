@@ -1,17 +1,17 @@
-import { Fragment, ReactNode, useState } from 'react'
-import { Accordion, AccordionHeader, AccordionBody } from '@material-tailwind/react'
+import { Fragment, ReactNode, useState } from 'react';
+import { Accordion, AccordionHeader, AccordionBody } from '@material-tailwind/react';
 
 interface Props {
-  title: string
-  children: ReactNode
+  title: string;
+  children: ReactNode;
 }
 
 const PostAccordian = ({ title, children }: Props) => {
-  const [open, setOpen] = useState(0)
+  const [open, setOpen] = useState(0);
 
   const handleOpen = (value) => {
-    setOpen(open === value ? 0 : value)
-  }
+    setOpen(open === value ? 0 : value);
+  };
 
   return (
     <Fragment>
@@ -32,7 +32,7 @@ const PostAccordian = ({ title, children }: Props) => {
         <AccordionBody>{children}</AccordionBody>
       </Accordion>
     </Fragment>
-  )
-}
+  );
+};
 
-export default PostAccordian
+export default PostAccordian;
