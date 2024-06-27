@@ -3,6 +3,10 @@
     {
       "source": "/ads.txt",
       "destination": "/static/ads.txt"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/favicons/favicon.ico"
     }
   ]
 }

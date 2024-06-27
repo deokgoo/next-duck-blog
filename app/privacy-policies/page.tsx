@@ -1,5 +1,5 @@
-import React from 'react'
-import Head from 'next/head'
+import React from 'react';
+import Head from 'next/head';
 
 const PrivacyPolicy: React.FC = () => {
   return (
@@ -78,7 +78,7 @@ const PrivacyPolicy: React.FC = () => {
         </section>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default PrivacyPolicy
+export default PrivacyPolicy;

@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
 const TestComponent = () => {
-  const [testText, setTestText] = useState<string>()
+  const [testText, setTestText] = useState<string>();
 
   const changeHandler = (e: React.FormEvent<HTMLInputElement>) => {
-    const currentText = e.currentTarget.value
-    setTestText(currentText)
-  }
+    const currentText = e.currentTarget.value;
+    setTestText(currentText);
+  };
 
   return (
     <>
@@ -18,7 +18,7 @@ const TestComponent = () => {
       />
       당신이 작성한 것 : {testText}
     </>
-  )
-}
+  );
+};
 
-export default TestComponent
+export default TestComponent;
