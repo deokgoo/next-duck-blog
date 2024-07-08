@@ -1,6 +1,7 @@
 ---
 title: '현실적이고 효과적인 SEO 최적화 방법 - 기술편'
 date: '2024-06-30'
+lastmod: '2024-07-08'
 tags: [SEO, 검색 엔진 최적화, 프론트엔드 개발, 웹사이트 성능, 트래픽 증가]
 draft: false
 summary: '프론트엔드 개발자를 위한 SEO 최적화 방법과 현실적인 팁을 제공하려 합니다. 구조화된 데이터 사용 등 SEO 필수 요소를 알아봅시다.'
@@ -255,6 +256,122 @@ sitemap.xml 파일은 아래와 같이 구성할 수 있습니다.
 ```
 
 </Expand>
+
+### 3.4 JSON-LD를 활용하자
+
+JSON-LD는 JSON(JavaScript Object Notation for Linked Data)의 줄임말로, 구조화된 데이터를 표현하기 위한 형식입니다. 이를 통해 웹 페이지에 포함된 정보를 검색 엔진이 더 쉽게 이해하고 처리할 수 있도록 돕습니다.
+
+아래는 요리에 관한 json ld 예시입니다.
+
+```html
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Recipe",
+    "name": "Chocolate Chip Cookies",
+    "author": {
+      "@type": "Person",
+      "name": "Jane Doe"
+    },
+    "recipeIngredient": ["1 cup butter", "1 cup sugar", "2 cups flour", "1 cup chocolate chips"],
+    "recipeInstructions": [
+      "Preheat oven to 350 degrees F.",
+      "Mix all ingredients.",
+      "Bake for 10 minutes."
+    ],
+    "image": "https://example.com/photo.jpg"
+  }
+</script>
+```
+
+이렇게 작성을 하면 구조화된 데이터를 통해 검색 엔진이 페이지의 레시피 정보를 쉽게 이해할 수 있습니다.
+
+JSON-LD는 SEO에 매우 유용한 도구이지만, 고품질의 콘텐츠를 대신할 수는 없습니다. JSON-LD를 사용하여 구조화된 데이터를 제공하는 것은 검색 엔진이 페이지를 더 잘 이해하고, 리치 스니펫을 통해 더 많은 클릭을 유도할 수 있도록 돕습니다. 그럼에도 불구하고 많은 페이지가 JSON-LD를 사용하지 않는 이유가 있습니다.
+
+    •	지식 부족: 많은 웹사이트 소유자와 개발자는 JSON-LD와 같은 구조화 데이터를 사용하여 얻을 수 있는 이점에 대해 잘 알지 못합니다. 특히 소규모 비즈니스나 개인 블로그의 경우, SEO 최적화에 대한 전문 지식이 부족할 수 있습니다.
+    •	우선순위 문제: 웹사이트를 운영할 때 여러 가지 요소를 고려해야 합니다. 콘텐츠 생성, 사용자 경험 개선, 기술적 유지보수 등 많은 과제가 있습니다. JSON-LD를 포함한 구조화 데이터의 구현이 우선순위에서 밀릴 수 있습니다.
+    •	즉각적인 효과 부족: JSON-LD를 사용한다고 해서 즉각적으로 눈에 띄는 SEO 개선 효과를 보장하지 않습니다. 이는 장기적인 전략으로 작용하며, 결과를 확인하기까지 시간이 걸릴 수 있습니다. 따라서 단기적인 성과에 집중하는 경우 우선순위에서 밀릴 수 있습니다.
+    •	자동화 도구 부족: 많은 콘텐츠 관리 시스템(CMS)이나 웹사이트 빌더가 JSON-LD를 자동으로 생성하거나 포함하는 기능을 기본 제공하지 않을 수 있습니다. 수동으로 JSON-LD를 작성하고 포함하는 작업이 추가적인 부담이 될 수 있습니다.
+    •	기타 SEO 요소의 중요성: SEO는 여러 요소가 복합적으로 작용합니다. 좋은 콘텐츠, 키워드 최적화, 백링크, 사용자 경험 등이 모두 중요한 역할을 합니다. JSON-LD는 그 중 하나의 요소일 뿐, 전체적인 SEO 성과에 영향을 미치는 유일한 요소는 아닙니다.
+
+### 3.5 AMP (Accelerated Mobile Pages) 적용
+
+AMP는 Google이 주도한 오픈 소스 프로젝트로, 모바일 웹 페이지의 로딩 속도를 획기적으로 향상시키기 위한 기술입니다. AMP를 적용하면 페이지가 신속하게 로드되며, 사용자 경험을 크게 향상시킬 수 있습니다. AMP를 적용하는 방법은 다음과 같습니다.
+
+#### 3.5.1 기본 AMP HTML 구조
+
+AMP HTML은 표준 HTML과 비슷하지만, 몇 가지 필수 태그와 제한 사항이 있습니다. 기본 AMP HTML 구조는 다음과 같습니다
+
+```html
+<!doctype html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8" />
+    <title>AMP 페이지 예제</title>
+    <link rel="canonical" href="https://www.example.com/amp-page.html" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
+    <style amp-boilerplate>
+      body {
+        visibility: hidden;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <h1>AMP 페이지 예제</h1>
+    <p>이것은 AMP 페이지의 예제입니다.</p>
+  </body>
+</html>
+```
+
+#### 3.5.2 AMP 컴포넌트 사용
+
+AMP에서는 표준 HTML 태그 대신 AMP 전용 컴포넌트를 사용해야 합니다. 예를 들어, 이미지를 표시할 때는 `<amp-img>` 태그를 사용합니다
+
+```html
+<amp-img
+  src="https://www.example.com/image.jpg"
+  width="600"
+  height="400"
+  layout="responsive"
+  alt="예제 이미지"
+></amp-img>
+```
+
+#### 3.5.3 스타일과 스크립트 제한
+
+AMP 페이지에서는 사용자 정의 스타일을 `<style amp-custom>` 태그 내에 작성해야 하며, 외부 CSS 파일은 사용할 수 없습니다. 또한, AMP는 자체적으로 제공하는 스크립트만 사용할 수 있으며, 커스텀 자바스크립트는 사용할 수 없습니다.
+
+```html
+<style amp-custom>
+  body {
+    font-family: Arial, sans-serif;
+  }
+  h1 {
+    color: #333;
+  }
+</style>
+```
+
+#### 3.5.4 AMP 페이지 검증
+
+AMP 페이지가 제대로 작성되었는지 확인하려면 AMP HTML 검증기를 사용해야 합니다. 다음과 같이 브라우저 콘솔에서 검증할 수 있습니다:
+
+    1.	AMP 페이지를 브라우저에서 엽니다.
+    2.	URL 끝에 #development=1을 추가합니다.
+    3.	개발자 도구 콘솔을 열고 AMP 오류를 확인합니다.
+
+#### 3.5.5 AMP가 SEO에 미치는 영향
+
+AMP를 적용하면 SEO에도 긍정적인 영향을 미칩니다. 그 이유는 다음과 같습니다:
+
+    1.	로딩 속도 향상: AMP는 페이지 로딩 속도를 크게 개선하여, 사용자 이탈률을 줄이고 방문자 만족도를 높입니다. 검색 엔진은 로딩 속도가 빠른 페이지를 선호하여, 더 높은 순위에 배치할 가능성이 큽니다.
+    2.	모바일 친화성: AMP는 모바일 환경에서 최적화된 페이지를 제공하여, 모바일 검색 결과에서 더 높은 순위를 차지할 수 있습니다. Google은 모바일 친화적인 페이지를 우선적으로 고려합니다.
+    3.	검색 결과에서의 가시성 증가: AMP 페이지는 Google 검색 결과에서 AMP 배지를 표시하여, 사용자가 빠르게 로드되는 페이지임을 인식하게 합니다. 이는 클릭률을 높이는 데 도움이 됩니다.
+    4.	검색 엔진 색인 최적화: AMP 페이지는 구조화된 데이터를 사용하여 검색 엔진이 페이지를 더 쉽게 색인하고 이해할 수 있도록 돕습니다. 이는 검색 결과에서의 노출을 증가시킵니다.
+    5.	리치 스니펫: AMP 페이지는 리치 스니펫으로 표시될 가능성이 높아, 검색 결과에서 더 매력적으로 보일 수 있습니다. 이는 더 많은 클릭과 트래픽을 유도합니다.
+
+AMP는 빠른 로딩 속도와 높은 성능을 제공하기 때문에, 모바일 사용자에게 최적화된 경험을 제공할 수 있습니다. 따라서 AMP를 적용하면 SEO에도 긍정적인 영향을 미칠 수 있습니다. 단, 제한된 기능 때문에 대부분의 페이지에서 활용을 꺼려합니다. NextJS 와 같이 프레임워크를 사용하고 있다면 손쉽게 구현할 수 있습니다.
 
 ## 4.검색엔진 색인 확인하기 (Google)
 
