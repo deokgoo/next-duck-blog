@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FixedSizeList as List } from 'react-window';
 
 const itemCount = 100000;
@@ -9,6 +9,7 @@ const itemWidth = 100; // 각 아이템의 너비
 
 function InfiniteSwipe() {
   const listRef = useRef(null);
+  const [listWidth, setListWidth] = useState(0);
 
   useEffect(() => {
     const list = listRef.current;
@@ -16,6 +17,7 @@ function InfiniteSwipe() {
     if (list && list.scrollToItem) {
       list.scrollToItem(Math.floor(itemCount / 2), 'center');
     }
+    setListWidth(window.innerWidth);
   }, []);
 
   const ItemRenderer = ({ index, style }) => (
@@ -46,7 +48,7 @@ function InfiniteSwipe() {
         <List
           ref={listRef}
           height={300}
-          width={window.innerWidth}
+          width={listWidth}
           itemCount={items.length}
           itemSize={itemWidth}
           layout="horizontal"
