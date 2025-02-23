@@ -144,26 +144,29 @@ export const Authors = defineDocumentType(() => ({
 
 // Sitemap XML 생성 함수
 const generateSitemap = (config, allBlogs) => {
-  const publishedPosts = allBlogs.filter((post) => !post.draft)
+  const publishedPosts = allBlogs.filter((post) => !post.draft);
+
+  const cleanSlug = (slug) => slug.trim().replace(/[^\x20-\x7E]/g, '').replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
 
   const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  ${publishedPosts
-    .map(
-      (post) => `
-  <url>
-    <loc>${config.siteUrl}/blog/${post.slug}</loc>
-    <lastmod>${new Date(post.date).toISOString()}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>`
-    )
-    .join('')}
-</urlset>`
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    ${publishedPosts
+      .map(
+        (post) => `
+    <url>
+      <loc>${config.siteUrl}/blog/${cleanSlug(post.slug)}</loc>
+      <lastmod>${new Date(post.date).toISOString()}</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.7</priority>
+    </url>`
+      )
+      .join('')}
+  </urlset>`
 
-  const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml')
-  writeFileSync(sitemapPath, sitemapContent, 'utf8')
-  console.log('✅ sitemap.xml 생성 완료!')
+  const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+  writeFileSync(sitemapPath, sitemapContent, { encoding: 'utf8' });
+  console.log('✅ sitemap.xml 생성 완료!');
 }
 
 export default makeSource({
