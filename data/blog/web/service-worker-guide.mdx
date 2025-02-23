@@ -1,0 +1,68 @@
+---
+
+title: "웹 성능을 극대화하는 서비스 워커 실전 가이드"
+date: "2025-02-23"
+tags: ["Service Worker", "Web Performance", "Caching", "Web Worker"]
+draft: false
+summary: "웹 애플리케이션 성능을 극대화하는 서비스 워커 활용법을 소개합니다."
+---
+
+# 웹 성능을 극대화하는 서비스 워커 실전 가이드
+
+서비스 워커(Service Worker)는 무거운 연산을 백그라운드에서 수행하고 네트워크 캐싱을 효율적으로 관리하여 기존 브라우저 환경의 한계를 극복하는 기술입니다. 이번 글에서는 실제 프로젝트에서 사용한 서비스 워커 활용 사례를 소개합니다.
+
+## OffscreenCanvas를 활용한 렌더링 최적화
+
+OffscreenCanvas는 메인 스레드에서 직접 그리지 않고, 웹 워커를 활용하여 백그라운드에서 렌더링 작업을 수행할 수 있는 기능입니다. 이를 통해 UI 스레드의 부담을 줄이고 렌더링 성능을 향상할 수 있습니다.
+
+### 예제 코드
+
+```javascript
+const offscreen = canvas.transferControlToOffscreen();
+const worker = new Worker("worker.js");
+worker.postMessage({ canvas: offscreen }, [offscreen]);
+```
+
+## 서비스 워커를 이용한 네트워크 캐싱
+
+서비스 워커를 활용하면 네트워크 요청을 캐싱하여 불안정한 네트워크 환경에서도 빠른 응답을 제공할 수 있습니다. 네이티브급의 빠른 응답을 원한다면 필수적으로 활용해야 합니다. 단순한 캐싱을 넘어, 최신 데이터를 수신하면 기존 캐시를 갱신하는 방식으로 효율적인 데이터 관리를 할 수 있습니다. 이를 통해 사용자는 안정적인 데이터 제공과 더불어 성능 향상을 체감할 수 있습니다.
+
+### 예제 코드
+
+```javascript
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request).then(networkResponse => {
+        return caches.open('dynamic-cache').then(cache => {
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        });
+      });
+    }).catch(() => caches.match('/offline.html')) // 오프라인 대응
+  );
+});
+```
+
+## 백그라운드에서 네트워크 요청 수행하기
+
+서비스 워커는 페이지가 닫혀도 네트워크 요청을 유지할 수 있습니다. 이를 활용하면 백그라운드에서 데이터를 요청하고, 완료 후 특정 로직을 실행할 수 있습니다.
+
+### 예제 코드
+
+```javascript
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if (url.pathname === '/api/data') {
+    event.respondWith(fetch(event.request).then(response => {
+      // 데이터가 도착하면 추가적인 처리를 수행할 수 있음
+      return response;
+    }));
+  }
+});
+```
+
+## 다음 글 예고
+
+다음 포스팅에서는 서비스 워커의 라이프사이클과 스코프를 관리하는 방법에 대해 다룰 예정입니다. 더 깊이 있는 서비스 워커 활용법이 궁금하다면 기대해주세요!
+
