@@ -152,7 +152,7 @@ const generateSitemap = (config, allBlogs) => {
     .map(
       (post) => `
   <url>
-    <loc>${`${config.siteUrl}/blog/${post.slug}`}</loc>
+    <loc>${config.siteUrl}/blog/${post.slug}</loc>
     <lastmod>${new Date(post.date).toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
