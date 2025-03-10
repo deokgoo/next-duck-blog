@@ -7,9 +7,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const cleanSlug = (slug) =>
     slug
       .trim()
-      .replace(/[^\x20-\x7E]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '');
+      .replace(/[^\x20-\x7E]/g, '') // ASCII 범위 이외 문자 제거
+      .replace(/\s+/g, '-') // 공백을 `-`로 변경
+      .replace(/[^\w-/]/g, ''); // `/`도 허용
 
   const blogRoutes = allBlogs
     .filter((post) => !post.draft)
