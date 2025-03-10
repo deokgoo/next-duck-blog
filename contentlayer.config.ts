@@ -1,30 +1,30 @@
-import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer2/source-files'
-import { writeFileSync } from 'fs'
-import readingTime from 'reading-time'
-import { slug } from 'github-slugger'
-import path from 'path'
-import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
+import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer2/source-files';
+import { writeFileSync } from 'fs';
+import readingTime from 'reading-time';
+import { slug } from 'github-slugger';
+import path from 'path';
+import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic';
 // Remark packages
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import {
   remarkExtractFrontmatter,
   remarkCodeTitles,
   remarkImgToJsx,
   extractTocHeadings,
-} from 'pliny/mdx-plugins/index.js'
+} from 'pliny/mdx-plugins/index.js';
 // Rehype packages
-import rehypeSlug from 'rehype-slug'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import rehypeKatex from 'rehype-katex'
-import rehypeCitation from 'rehype-citation'
-import rehypePrismPlus from 'rehype-prism-plus'
-import rehypePresetMinify from 'rehype-preset-minify'
-import siteMetadata from './data/siteMetadata'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeKatex from 'rehype-katex';
+import rehypeCitation from 'rehype-citation';
+import rehypePrismPlus from 'rehype-prism-plus';
+import rehypePresetMinify from 'rehype-preset-minify';
+import siteMetadata from './data/siteMetadata';
+import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js';
 
-const root = process.cwd()
-const isProduction = process.env.NODE_ENV === 'production'
+const root = process.cwd();
+const isProduction = process.env.NODE_ENV === 'production';
 
 // heroicon mini link
 const icon = fromHtmlIsomorphic(
@@ -37,7 +37,7 @@ const icon = fromHtmlIsomorphic(
   </span>
 `,
   { fragment: true }
-)
+);
 
 const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
@@ -54,26 +54,26 @@ const computedFields: ComputedFields = {
     resolve: (doc) => doc._raw.sourceFilePath,
   },
   toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
-}
+};
 
 /**
  * Count the occurrences of all tags across blog posts and write to json file
  */
 function createTagCount(allBlogs) {
-  const tagCount: Record<string, number> = {}
+  const tagCount: Record<string, number> = {};
   allBlogs.forEach((file) => {
     if (file.tags && (!isProduction || file.draft !== true)) {
       file.tags.forEach((tag) => {
-        const formattedTag = slug(tag)
+        const formattedTag = slug(tag);
         if (formattedTag in tagCount) {
-          tagCount[formattedTag] += 1
+          tagCount[formattedTag] += 1;
         } else {
-          tagCount[formattedTag] = 1
+          tagCount[formattedTag] = 1;
         }
-      })
+      });
     }
-  })
-  writeFileSync('./app/tag-data.json', JSON.stringify(tagCount))
+  });
+  writeFileSync('./app/tag-data.json', JSON.stringify(tagCount));
 }
 
 function createSearchIndex(allBlogs) {
@@ -84,8 +84,8 @@ function createSearchIndex(allBlogs) {
     writeFileSync(
       `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
       JSON.stringify(allCoreContent(sortPosts(allBlogs)))
-    )
-    console.log('Local search index generated...')
+    );
+    console.log('Local search index generated...');
   }
 }
 
@@ -122,7 +122,7 @@ export const Blog = defineDocumentType(() => ({
       }),
     },
   },
-}))
+}));
 
 export const Authors = defineDocumentType(() => ({
   name: 'Authors',
@@ -140,14 +140,18 @@ export const Authors = defineDocumentType(() => ({
     layout: { type: 'string' },
   },
   computedFields,
-}))
+}));
 
 // Sitemap XML 생성 함수
 const generateSitemap = (config, allBlogs) => {
   const publishedPosts = allBlogs.filter((post) => !post.draft);
 
-  const cleanSlug = (slug) => slug.trim().replace(/[^\x20-\x7E]/g, '').replace(/\s+/g, '-').replace(/[^\w-]/g, '');
-
+  const cleanSlug = (slug) =>
+    slug
+      .trim()
+      .replace(/[^\x20-\x7E]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '');
 
   const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -162,12 +166,12 @@ const generateSitemap = (config, allBlogs) => {
     </url>`
       )
       .join('')}
-  </urlset>`
+  </urlset>`;
 
   const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
   writeFileSync(sitemapPath, sitemapContent, { encoding: 'utf8' });
   console.log('✅ sitemap.xml 생성 완료!');
-}
+};
 
 export default makeSource({
   contentDirPath: 'data',
@@ -200,11 +204,10 @@ export default makeSource({
     ],
   },
 
-  
   onSuccess: async (importData) => {
-    const { allBlogs } = await importData()
-    createTagCount(allBlogs)
-    createSearchIndex(allBlogs)
-    generateSitemap(siteMetadata, allBlogs) // ✅ 추가된 sitemap 생성 함수 실행
+    const { allBlogs } = await importData();
+    createTagCount(allBlogs);
+    createSearchIndex(allBlogs);
+    generateSitemap(siteMetadata, allBlogs); // ✅ 추가된 sitemap 생성 함수 실행
   },
-})
+});
