@@ -1,0 +1,169 @@
+---
+title: '이미지 업로드 UX를 살리는 Web Worker 활용법 – 성능 이슈 해결기'
+date: '2025-04-07'
+tags:
+  ['Web Worker', '프론트엔드 성능', '이미지 최적화', 'OffscreenCanvas', 'browser-image-compression']
+draft: false
+summary: '이미지 업로드 시 발생하는 렌더링 지연과 UX 저하 문제를 Web Worker로 어떻게 해결했는지 실제 구현 기반으로 소개합니다.'
+---
+
+# 브라우저의 멀티 스레딩, 그리고 Web Worker
+
+브라우저는 기본적으로 여러 개의 스레드로 동작합니다. 대표적으로:
+
+- **메인 스레드**: JavaScript 실행과 UI 렌더링을 담당
+- **네트워크 스레드**: HTTP 요청과 응답을 처리
+- **렌더러 스레드**: 페이지 레이아웃과 페인팅을 수행
+- **컴포지터 스레드**: 레이어 합성을 처리
+
+하지만 실제 웹 애플리케이션 로직의 대부분은 메인 스레드에서 실행됩니다. JavaScript가 싱글 스레드 기반이기 때문이죠.
+
+## 메인 스레드의 한계
+
+메인 스레드는 다음과 같은 작업을 모두 처리해야 합니다:
+
+- JavaScript 코드 실행
+- DOM 조작
+- 사용자 이벤트 처리
+- 레이아웃 계산
+- 리페인팅
+
+이런 작업들이 동시에 발생하면 어떻게 될까요? 특히 무거운 연산이 필요한 작업이 끼어들면?
+
+> 메인 스레드가 막히면 전체 UI가 멈춰버립니다. 사용자는 '앱이 멈췄다'고 느끼게 되죠.
+
+## Web Worker: 백그라운드 스레드의 등장
+
+Web Worker는 이런 문제를 해결하기 위한 브라우저의 해답입니다. 메인 스레드와는 별개로 동작하는 백그라운드 스레드를 제공하죠.
+
+```javascript
+// worker.js
+self.onmessage = function (e) {
+  // 무거운 작업 수행
+  const result = heavyComputation(e.data);
+  self.postMessage(result);
+};
+
+// main.js
+const worker = new Worker('worker.js');
+worker.postMessage(data);
+worker.onmessage = function (e) {
+  // 결과 처리
+};
+```
+
+워커는 다음과 같은 특징이 있습니다:
+
+- 메인 스레드와 완전히 분리된 실행 환경
+- 메시지 기반의 비동기 통신
+- DOM 접근은 불가능하지만, 대부분의 Web API 사용 가능
+
+# 실제 사례: 이미지 업로드 최적화
+
+제가 최근 마주했던 문제를 통해 Web Worker의 활용법을 소개해드리려 합니다.
+
+## 기존 이미지 업로드 프로세스의 문제
+
+사용자가 여러 장의 이미지를 선택하면:
+
+1. 각 이미지를 프리뷰로 표시
+2. 이미지 최적화 (리사이징/압축)
+3. 서버 업로드
+
+이 모든 과정이 메인 스레드에서 일어나다 보니:
+
+```javascript
+// 기존 코드
+async function handleImageUpload(files) {
+  for (const file of files) {
+    const preview = await createImagePreview(file); // 메인 스레드 블로킹
+    const optimized = await optimizeImage(file); // 무거운 연산
+    await uploadToServer(optimized); // 네트워크 요청
+  }
+}
+```
+
+### 발생한 문제들
+
+1. **프리뷰 생성 시 UI 멈춤**
+
+   - 고해상도 이미지(4MB+) 처리 시 특히 심각
+   - iOS에서 브라우저 강제 종료까지 발생
+
+2. **사용자 경험 저하**
+   - 이미지 선택 후 수 초간 반응 없음
+   - 업로드 진행률 표시 불가
+   - 다른 UI 상호작용 불가능
+
+## Web Worker로 개선하기
+
+워커를 도입해 이미지 처리 로직을 분리했습니다.
+
+```javascript
+// imageWorker.js
+self.onmessage = async function (e) {
+  const { file, type } = e.data;
+
+  switch (type) {
+    case 'preview':
+      const preview = await createPreview(file);
+      self.postMessage({ type: 'preview', result: preview });
+      break;
+    case 'optimize':
+      const optimized = await optimizeImage(file);
+      self.postMessage({ type: 'optimized', result: optimized });
+      break;
+  }
+};
+
+// main.js
+const imageWorker = new Worker('imageWorker.js');
+imageWorker.onmessage = (e) => {
+  const { type, result } = e.data;
+  // UI 업데이트
+};
+```
+
+### 개선된 점
+
+1. **반응성 향상**
+
+   - 이미지 처리 중에도 UI 응답성 유지
+   - 진행률 표시 가능
+
+2. **성능 최적화**
+
+   - `OffscreenCanvas` 활용으로 메모리 효율 개선
+   - 여러 이미지 동시 처리 가능
+
+3. **안정성 확보**
+   - 메인 스레드 부하 감소
+   - 브라우저 크래시 방지
+
+# 더 나아가기
+
+Web Worker는 이미지 처리 외에도 다양한 영역에서 활용할 수 있습니다:
+
+- 대용량 데이터 처리
+- 복잡한 계산
+- 실시간 데이터 처리
+- 백그라운드 동기화
+
+## 앞으로의 계획
+
+1. **워커 풀 도입**
+
+   - 여러 워커를 관리하여 부하 분산
+   - 작업 우선순위 관리
+
+2. **SharedArrayBuffer 활용**
+   - 워커 간 메모리 공유로 성능 개선
+   - 대용량 데이터 처리 최적화
+
+# 마무리
+
+Web Worker는 단순한 백그라운드 처리 도구를 넘어, 현대 웹 애플리케이션의 필수 요소가 되어가고 있습니다. 특히 복잡한 UI와 무거운 연산이 공존하는 애플리케이션에서는 더욱 그렇죠.
+
+메인 스레드만으로는 한계가 있습니다. Web Worker를 통해 백그라운드 처리를 분리하면, 더 나은 사용자 경험을 제공할 수 있습니다.
+
+> "성능 최적화의 시작은 작업을 적절한 스레드에 배치하는 것부터입니다."
