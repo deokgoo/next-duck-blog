@@ -21,11 +21,15 @@ const PostAccordian = ({ title, children }: Props) => {
         placeholder={undefined}
         onPointerEnterCapture={undefined}
         onPointerLeaveCapture={undefined}
+        onResize={undefined}
+        onResizeCapture={undefined}
       >
         <AccordionHeader
           placeholder={undefined}
           onPointerEnterCapture={undefined}
           onPointerLeaveCapture={undefined}
+          onResize={undefined}
+          onResizeCapture={undefined}
         >
           {title}
         </AccordionHeader>

@@ -6,9 +6,11 @@ import Image from './Image';
 import CustomLink from './Link';
 import TableWrapper from './TableWrapper';
 import ExpandableSection from './ExpandableSection';
+import DoubleImage from './DoubleImage';
 
 export const components: MDXComponents = {
   Image,
+  DoubleImage,
   TOCInline,
   a: CustomLink,
   pre: Pre,
