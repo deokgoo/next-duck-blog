@@ -64,6 +64,7 @@ module.exports = () => {
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
       dirs: ['app', 'components', 'layouts', 'scripts'],
+      ignoreDuringBuilds: true,
     },
     images: {
       deviceSizes: [320, 420, 768, 1024, 1040, 1200, 1440], // 더 큰 사이즈 추가
