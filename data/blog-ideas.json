@@ -1,0 +1,24 @@
+{
+  "ideas": [
+    {
+      "id": 1,
+      "title": "Next.js 15 새로운 기능 정리",
+      "category": "nextjs",
+      "tags": ["nextjs", "react", "web"],
+      "priority": "high",
+      "status": "planned",
+      "description": "Next.js 15의 주요 변경사항과 새로운 기능들을 정리",
+      "createdAt": "2024-10-08"
+    },
+    {
+      "id": 2,
+      "title": "React Server Components 실무 적용기",
+      "category": "react",
+      "tags": ["react", "rsc", "nextjs"],
+      "priority": "medium",
+      "status": "draft",
+      "description": "실제 프로젝트에 RSC를 적용하면서 겪은 경험담",
+      "createdAt": "2024-10-08"
+    }
+  ]
+}
