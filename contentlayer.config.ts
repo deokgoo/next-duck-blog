@@ -207,9 +207,13 @@ export default makeSource({
   },
 
   onSuccess: async (importData) => {
-    const { allBlogs } = await importData();
-    createTagCount(allBlogs);
-    createSearchIndex(allBlogs);
-    // generateSitemap(siteMetadata, allBlogs); // ❌ 이 줄 제거
+    try {
+      const { allBlogs } = await importData();
+      createTagCount(allBlogs);
+      createSearchIndex(allBlogs);
+      // generateSitemap(siteMetadata, allBlogs); // ❌ 이 줄 제거
+    } catch (error) {
+      console.log('onSuccess callback skipped due to import error');
+    }
   },
 });
