@@ -106,64 +106,11 @@ function ProductList() {
 ```
 
 ```typescript
-// SRP 준수: 책임을 분리
-
-// 1. API 호출 책임 - Custom Hook
-function useProducts() {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
-
-  useEffect(() => {
-    setLoading(true)
-    fetch('/api/products')
-      .then(res => res.json())
-      .then(data => setProducts(data))
-      .catch(err => setError(err))
-      .finally(() => setLoading(false))
-  }, [])
-
-  return { products, loading, error }
-}
-
-// 2. 검색 필터링 책임 - Custom Hook
-function useProductSearch(products: Product[], searchTerm: string) {
-  return useMemo(() => {
-    return products.filter(product =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }, [products, searchTerm])
-}
-
-// 3. 가격 포맷팅 책임 - Utility
-const PriceFormatter = {
-  toKRW: (price: number) => {
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW'
-    }).format(price)
-  }
-}
-
-// 4. Analytics 책임 - Service
-class AnalyticsService {
-  static trackEvent(event: string, data: Record<string, any>) {
-    fetch('/api/analytics', {
-      method: 'POST',
-      body: JSON.stringify({ event, ...data })
-    })
-  }
-
-  static trackProductClick(productId: string) {
-    this.trackEvent('product_click', { productId })
-  }
-}
-
-// 5. UI 렌더링 책임만 남은 컴포넌트
+// SRP 준수: 책임을 분리한 컴포넌트
 function ProductList() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const { products, loading, error } = useProducts()
-  const filteredProducts = useProductSearch(products, searchTerm)
+  const [searchTerm, setSearchTerm] = useState('') // UI 상태 관리
+  const { products, loading, error } = useProducts() // API 호출 책임
+  const filteredProducts = useProductSearch(products, searchTerm) // 검색 필터링 책임
 
   if (loading) return <Spinner />
   if (error) return <ErrorMessage error={error} />
@@ -214,10 +161,12 @@ graph TD
 
 ### 실무 적용 팁
 
-- **커스텀 훅으로 로직 분리**: 데이터 페칭, 검색/필터링, 폼 관리 등을 별도 훅으로 분리
-- **서비스 레이어 구성**: API 호출, Analytics, 로컬 스토리지 등을 별도 서비스로 분리
-- **유틸리티 함수 분리**: 포맷팅, 검증, 계산 로직 등을 순수 함수로 분리
-- **프레젠테이셔널/컨테이너 패턴**: 비즈니스 로직과 UI를 명확히 분리
+SRP를 React에서 효과적으로 구현하기 위한 구체적인 방법들:
+
+- **커스텀 훅으로 로직 분리**: 데이터 페칭, 검색/필터링, 폼 관리 등을 별도 훅으로 분리 → 상태 관리 책임과 UI 책임을 분리
+- **서비스 레이어 구성**: API 호출, Analytics, 로컬 스토리지 등을 별도 서비스로 분리 → 외부 의존성 관리 책임을 분리
+- **유틸리티 함수 분리**: 포맷팅, 검증, 계산 로직 등을 순수 함수로 분리 → 데이터 처리 책임을 분리
+- **프레젠테이셔널/컨테이너 패턴**: 비즈니스 로직과 UI를 명확히 분리 → 데이터 관리 책임과 렌더링 책임을 분리
 
 ## 2. OCP (Open-Closed Principle) - 개방-폐쇄 원칙
 
@@ -264,7 +213,8 @@ function Notification({ type, message }: { type: string; message: string }) {
 ```
 
 ```typescript
-// ✅ OCP 준수: Strategy Pattern 활용
+// ✅ OCP 준수: Strategy Pattern으로 확장 가능하게 구현
+// 새로운 알림 타입 추가 시 기존 컴포넌트 코드 수정 없이 설정만 추가
 
 interface NotificationConfig {
   bgColor: string
@@ -334,9 +284,9 @@ graph TD
     end
 ```
 
-### React의 Composition Pattern
+### React의 Composition Pattern으로 OCP 구현
 
-React의 컴포넌트 합성은 OCP를 자연스럽게 구현할 수 있는 강력한 패턴입니다.
+OCP의 "확장에는 열려있고, 수정에는 닫혀있어야 한다"는 원칙을 React에서 가장 자연스럽게 구현하는 방법이 Composition Pattern입니다. 기존 컴포넌트를 수정하지 않고도 새로운 기능을 확장할 수 있습니다.
 
 ```typescript
 // ✅ Composition을 통한 OCP 구현
@@ -390,9 +340,11 @@ function AlertModal() {
 
 ### 실무 적용 팁
 
-- **플러그인 아키텍처**: 기능을 플러그인으로 확장 가능하게 설계
-- **Render Props / Compound Components**: React의 합성 패턴 활용
-- **설정 기반 렌더링**: JSON 설정으로 UI 동적 생성
+OCP를 React에서 효과적으로 구현하기 위한 구체적인 방법들:
+
+- **플러그인 아키텍처**: 기능을 플러그인으로 확장 가능하게 설계 → 새 기능 추가 시 기존 코드 수정 방지
+- **Render Props / Compound Components**: React의 합성 패턴 활용 → 컴포넌트를 수정하지 않고 새로운 기능 합성
+- **설정 기반 렌더링**: JSON 설정으로 UI 동적 생성 → 설정 추가만으로 새로운 UI 확장
 
 ## 3. LSP (Liskov Substitution Principle) - 리스코프 치환 원칙
 
@@ -1079,10 +1031,12 @@ function OrderList() {
 
 ### 실무 적용 팁
 
-- **서비스 레이어 분리**: API 호출, 저장소, 알림 등을 서비스로 추상화
-- **Context로 의존성 주입**: Provider 패턴으로 구현체 주입
-- **Custom Hook으로 캡슐화**: 구현 세부사항을 Hook 안에 숨기기
-- **환경별 구현체 교체**: 개발/테스트/프로덕션 환경에 맞는 구현체 주입
+DIP를 React에서 효과적으로 구현하기 위한 구체적인 방법들:
+
+- **서비스 레이어 분리**: API 호출, 저장소, 알림 등을 서비스로 추상화 → 고수준 컴포넌트가 구체적 구현에 의존하지 않음
+- **Context로 의존성 주입**: Provider 패턴으로 구현체 주입 → 런타임에 의존성을 외부에서 주입 가능
+- **Custom Hook으로 캡슐화**: 구현 세부사항을 Hook 안에 숨기기 → 컴포넌트는 Hook의 인터페이스에만 의존
+- **환경별 구현체 교체**: 개발/테스트/프로덕션 환경에 맞는 구현체 주입 → 환경에 따른 유연한 구현 교체
 
 ## 프론트엔드 개발자를 위한 SOLID 체크리스트
 
@@ -1143,6 +1097,10 @@ SOLID 원칙은 프론트엔드 개발에서도 충분히 유용한 설계 가�
 4. **협업**: 명확한 책임 분리로 협업이 수월해짐
 
 다만 주의할 점은, SOLID 원칙을 지키는 것 자체가 목표가 되어서는 안 됩니다. 버튼 하나에 인터페이스를 3개 만들고 클래스를 4개 만드는 것은 과도한 추상화입니다. **실용성과 복잡성의 균형**을 맞추는 것이 진짜 실력입니다.
+
+솔직히 말하면, 저 역시 코드를 작성하다 보면 이런 원칙들이 잘 지켜지지 않을 경우가 많습니다. 일정에 쫓기다 보면 "일단 작동하게 만들자"는 생각으로 모든 로직을 한 컴포넌트에 때려 넣곤 하죠. 그리고 나중에 "이 코드 누가 짠 거야?"라며 과거의 나를 원망하게 됩니다.
+
+이 글도 사실 미래의 저에게 도움이 되기를 기대하며 작성한 글입니다. 몇 달 후에 코드 리팩토링을 할 때, "아, 그때 정리해둔 SOLID 원칙 글이 있었지!"라며 이 글을 다시 찾아보게 되길 바라면서요.
 
 프로젝트가 커질수록 코드 수정이 두려워진다면, 이 글에서 소개한 SOLID 원칙을 하나씩 적용해보세요. 처음부터 완벽하게 지킬 필요는 없습니다. 리팩토링하면서 점진적으로 개선하는 것만으로도 충분합니다.
 
