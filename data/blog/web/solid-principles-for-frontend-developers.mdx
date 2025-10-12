@@ -137,25 +137,25 @@ function ProductList() {
 
 ```mermaid
 graph TD
-    subgraph SRP 위반
+    subgraph BEFORE["SRP 위반"]
         A[ProductList Component]
-        A --> B{API 호출}
-        A --> C{검색/필터링}
-        A --> D{가격 포맷팅}
-        A --> E{Analytics}
-        A --> F{UI 렌더링}
+        A --> B["API 호출"]
+        A --> C["검색/필터링"]
+        A --> D["가격 포맷팅"]
+        A --> E["Analytics"]
+        A --> F["UI 렌더링"]
     end
 
-    subgraph SRP 준수
-        G[ProductList Component] -- UI 렌더링 --> H(UI)
-        G --> I{useProducts Hook}
-        G --> J{useProductSearch Hook}
-        I --> K[API 호출]
-        J --> L[검색/필터링]
-        G --> M{PriceFormatter}
-        M --> N[가격 포맷팅]
-        G --> O{AnalyticsService}
-        O --> P[Analytics]
+    subgraph AFTER["SRP 준수"]
+        G[ProductList Component] --> H["UI 렌더링"]
+        G --> I["useProducts Hook"]
+        G --> J["useProductSearch Hook"]
+        I --> K["API 호출"]
+        J --> L["검색/필터링"]
+        G --> M["PriceFormatter"]
+        M --> N["가격 포맷팅"]
+        G --> O["AnalyticsService"]
+        O --> P["Analytics"]
     end
 ```
 
@@ -267,20 +267,20 @@ notificationConfigs.info = {
 
 ```mermaid
 graph TD
-    subgraph OCP 위반
+    subgraph BEFORE["OCP 위반"]
         A[Notification Component]
-        A -- if type is 'success' --> B(Success UI)
-        A -- if type is 'error' --> C(Error UI)
-        A -- if type is 'warning' --> D(Warning UI)
-        A -- 새로운 타입 추가 시 --> A
+        A --> B["Success UI"]
+        A --> C["Error UI"]
+        A --> D["Warning UI"]
+        A -.-> A["새로운 타입 추가 시<br/>기존 코드 수정"]
     end
 
-    subgraph OCP 준수
-        E[Notification Component] --> F{notificationConfigs}
-        F -- 'success' --> G[Success Config]
-        F -- 'error' --> H[Error Config]
-        F -- 'warning' --> I[Warning Config]
-        J[New Config] -- 새로운 타입 추가 --> F
+    subgraph AFTER["OCP 준수"]
+        E[Notification Component] --> F["notificationConfigs"]
+        F --> G["Success Config"]
+        F --> H["Error Config"]
+        F --> I["Warning Config"]
+        J["New Config"] -.-> F["새로운 타입 추가<br/>설정만 추가"]
     end
 ```
 
@@ -487,12 +487,12 @@ function PaymentProcessor({ method }: { method: PaymentMethod }) {
 
 ```mermaid
 graph TD
-    subgraph LSP
-        A[PaymentProcessor] --> B{PaymentMethod}
+    subgraph LSP["LSP 위반 예시"]
+        A[PaymentProcessor] --> B["PaymentMethod"]
         B --> C[CreditCardPayment]
         B --> D[KakaoPayPayment]
-        C -- canProcess() --> E{true}
-        D -- canProcess() --> F{true/false}
+        C --> E["canProcess(): true"]
+        D --> F["canProcess(): true/false<br/>(예외적 동작)"]
     end
 ```
 
@@ -737,19 +737,19 @@ function AdvancedTable(props: TableDataProps & TablePaginationProps & TableSortP
 
 ```mermaid
 graph TD
-    subgraph ISP 위반
+    subgraph BEFORE["ISP 위반"]
         A[TableProps]
-        A --> B(data)
-        A --> C(pagination)
-        A --> D(sort)
-        A --> E(filter)
-        A --> F(selection)
-        A --> G(actions)
+        A --> B["data"]
+        A --> C["pagination"]
+        A --> D["sort"]
+        A --> E["filter"]
+        A --> F["selection"]
+        A --> G["actions"]
         H[SimpleTable] --> A
         I[AdvancedTable] --> A
     end
 
-    subgraph ISP 준수
+    subgraph AFTER["ISP 준수"]
         J[TableDataProps]
         K[TablePaginationProps]
         L[TableSortProps]
