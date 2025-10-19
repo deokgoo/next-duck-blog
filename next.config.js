@@ -75,6 +75,14 @@ module.exports = () => {
           protocol: 'https',
           hostname: 'picsum.photos',
         },
+        {
+          protocol: 'https',
+          hostname: 'media.giphy.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'i.giphy.com',
+        },
       ],
     },
     async headers() {
