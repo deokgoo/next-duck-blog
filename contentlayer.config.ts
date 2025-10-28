@@ -202,7 +202,20 @@ export default makeSource({
       [rehypeCitation, { path: path.join(root, 'data') }],
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
       rehypePresetMinify,
-      [rehypeMermaid, { strategy: 'pre-mermaid' }]
+      [rehypeMermaid, { 
+        strategy: 'img-svg',
+        mermaidConfig: {
+          theme: 'default',
+          themeVariables: {
+            primaryColor: '#3b82f6',
+            primaryTextColor: '#1f2937',
+            primaryBorderColor: '#e5e7eb',
+            lineColor: '#6b7280',
+            secondaryColor: '#f3f4f6',
+            tertiaryColor: '#ffffff'
+          }
+        }
+      }]
     ],
   },
 
