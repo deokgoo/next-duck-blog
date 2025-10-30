@@ -137,30 +137,9 @@ function ProductList() {
 - UI 디자인 변경만 이 컴포넌트 수정
 - API, 검색, 포맷팅, Analytics는 각자 분리됨
 
-```mermaid
-graph TD
-    subgraph BEFORE["SRP 위반"]
-        A[ProductList Component]
-        A --> B["API 호출"]
-        A --> C["검색/필터링"]
-        A --> D["가격 포맷팅"]
-        A --> E["Analytics"]
-        A --> F["UI 렌더링"]
-    end
-
-    subgraph AFTER["SRP 준수"]
-        G[ProductList Component] --> H["UI 렌더링"]
-        G --> I["useProducts Hook"]
-        G --> J["useProductSearch Hook"]
-        I --> K["API 호출"]
-        J --> L["검색/필터링"]
-        G --> M["PriceFormatter"]
-        M --> N["가격 포맷팅"]
-        G --> O["AnalyticsService"]
-        O --> P["Analytics"]
-    end
-```
-
+**구조 변화:**
+- BEFORE: 하나의 컴포넌트에 모든 책임이 집중
+- AFTER: 각 책임별로 분리된 컴포넌트 구조
 ### 실무 적용 팁
 
 SRP를 React에서 효과적으로 구현하기 위한 구체적인 방법들:
@@ -267,25 +246,9 @@ notificationConfigs.info = {
 - ✅ 새로운 타입 추가 시 기존 함수 수정 불필요
 - 설정 객체만 확장하면 됨
 
-```mermaid
-graph TD
-    subgraph BEFORE["OCP 위반"]
-        A[Notification Component]
-        A --> B["Success UI"]
-        A --> C["Error UI"]
-        A --> D["Warning UI"]
-        A -.-> A["새로운 타입 추가 시<br/>기존 코드 수정"]
-    end
-
-    subgraph AFTER["OCP 준수"]
-        E[Notification Component] --> F["notificationConfigs"]
-        F --> G["Success Config"]
-        F --> H["Error Config"]
-        F --> I["Warning Config"]
-        J["New Config"] -.-> F["새로운 타입 추가<br/>설정만 추가"]
-    end
-```
-
+**구조 변화:**
+- BEFORE: 하나의 컴포넌트에 모든 책임이 집중
+- AFTER: 각 책임별로 분리된 컴포넌트 구조
 ### React의 Composition Pattern으로 OCP 구현
 
 OCP의 "확장에는 열려있고, 수정에는 닫혀있어야 한다"는 원칙을 React에서 가장 자연스럽게 구현하는 방법이 Composition Pattern입니다. 기존 컴포넌트를 수정하지 않고도 새로운 기능을 확장할 수 있습니다.
@@ -487,17 +450,9 @@ function PaymentProcessor({ method }: { method: PaymentMethod }) {
 - ✅ 모든 PaymentMethod 구현체가 동일한 계약 준수
 - 사전 검증 메서드로 예측 가능한 동작 보장
 
-```mermaid
-graph TD
-    subgraph LSP["LSP 위반 예시"]
-        A[PaymentProcessor] --> B["PaymentMethod"]
-        B --> C[CreditCardPayment]
-        B --> D[KakaoPayPayment]
-        C --> E["canProcess(): true"]
-        D --> F["canProcess(): true/false<br/>(예외적 동작)"]
-    end
-```
-
+**구조 변화:**
+- BEFORE: 하나의 컴포넌트에 모든 책임이 집중
+- AFTER: 각 책임별로 분리된 컴포넌트 구조
 ### React에서의 LSP
 
 ```typescript
@@ -737,31 +692,9 @@ function AdvancedTable(props: TableDataProps & TablePaginationProps & TableSortP
 - ✅ 필요한 props만 선택적으로 사용
 - 컴포넌트 간 불필요한 의존성 제거
 
-```mermaid
-graph TD
-    subgraph BEFORE["ISP 위반"]
-        A[TableProps]
-        A --> B["data"]
-        A --> C["pagination"]
-        A --> D["sort"]
-        A --> E["filter"]
-        A --> F["selection"]
-        A --> G["actions"]
-        H[SimpleTable] --> A
-        I[AdvancedTable] --> A
-    end
-
-    subgraph AFTER["ISP 준수"]
-        J[TableDataProps]
-        K[TablePaginationProps]
-        L[TableSortProps]
-        M[SimpleTable] --> J
-        N[AdvancedTable] --> J
-        N --> K
-        N --> L
-    end
-```
-
+**구조 변화:**
+- BEFORE: 하나의 컴포넌트에 모든 책임이 집중
+- AFTER: 각 책임별로 분리된 컴포넌트 구조
 ### React Context에서의 ISP
 
 ```typescript

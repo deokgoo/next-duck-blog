@@ -23,7 +23,14 @@ MSA 환경에서 서로 다른 아키텍처를 사용하는 서비스들 간에 
 
 각 서비스가 독립적인 기술 스택을 사용하는 환경에서 동일한 UI 컴포넌트를 적용해야 할 때, 서비스마다 별도로 구현하는 것은 유지보수 측면에서 비효율적입니다.
 
-이 글에서는 이런 환경에서 웹 컴포넌트를 활용한 접근법과 LIT 프레임워크를 통한 구현 방법을 다룹니다.
+**이 글에서 다루는 내용:**
+- MSA 환경에서 공통 UI 컴포넌트 문제 해결을 위한 선택지 검토 과정
+- 웹 컴포넌트를 최종 선택한 이유와 근거
+- LIT 프레임워크를 활용한 실제 구현 방법
+- 빌드 환경 구성과 배포 전략 (ESM/IIFE 듀얼 빌드)
+- 실제 프로덕션 환경에서의 적용 사례
+
+> **참고**: LIT의 렌더링 메커니즘, 리액티브 컨트롤러, 성능 최적화 등 깊이 있는 기술적 내용은 별도 포스트에서 자세히 다룰 예정입니다.
 
 ## MSA 환경에서의 UI 컴포넌트 문제
 
@@ -31,9 +38,12 @@ MSA 환경에서 서로 다른 아키텍처를 사용하는 서비스들 간에 
 
 MSA(Microservices Architecture) 환경에서는 각 서비스가 독립적인 기술 스택을 사용하는 경우가 많습니다
 
-<div className="flex flex-col items-center flex-wrap overflow-hidden">
-  <div className="my-1 px-2 overflow-hidden xl:px-2 w-3/4">
-    <img src="/static/images/web/msa-architecture-problem.png" alt="MSA 환경에서의 파편화된 아키텍처" />
+<div class="flex flex-col flex-wrap items-center overflow-hidden">
+  <div class="my-1 w-3/4 overflow-hidden px-2 xl:px-2">
+    <img
+      src="/static/images/web/msa-architecture-problem.png"
+      alt="MSA 환경에서의 파편화된 아키텍처"
+    />
   </div>
 </div>
 
@@ -68,30 +78,7 @@ MSA(Microservices Architecture) 환경에서는 각 서비스가 독립적인 �
 
 ### 검토한 옵션들
 
-```mermaid
-graph TD
-    A[MSA 환경 공통 UI 컴포넌트 문제] --> B[마이크로 프론트엔드]
-    A --> C[각 서비스별 개별 구현]
-    A --> D[웹 컴포넌트]
-
-    B --> B1[✅ 독립적 개발]
-    B --> B2[❌ 인프라 복잡성]
-    B --> B3[❌ 높은 구축 비용]
-
-    C --> C1[✅ 환경별 최적화]
-    C --> C2[❌ 유지보수 부담]
-    C --> C3[❌ 일관성 보장 어려움]
-
-    D --> D1[✅ 아키텍처 독립적]
-    D --> D2[✅ 표준 기반]
-    D --> D3[✅ 가벼운 번들]
-    D --> D4[❌ 작은 생태계]
-
-    style D fill:#e1f5fe
-    style D1 fill:#c8e6c9
-    style D2 fill:#c8e6c9
-    style D3 fill:#c8e6c9
-```
+**MSA 환경 공통 UI 컴포넌트 해결 방안:**
 
 **1. 마이크로 프론트엔드**
 
@@ -130,8 +117,8 @@ LIT는 매우 작은 번들 사이즈를 제공합니다 (~5KB gzipped). Virtual
 
 실제로 여러 라이브러리를 사용하고 비즈니스 로직이 복잡한 컴포넌트를 구현했을 때도 IIFE 방식의 빌드 결과가 1MB 미만이었습니다. 더욱 인상적인 것은 ESM 모듈로 사용하는 경우 대부분 100KB 미만의 크기를 유지한다는 점입니다. 이는 트리 쉐이킹과 모듈 시스템의 장점을 최대한 활용할 수 있기 때문입니다.
 
-<div className="flex flex-col items-center flex-wrap overflow-hidden">
-  <div className="my-1 px-2 overflow-hidden xl:px-2 w-2/3">
+<div class="flex flex-col flex-wrap items-center overflow-hidden">
+  <div class="my-1 w-2/3 overflow-hidden px-2 xl:px-2">
     <img src="/static/images/web/bundle-size-comparison.png" alt="IIFE vs ESM 번들 사이즈 비교" />
   </div>
 </div>
@@ -178,9 +165,12 @@ LIT는 매우 작은 번들 사이즈를 제공합니다 (~5KB gzipped). Virtual
 
 웹 컴포넌트는 4가지 핵심 웹 표준 기술의 조합으로 구성됩니다:
 
-<div className="flex flex-col items-center flex-wrap overflow-hidden">
-  <div className="my-1 px-2 overflow-hidden xl:px-2 w-2/3">
-    <img src="/static/images/web/web-components-core-technologies.png" alt="웹 컴포넌트 4가지 핵심 기술" />
+<div class="flex flex-col flex-wrap items-center overflow-hidden">
+  <div class="my-1 w-2/3 overflow-hidden px-2 xl:px-2">
+    <img
+      src="/static/images/web/web-components-core-technologies.png"
+      alt="웹 컴포넌트 4가지 핵심 기술"
+    />
   </div>
 </div>
 
@@ -269,40 +259,26 @@ export class UserCard extends LitElement {
 
 GitHub Actions를 통해 자동 배포를 구성했습니다. 다양한 환경을 고려해 두 가지 빌드 버전을 제공합니다:
 
-```mermaid
-flowchart TD
-    A[소스 코드] --> B[GitHub Actions]
-    B --> C{빌드 타입}
+**배포 프로세스:**
 
-    C -->|ESM| D[ES Modules 빌드]
-    C -->|IIFE| E[IIFE 빌드]
-
-    D --> F[npm 패키지 배포]
-    D --> G[트리 쉐이킹 지원]
-    D --> H[~100KB 미만]
-
-    E --> I[CDN 배포]
-    E --> J[레거시 환경 지원]
-    E --> K[~1MB 미만]
-
-    F --> L[모던 프로젝트에서 import]
-    I --> M[script 태그로 직접 사용]
-
-    style D fill:#e8f5e8
-    style E fill:#fff3e0
-    style H fill:#c8e6c9
-    style K fill:#ffcc80
-```
+1. 소스 코드 → GitHub Actions
+2. 빌드 타입 선택:
+   - **ESM 빌드**: ES Modules 형태
+   - **IIFE 빌드**: 즉시 실행 함수 형태
 
 **ESM 버전**
 
-- 모던 프로젝트에서 package manager를 활용한 트리쉐이킹 지원
-- npm을 통해 배포 및 설치
+- npm 패키지 배포
+- 트리 쉐이킹 지원
+- ~100KB 미만
+- 모던 프로젝트에서 import
 
 **IIFE 버전**
 
-- 레거시 환경이나 즉시 실행이 필요한 환경 지원
-- CDN을 통해 제공
+- CDN 배포
+- 레거시 환경 지원
+- ~1MB 미만
+- script 태그로 직접 사용
 
 **버전 관리**
 
