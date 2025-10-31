@@ -1,12 +1,25 @@
 ---
 title: SOLID 원칙으로 React 코드 품질 높이기 - 프론트엔드 설계 가이드
 summary: React 프로젝트 코드가 복잡해질 때 SOLID 원칙으로 해결하세요. TypeScript 예제와 실무 패턴으로 유지보수하기 쉬운 컴포넌트 설계법을 배워보세요.
-tags: [SOLID, React, TypeScript, 클린코드, 설계패턴, 컴포넌트설계, 프론트엔드, 코드품질, 리팩토링, 객체지향, 소프트웨어아키텍처]
+tags:
+  [
+    SOLID,
+    React,
+    TypeScript,
+    클린코드,
+    설계패턴,
+    컴포넌트설계,
+    프론트엔드,
+    코드품질,
+    리팩토링,
+    객체지향,
+    소프트웨어아키텍처,
+  ]
 date: 2025-10-11
 images: ['/static/images/web/solid.png']
 layout: PostBanner
 authors: ['default']
-draft: true
+draft: false
 ---
 
 ## 서론
@@ -138,8 +151,10 @@ function ProductList() {
 - API, 검색, 포맷팅, Analytics는 각자 분리됨
 
 **구조 변화:**
+
 - BEFORE: 하나의 컴포넌트에 모든 책임이 집중
 - AFTER: 각 책임별로 분리된 컴포넌트 구조
+
 ### 실무 적용 팁
 
 SRP를 React에서 효과적으로 구현하기 위한 구체적인 방법들:
@@ -247,8 +262,10 @@ notificationConfigs.info = {
 - 설정 객체만 확장하면 됨
 
 **구조 변화:**
+
 - BEFORE: 하나의 컴포넌트에 모든 책임이 집중
 - AFTER: 각 책임별로 분리된 컴포넌트 구조
+
 ### React의 Composition Pattern으로 OCP 구현
 
 OCP의 "확장에는 열려있고, 수정에는 닫혀있어야 한다"는 원칙을 React에서 가장 자연스럽게 구현하는 방법이 Composition Pattern입니다. 기존 컴포넌트를 수정하지 않고도 새로운 기능을 확장할 수 있습니다.
@@ -451,8 +468,10 @@ function PaymentProcessor({ method }: { method: PaymentMethod }) {
 - 사전 검증 메서드로 예측 가능한 동작 보장
 
 **구조 변화:**
+
 - BEFORE: 하나의 컴포넌트에 모든 책임이 집중
 - AFTER: 각 책임별로 분리된 컴포넌트 구조
+
 ### React에서의 LSP
 
 ```typescript
@@ -693,8 +712,10 @@ function AdvancedTable(props: TableDataProps & TablePaginationProps & TableSortP
 - 컴포넌트 간 불필요한 의존성 제거
 
 **구조 변화:**
+
 - BEFORE: 하나의 컴포넌트에 모든 책임이 집중
 - AFTER: 각 책임별로 분리된 컴포넌트 구조
+
 ### React Context에서의 ISP
 
 ```typescript
