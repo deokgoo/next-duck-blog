@@ -8,28 +8,29 @@ import TableWrapper from './TableWrapper';
 import ExpandableSection from './ExpandableSection';
 import DoubleImage from './DoubleImage';
 import SOLIDChecklistModal from './SOLIDChecklistModal';
+import ChromeDevToolsMCPSetupModal from './ChromeDevToolsMCPSetupModal';
 import CodeComparison from './CodeComparison';
 import Mermaid from './Mermaid';
 
 const PreWithMermaid = (props) => {
-  const { children, className, ...rest } = props
+  const { children, className, ...rest } = props;
 
   if (className?.includes('mermaid')) {
-    let code = ''
+    let code = '';
     if (typeof children === 'string') {
-      code = children
+      code = children;
     } else if (children && children.props && typeof children.props.children === 'string') {
-      code = children.props.children
+      code = children.props.children;
     }
 
     if (code) {
-      return <Mermaid chart={code} />
+      return <Mermaid chart={code} />;
     }
-    return null
+    return null;
   }
 
-  return <Pre {...props} />
-}
+  return <Pre {...props} />;
+};
 
 export const components: MDXComponents = {
   Image,
@@ -41,6 +42,7 @@ export const components: MDXComponents = {
   BlogNewsletterForm,
   Expand: ExpandableSection,
   SOLIDChecklistModal,
+  ChromeDevToolsMCPSetupModal,
   CodeComparison,
   Mermaid,
 };

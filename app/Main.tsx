@@ -34,11 +34,11 @@ export default function Home({ posts }) {
                         </dd>
                       </dl>
                       <div className="space-y-2 xl:col-span-3">
-                        <div className="flex flex-wrap items-center gap-3">
+                        <div>
                           <h2 className="text-xl font-bold leading-7 tracking-tight text-gray-900 transition-colors group-hover:text-primary-500 dark:text-gray-100 dark:group-hover:text-primary-400">
                             {title}
                           </h2>
-                          <div className="flex items-center gap-2 text-xs">
+                          <div className="mt-1 flex items-center gap-2 text-xs">
                             {tags.slice(0, 3).map((tag) => (
                               <span
                                 key={tag}
