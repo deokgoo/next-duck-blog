@@ -4,7 +4,7 @@ import siteMetadata from '@/data/siteMetadata';
 import { formatDate } from 'pliny/utils/formatDate';
 import NewsletterForm from 'pliny/ui/NewsletterForm';
 
-const MAX_DISPLAY = 5;
+const MAX_DISPLAY = 10; // 5개 → 10개로 증가
 
 export default function Home({ posts }) {
   return (
@@ -23,47 +23,41 @@ export default function Home({ posts }) {
           {posts.slice(0, MAX_DISPLAY).map((post) => {
             const { slug, date, title, summary, tags } = post;
             return (
-              <li key={slug} className="py-12">
+              <li key={slug} className="py-6">
                 <article>
-                  <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
-                    <dl>
-                      <dt className="sr-only">Published on</dt>
-                      <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                        <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
-                      </dd>
-                    </dl>
-                    <div className="space-y-5 xl:col-span-3">
-                      <div className="space-y-6">
-                        <div>
-                          <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link
-                              href={`/blog/${slug}`}
-                              className="text-gray-900 dark:text-gray-100"
-                            >
-                              {title}
-                            </Link>
+                  <Link href={`/blog/${slug}`} className="group block">
+                    <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
+                      <dl>
+                        <dt className="sr-only">Published on</dt>
+                        <dd className="text-sm font-medium leading-6 text-gray-500 dark:text-gray-400">
+                          <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
+                        </dd>
+                      </dl>
+                      <div className="space-y-2 xl:col-span-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <h2 className="text-xl font-bold leading-7 tracking-tight text-gray-900 transition-colors group-hover:text-primary-500 dark:text-gray-100 dark:group-hover:text-primary-400">
+                            {title}
                           </h2>
-                          <div className="flex flex-wrap">
-                            {tags.map((tag) => (
-                              <Tag key={tag} text={tag} />
+                          <div className="flex items-center gap-2 text-xs">
+                            {tags.slice(0, 3).map((tag) => (
+                              <span
+                                key={tag}
+                                className="font-medium text-primary-500 dark:text-primary-400"
+                              >
+                                #{tag.split(' ').join('-')}
+                              </span>
                             ))}
+                            {tags.length > 3 && (
+                              <span className="text-primary-400 dark:text-primary-500">...</span>
+                            )}
                           </div>
                         </div>
-                        <div className="prose max-w-none text-gray-500 dark:text-gray-400">
+                        <div className="prose line-clamp-2 max-w-none text-sm text-gray-500 dark:text-gray-400">
                           {summary}
                         </div>
                       </div>
-                      <div className="text-base font-medium leading-6">
-                        <Link
-                          href={`/blog/${slug}`}
-                          className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-                          aria-label={`Read more: "${title}"`}
-                        >
-                          Read more &rarr;
-                        </Link>
-                      </div>
                     </div>
-                  </div>
+                  </Link>
                 </article>
               </li>
             );
@@ -77,7 +71,7 @@ export default function Home({ posts }) {
             className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
             aria-label="All posts"
           >
-            All Posts &rarr;
+            All Posts →
           </Link>
         </div>
       )}
