@@ -1,0 +1,747 @@
+---
+title: '브라우저 Storage, 제대로 알고 쓰자'
+date: '2025-11-03'
+tags:
+  [
+    'Browser Storage',
+    'LocalStorage',
+    'SessionStorage',
+    'IndexedDB',
+    'Cache API',
+    'Cookie',
+    '웹 스토리지',
+    '브라우저',
+    '프론트엔드',
+  ]
+draft: true
+summary: 'LocalStorage만 쓰고 계신가요? 브라우저가 제공하는 다양한 Storage의 특징과 선택 기준, 그리고 왜 동기 API를 선택했는지까지 깊이 있게 알아봅니다.'
+images: ['/static/images/web/browser-storage.png']
+layout: PostBanner
+authors: ['default']
+---
+
+## 서론
+
+브라우저는 5가지 Storage를 제공합니다. Cookie, LocalStorage, SessionStorage, IndexedDB, Cache API. 각각 다른 목적으로 설계되었고, 다른 제약을 가지고 있습니다.
+
+문제는 대부분의 개발자가 LocalStorage만 사용한다는 것입니다. 익숙하고 간단하니까요. 하지만 LocalStorage는 5MB 제한, 동기 API, XSS 취약점이라는 명확한 한계가 있습니다. 이 한계를 모르고 사용하면 프로덕션에서 문제가 터집니다.
+
+이 글은 각 Storage의 **설계 의도**와 **내부 동작 원리**, 그리고 **실무에서 마주치는 제약**을 다룹니다. "어떻게 쓰는가"보다 "왜 이렇게 설계되었고, 언제 한계에 부딪히는가"에 집중합니다.
+
+## 브라우저 Storage의 설계 철학
+
+브라우저 Storage는 시대별로 다른 문제를 해결하기 위해 추가되었습니다:
+
+**1994년 - Cookie**: HTTP는 stateless입니다. 서버가 클라이언트를 기억할 방법이 없었죠. Cookie는 이 문제를 해결하기 위해 만들어졌습니다. 모든 HTTP 요청에 자동으로 포함되는 4KB 저장소.
+
+**2009년 - LocalStorage/SessionStorage**: AJAX가 보편화되면서 클라이언트 사이드에서 데이터를 저장할 필요가 생겼습니다. Cookie는 너무 작고, 모든 요청에 포함되어 비효율적이었죠. 그래서 5-10MB 용량의 key-value 저장소가 추가되었습니다.
+
+**2014년 - Cache API**: PWA(Progressive Web App)가 등장하면서 오프라인 지원이 필수가 되었습니다. 네트워크 리소스(HTML, CSS, JS, 이미지)를 캐싱하기 위한 전용 Storage가 추가되었습니다.
+
+**2015년 - IndexedDB**: 웹 앱이 복잡해지면서 LocalStorage의 5MB 제한이 문제가 되었습니다. 대용량 데이터를 저장하고 쿼리할 수 있는 NoSQL 데이터베이스가 필요했죠. IndexedDB는 수백 MB ~ 수 GB를 저장할 수 있습니다.
+
+각 Storage는 **특정 문제를 해결하기 위해 설계**되었습니다. 그래서 하나의 Storage로 모든 것을 해결하려고 하면 설계 의도와 충돌합니다.
+
+## 브라우저 Storage 비교표
+
+| Storage        | 용량 제한      | 데이터 타입      | 동기/비동기 | 유효 기간        | 주요 용도                    |
+| -------------- | -------------- | ---------------- | ----------- | ---------------- | ---------------------------- |
+| Cookie         | 4KB            | 문자열           | 동기        | 설정 가능        | 인증 토큰, 서버 통신         |
+| LocalStorage   | 5-10MB         | 문자열           | 동기        | 영구             | 사용자 설정, 간단한 데이터   |
+| SessionStorage | 5-10MB         | 문자열           | 동기        | 탭 닫을 때까지   | 임시 폼 데이터, 탭별 상태    |
+| IndexedDB      | 수백 MB ~ 수GB | 객체, Blob, File | 비동기      | 영구             | 대용량 데이터, 오프라인 앱   |
+| Cache API      | 수백 MB ~ 수GB | Response 객체    | 비동기      | 수동 관리        | 네트워크 리소스 캐싱, PWA    |
+
+## 1. Cookie - HTTP 상태 관리의 유일한 표준
+
+### 왜 Cookie인가?
+
+Cookie의 핵심은 **자동 전송**입니다. `fetch()`나 `XMLHttpRequest`를 호출할 때 개발자가 명시적으로 추가하지 않아도 브라우저가 자동으로 Cookie를 HTTP 헤더에 포함시킵니다. 이게 LocalStorage와의 결정적 차이입니다.
+
+```javascript
+// Cookie: 자동 전송
+document.cookie = "sessionId=abc123; secure; httpOnly; samesite=strict";
+fetch('/api/user'); // Cookie가 자동으로 포함됨
+
+// LocalStorage: 수동 전송
+const token = localStorage.getItem('token');
+fetch('/api/user', {
+  headers: { 'Authorization': `Bearer ${token}` } // 매번 명시적으로 추가
+});
+```
+
+### httpOnly의 진짜 의미
+
+`httpOnly` 플래그는 JavaScript에서 Cookie 접근을 차단합니다. XSS 공격으로 `document.cookie`를 탈취당해도 `httpOnly` Cookie는 안전합니다.
+
+```javascript
+// 서버에서 설정 (Node.js Express 예시)
+res.cookie('sessionId', 'abc123', {
+  httpOnly: true,  // JavaScript 접근 차단
+  secure: true,    // HTTPS만 전송
+  sameSite: 'strict' // CSRF 방어
+});
+
+// 클라이언트에서 접근 불가
+console.log(document.cookie); // sessionId가 보이지 않음
+```
+
+**중요**: `httpOnly`는 서버에서만 설정 가능합니다. 클라이언트에서 `document.cookie`로는 설정할 수 없습니다.
+
+### SameSite의 3가지 모드
+
+| 모드     | 동작                                  | 사용 사례                |
+| -------- | ------------------------------------- | ------------------------ |
+| Strict   | 같은 사이트에서만 전송                | 민감한 인증 Cookie       |
+| Lax      | 같은 사이트 + Top-level navigation    | 일반적인 세션 Cookie     |
+| None     | 모든 요청에 전송 (secure 필수)        | 크로스 도메인 API        |
+
+```javascript
+// Strict: 가장 안전하지만 UX 문제 가능
+// 외부 링크 클릭 시 Cookie가 전송되지 않아 로그아웃 상태로 보임
+document.cookie = "auth=token; samesite=strict";
+
+// Lax: 균형잡힌 선택 (Chrome 기본값)
+// GET 요청의 Top-level navigation에서만 전송
+document.cookie = "session=id; samesite=lax";
+
+// None: 크로스 도메인 필수 시 (secure 필수)
+document.cookie = "tracking=id; samesite=none; secure";
+```
+
+### Cookie의 성능 함정
+
+모든 HTTP 요청에 Cookie가 포함되므로, 불필요한 Cookie는 네트워크 오버헤드를 유발합니다.
+
+```javascript
+// ❌ 나쁜 예: 모든 요청에 불필요한 데이터 전송
+document.cookie = "userPreferences=" + JSON.stringify({
+  theme: 'dark',
+  fontSize: 16,
+  // ... 3KB 데이터
+}); // 이미지, CSS 요청에도 3KB가 추가됨
+
+// ✅ 좋은 예: path로 범위 제한
+document.cookie = "apiToken=abc; path=/api"; // /api/* 요청에만 전송
+document.cookie = "theme=dark; path=/"; // 모든 요청에 전송 (작은 데이터만)
+```
+
+### Domain과 Path의 미묘한 차이
+
+```javascript
+// domain 미설정: 현재 도메인에만 유효
+document.cookie = "token=abc"; // example.com에서만 유효
+
+// domain 설정: 서브도메인 포함
+document.cookie = "token=abc; domain=.example.com"; 
+// example.com, api.example.com, www.example.com 모두 유효
+
+// path: URL 경로 제한
+document.cookie = "adminToken=xyz; path=/admin"; // /admin/* 에만 전송
+```
+
+## 2. LocalStorage - 동기 API의 trade-off
+
+### 왜 동기 API인가?
+
+LocalStorage가 설계된 2009년, 웹 개발은 지금과 달랐습니다. Promise는 없었고, callback hell이 일상이었죠. 간단한 설정 값을 저장하는데 비동기 처리는 과도한 복잡성이었습니다.
+
+```javascript
+// 2009년 당시 비동기 API였다면
+localStorage.getItem('theme', function(value) {
+  if (value === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+}); // callback hell의 시작
+
+// 동기 API의 단순함
+const theme = localStorage.getItem('theme');
+if (theme === 'dark') {
+  document.body.classList.add('dark-mode');
+}
+```
+
+하지만 이 선택은 **메인 스레드 블로킹**이라는 대가를 치릅니다.
+
+### 동기 API의 성능 함정
+
+LocalStorage는 디스크 I/O를 동기적으로 수행합니다. 5MB 데이터를 읽으면 메인 스레드가 멈춥니다.
+
+```javascript
+// ❌ 메인 스레드 블로킹
+const start = performance.now();
+const largeData = localStorage.getItem('largeData'); // 5MB
+console.log(`Blocked for ${performance.now() - start}ms`); // 50-100ms
+
+// 이 시간 동안 UI는 멈춤
+// 스크롤, 클릭, 애니메이션 모두 정지
+```
+
+**해결책**: Web Worker에서 사용하거나, IndexedDB로 마이그레이션
+
+```javascript
+// Web Worker에서는 LocalStorage 접근 불가
+// SharedWorker나 BroadcastChannel로 우회 가능하지만 복잡함
+
+// 더 나은 방법: IndexedDB
+const db = await openDB('myDB');
+const largeData = await db.get('store', 'largeData'); // 비동기, 메인 스레드 블로킹 없음
+```
+
+### Origin 격리와 Quota
+
+LocalStorage는 **origin 단위로 격리**됩니다. `https://example.com`과 `https://api.example.com`은 다른 origin이므로 Storage를 공유하지 않습니다.
+
+```javascript
+// https://example.com
+localStorage.setItem('token', 'abc');
+
+// https://api.example.com
+console.log(localStorage.getItem('token')); // null (다른 origin)
+
+// https://example.com:3000
+console.log(localStorage.getItem('token')); // null (포트가 다르면 다른 origin)
+```
+
+**Quota 관리**: 브라우저마다 다르지만 일반적으로 5-10MB
+
+```javascript
+// Quota 초과 시 에러
+try {
+  localStorage.setItem('key', largeData);
+} catch (e) {
+  if (e.name === 'QuotaExceededError') {
+    // 오래된 데이터 삭제 또는 IndexedDB로 이동
+    const oldKeys = Object.keys(localStorage).filter(k => k.startsWith('cache_'));
+    oldKeys.forEach(k => localStorage.removeItem(k));
+  }
+}
+```
+
+### Storage Event의 활용
+
+LocalStorage는 **탭 간 동기화**를 지원합니다. 한 탭에서 변경하면 다른 탭에서 `storage` 이벤트가 발생합니다.
+
+```javascript
+// Tab 1: 데이터 변경
+localStorage.setItem('theme', 'dark');
+
+// Tab 2: 자동으로 감지
+window.addEventListener('storage', (e) => {
+  if (e.key === 'theme') {
+    console.log('Old:', e.oldValue); // 'light'
+    console.log('New:', e.newValue); // 'dark'
+    applyTheme(e.newValue);
+  }
+});
+```
+
+**주의**: `storage` 이벤트는 **변경한 탭에서는 발생하지 않습니다**. 다른 탭에서만 발생합니다.
+
+### JSON.stringify의 함정
+
+LocalStorage는 문자열만 저장하므로 객체는 직렬화가 필요합니다. 하지만 `JSON.stringify`는 함수, undefined, Symbol을 무시합니다.
+
+```javascript
+const data = {
+  name: 'John',
+  age: 30,
+  greet: function() { console.log('Hi'); }, // 함수는 무시됨
+  secret: undefined, // undefined는 무시됨
+  id: Symbol('id') // Symbol은 무시됨
+};
+
+localStorage.setItem('user', JSON.stringify(data));
+const restored = JSON.parse(localStorage.getItem('user'));
+
+console.log(restored); // { name: 'John', age: 30 }
+// greet, secret, id는 사라짐
+```
+
+**순환 참조 문제**:
+
+```javascript
+const obj = { name: 'John' };
+obj.self = obj; // 순환 참조
+
+localStorage.setItem('data', JSON.stringify(obj)); 
+// TypeError: Converting circular structure to JSON
+```
+
+## 3. SessionStorage - 탭 단위 임시 저장소
+
+### 특징
+
+SessionStorage는 LocalStorage와 API가 동일하지만, **탭을 닫으면 데이터가 삭제**됩니다.
+
+```javascript
+// 저장
+sessionStorage.setItem('formData', JSON.stringify({ name: 'John', email: 'john@example.com' }));
+
+// 읽기
+const formData = JSON.parse(sessionStorage.getItem('formData'));
+
+// 탭을 닫으면 자동으로 삭제됨
+```
+
+### 장점
+
+- **탭 격리**: 각 탭마다 독립적인 저장소
+- **자동 정리**: 탭을 닫으면 자동으로 삭제
+- **LocalStorage와 동일한 API**: 학습 비용 없음
+
+### 단점
+
+- **탭 간 공유 불가**: 같은 도메인이어도 탭마다 다른 데이터
+- **새로고침 시 유지**: 탭을 닫지 않으면 새로고침해도 유지 (의도와 다를 수 있음)
+
+### 언제 사용할까?
+
+```javascript
+// ✅ 좋은 사용 사례: 폼 임시 저장
+const saveFormData = () => {
+  const formData = {
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+  };
+  sessionStorage.setItem('formData', JSON.stringify(formData));
+};
+
+// 페이지 로드 시 복원
+window.addEventListener('load', () => {
+  const formData = JSON.parse(sessionStorage.getItem('formData'));
+  if (formData) {
+    document.getElementById('name').value = formData.name;
+    document.getElementById('email').value = formData.email;
+  }
+});
+
+// ✅ 좋은 사용 사례: 탭별 상태 관리
+sessionStorage.setItem('currentStep', '2'); // 다단계 폼의 현재 단계
+
+// ❌ 나쁜 사용 사례: 탭 간 공유가 필요한 데이터
+sessionStorage.setItem('cart', JSON.stringify(cartItems)); // 다른 탭에서 접근 불가
+```
+
+**사용 기준**:
+- 탭을 닫으면 삭제되어야 하는 데이터
+- 탭별로 독립적인 상태 관리
+- 임시 폼 데이터
+
+## 4. IndexedDB - 대용량 구조화된 데이터 저장소
+
+### 특징
+
+IndexedDB는 **브라우저 내장 NoSQL 데이터베이스**입니다. 대용량 데이터를 효율적으로 저장하고 검색할 수 있습니다.
+
+```javascript
+// IndexedDB 열기
+const request = indexedDB.open('MyDatabase', 1);
+
+request.onupgradeneeded = (event) => {
+  const db = event.target.result;
+  
+  // Object Store 생성 (테이블과 유사)
+  const objectStore = db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
+  
+  // 인덱스 생성 (검색 최적화)
+  objectStore.createIndex('email', 'email', { unique: true });
+};
+
+request.onsuccess = (event) => {
+  const db = event.target.result;
+  
+  // 데이터 추가
+  const transaction = db.transaction(['users'], 'readwrite');
+  const objectStore = transaction.objectStore('users');
+  
+  objectStore.add({ name: 'John', email: 'john@example.com', age: 30 });
+  
+  // 데이터 읽기
+  const getRequest = objectStore.get(1);
+  getRequest.onsuccess = () => {
+    console.log(getRequest.result); // { id: 1, name: 'John', ... }
+  };
+};
+```
+
+### 장점
+
+- **대용량 저장**: 수백 MB ~ 수 GB (브라우저/디스크 용량에 따라 다름)
+- **구조화된 데이터**: 객체, 배열, Blob, File 등 다양한 타입 저장
+- **인덱싱**: 빠른 검색을 위한 인덱스 생성 가능
+- **트랜잭션**: 데이터 일관성 보장
+
+### 단점
+
+- **복잡한 API**: 콜백 기반으로 사용하기 어려움
+- **비동기 처리**: Promise나 async/await로 래핑 필요
+- **브라우저 호환성**: 구형 브라우저에서 지원 안 됨
+
+### 실무에서는 라이브러리 사용
+
+IndexedDB의 복잡한 API를 직접 사용하는 대신, 라이브러리를 사용하는 것이 일반적입니다.
+
+```javascript
+// Dexie.js 사용 예시
+import Dexie from 'dexie';
+
+const db = new Dexie('MyDatabase');
+
+db.version(1).stores({
+  users: '++id, name, email, age',
+});
+
+// 데이터 추가
+await db.users.add({ name: 'John', email: 'john@example.com', age: 30 });
+
+// 데이터 읽기
+const user = await db.users.get(1);
+
+// 검색
+const users = await db.users.where('age').above(25).toArray();
+```
+
+### 언제 사용할까?
+
+```javascript
+// ✅ 좋은 사용 사례: 오프라인 앱
+// 서버 데이터를 로컬에 캐싱
+await db.products.bulkPut(productsFromServer);
+
+// 오프라인 시 로컬 데이터 사용
+const products = await db.products.toArray();
+
+// ✅ 좋은 사용 사례: 대용량 파일 저장
+const file = new Blob([videoData], { type: 'video/mp4' });
+await db.videos.add({ id: 1, file, title: 'My Video' });
+
+// ❌ 나쁜 사용 사례: 간단한 설정 저장
+await db.settings.put({ theme: 'dark' }); // LocalStorage가 더 적합
+```
+
+**사용 기준**:
+- 5MB 이상의 대용량 데이터
+- 복잡한 쿼리가 필요한 구조화된 데이터
+- 오프라인 앱, PWA
+
+## 5. Cache API - 네트워크 리소스 캐싱
+
+### 특징
+
+Cache API는 **HTTP 요청/응답을 캐싱**하기 위한 Storage입니다. Service Worker와 함께 사용하여 오프라인 경험을 제공합니다.
+
+```javascript
+// 캐시에 저장
+const cache = await caches.open('my-cache-v1');
+await cache.add('/index.html');
+await cache.addAll(['/styles.css', '/script.js', '/image.png']);
+
+// 캐시에서 읽기
+const response = await cache.match('/index.html');
+if (response) {
+  const html = await response.text();
+  console.log(html);
+}
+
+// Service Worker에서 사용
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});
+```
+
+### 장점
+
+- **네트워크 리소스 캐싱**: HTML, CSS, JS, 이미지 등 모든 리소스 캐싱 가능
+- **오프라인 지원**: 네트워크 없이도 앱 실행 가능
+- **버전 관리**: 캐시 이름으로 버전 관리 가능
+
+### 단점
+
+- **Service Worker 필수**: Cache API만으로는 사용 불가
+- **수동 관리**: 캐시 업데이트, 삭제를 직접 관리해야 함
+- **복잡한 전략**: 캐시 우선, 네트워크 우선 등 전략 설계 필요
+
+### 언제 사용할까?
+
+```javascript
+// ✅ 좋은 사용 사례: PWA 오프라인 지원
+const CACHE_NAME = 'my-app-v1';
+const urlsToCache = [
+  '/',
+  '/styles.css',
+  '/script.js',
+  '/offline.html',
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(urlsToCache);
+    })
+  );
+});
+
+// ✅ 좋은 사용 사례: 이미지 캐싱
+self.addEventListener('fetch', (event) => {
+  if (event.request.destination === 'image') {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        return response || fetch(event.request).then((fetchResponse) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, fetchResponse.clone());
+            return fetchResponse;
+          });
+        });
+      })
+    );
+  }
+});
+
+// ❌ 나쁜 사용 사례: 동적 데이터 캐싱
+// API 응답은 Cache API보다 IndexedDB가 적합
+```
+
+**사용 기준**:
+- PWA 오프라인 지원
+- 정적 리소스 캐싱
+- Service Worker 기반 앱
+
+## Storage 선택 기준
+
+### 1. 데이터 크기
+
+```
+< 4KB        → Cookie
+< 5MB        → LocalStorage / SessionStorage
+< 수백 MB    → IndexedDB
+네트워크 리소스 → Cache API
+```
+
+### 2. 유효 기간
+
+```
+영구 저장      → LocalStorage, IndexedDB
+탭 닫을 때까지 → SessionStorage
+설정 가능     → Cookie
+수동 관리     → Cache API
+```
+
+### 3. 데이터 타입
+
+```
+문자열        → LocalStorage, SessionStorage, Cookie
+객체/배열     → IndexedDB
+파일/Blob     → IndexedDB
+HTTP 응답     → Cache API
+```
+
+### 4. 서버 통신 필요 여부
+
+```
+서버에 자동 전송 → Cookie
+클라이언트만    → LocalStorage, SessionStorage, IndexedDB, Cache API
+```
+
+### 5. 보안 요구사항
+
+```
+민감한 정보    → Cookie (httpOnly, secure)
+일반 데이터    → LocalStorage, SessionStorage
+대용량 데이터  → IndexedDB
+```
+
+## 왜 LocalStorage/SessionStorage는 동기 API를 선택했을까?
+
+많은 개발자들이 궁금해하는 질문입니다. "왜 LocalStorage는 동기 API일까? 비동기가 더 좋지 않나?"
+
+### 역사적 배경
+
+LocalStorage가 설계된 2009년 당시, 웹 애플리케이션은 지금보다 훨씬 단순했습니다:
+
+- **작은 데이터**: 대부분 몇 KB 수준의 설정 값
+- **단순한 UI**: 복잡한 인터랙션이 적음
+- **동기 코드 선호**: Promise, async/await가 없던 시절
+
+### 동기 API의 장점
+
+```javascript
+// ✅ 동기 API: 간단하고 직관적
+const theme = localStorage.getItem('theme');
+if (theme === 'dark') {
+  document.body.classList.add('dark-mode');
+}
+
+// ❌ 비동기 API: 복잡함
+const theme = await localStorage.getItem('theme');
+if (theme === 'dark') {
+  document.body.classList.add('dark-mode');
+}
+// 또는
+localStorage.getItem('theme').then((theme) => {
+  if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+});
+```
+
+### 동기 API의 단점
+
+```javascript
+// ❌ 메인 스레드 블로킹
+// 5MB 데이터를 읽으면 UI가 멈출 수 있음
+const largeData = localStorage.getItem('largeData'); // 수십 ms 블로킹
+
+// ✅ IndexedDB는 비동기로 해결
+const largeData = await db.data.get('largeData'); // 메인 스레드 블로킹 없음
+```
+
+### 결론
+
+LocalStorage는 **간단한 사용성**을 위해 동기 API를 선택했습니다. 대부분의 경우 문제가 없지만, 대용량 데이터를 다룰 때는 IndexedDB를 사용해야 합니다.
+
+## 실무 활용 패턴
+
+### 1. 하이브리드 전략
+
+```javascript
+// 작은 데이터는 LocalStorage, 큰 데이터는 IndexedDB
+class StorageManager {
+  static async set(key, value) {
+    const size = new Blob([JSON.stringify(value)]).size;
+    
+    if (size < 1024 * 1024) { // 1MB 미만
+      localStorage.setItem(key, JSON.stringify(value));
+    } else {
+      await db.data.put({ key, value });
+    }
+  }
+  
+  static async get(key) {
+    const localData = localStorage.getItem(key);
+    if (localData) {
+      return JSON.parse(localData);
+    }
+    
+    const dbData = await db.data.get(key);
+    return dbData?.value;
+  }
+}
+```
+
+### 2. 캐싱 전략
+
+```javascript
+// 네트워크 우선, 캐시 폴백
+async function fetchWithCache(url) {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    // 캐시에 저장
+    localStorage.setItem(url, JSON.stringify(data));
+    
+    return data;
+  } catch (error) {
+    // 네트워크 실패 시 캐시 사용
+    const cached = localStorage.getItem(url);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+    throw error;
+  }
+}
+```
+
+### 3. 만료 시간 관리
+
+```javascript
+// LocalStorage에 만료 시간 추가
+class CacheStorage {
+  static set(key, value, ttl = 3600000) { // 기본 1시간
+    const item = {
+      value,
+      expiry: Date.now() + ttl,
+    };
+    localStorage.setItem(key, JSON.stringify(item));
+  }
+  
+  static get(key) {
+    const item = localStorage.getItem(key);
+    if (!item) return null;
+    
+    const { value, expiry } = JSON.parse(item);
+    
+    if (Date.now() > expiry) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    
+    return value;
+  }
+}
+```
+
+## 주의사항
+
+### 1. 용량 초과 처리
+
+```javascript
+// LocalStorage 용량 초과 시 에러 처리
+try {
+  localStorage.setItem('key', largeData);
+} catch (e) {
+  if (e.name === 'QuotaExceededError') {
+    console.error('Storage 용량 초과');
+    // 오래된 데이터 삭제 또는 IndexedDB로 이동
+  }
+}
+```
+
+### 2. 보안
+
+```javascript
+// ❌ 민감한 정보를 LocalStorage에 저장하지 마세요
+localStorage.setItem('password', '1234'); // XSS 공격에 노출
+
+// ✅ 민감한 정보는 Cookie (httpOnly, secure)
+document.cookie = "accessToken=abc123; secure; httpOnly; samesite=strict";
+```
+
+### 3. 동기화
+
+```javascript
+// LocalStorage는 탭 간 동기화됨
+window.addEventListener('storage', (e) => {
+  if (e.key === 'theme') {
+    console.log('다른 탭에서 테마가 변경됨:', e.newValue);
+    applyTheme(e.newValue);
+  }
+});
+```
+
+## 결론
+
+브라우저 Storage는 각각의 목적과 특징이 있습니다. "무조건 LocalStorage"가 아니라, 상황에 맞는 Storage를 선택하는 것이 중요합니다.
+
+**간단한 선택 가이드**:
+- 사용자 설정, 테마 → **LocalStorage**
+- 임시 폼 데이터 → **SessionStorage**
+- 인증 토큰 → **Cookie**
+- 대용량 데이터, 오프라인 앱 → **IndexedDB**
+- 네트워크 리소스 캐싱 → **Cache API**
+
+저도 이 글을 쓰면서 많이 배웠습니다. 특히 "왜 동기 API를 선택했을까?"라는 질문에 대한 답을 찾는 과정이 흥미로웠습니다. 역사적 맥락을 이해하니 현재의 설계가 더 명확하게 보이더군요.
+
+여러분도 프로젝트에서 Storage를 선택할 때, 이 글이 도움이 되길 바랍니다. 그리고 "그냥 LocalStorage에 저장하면 되는 거 아니야?"라는 질문에 자신 있게 답할 수 있게 되셨으면 좋겠습니다.
+
+## 참고 자료
+
+- [MDN - Web Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API)
+- [MDN - IndexedDB API](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)
+- [MDN - Cache API](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
+- [Web.dev - Storage for the web](https://web.dev/storage-for-the-web/)
