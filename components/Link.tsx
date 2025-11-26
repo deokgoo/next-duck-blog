@@ -1,14 +1,29 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
-import Link from 'next/link';
-import type { LinkProps } from 'next/link';
+'use client';
+
 import { AnchorHTMLAttributes } from 'react';
 
-const CustomLink = ({ href, ...rest }: LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>) => {
+interface CustomLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+  href?: string;
+}
+
+const CustomLink = ({ href, onClick, ...rest }: CustomLinkProps) => {
   const isInternalLink = href && href.startsWith('/');
   const isAnchorLink = href && href.startsWith('#');
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (onClick) {
+      onClick(e);
+    }
+
+    if (isInternalLink && !e.defaultPrevented) {
+      e.preventDefault();
+      window.location.href = href;
+    }
+  };
+
   if (isInternalLink) {
-    return <Link href={href} {...rest} />;
+    return <a href={href} onClick={handleClick} {...rest} />;
   }
 
   if (isAnchorLink) {
