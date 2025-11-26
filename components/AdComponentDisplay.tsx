@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-const AdComponentGrid = () => {
+const AdComponentDisplay = () => {
   useEffect(() => {
     setTimeout(() => {
       try {
@@ -15,7 +15,7 @@ const AdComponentGrid = () => {
   }, []);
 
   return (
-    <div className="ad-container" style={{ textAlign: 'center', margin: '20px 0' }}>
+    <>
       <script
         async
         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2038243209448310"
@@ -24,14 +24,13 @@ const AdComponentGrid = () => {
       <ins
         className="adsbygoogle"
         style={{ display: 'block' }}
-        data-ad-format="fluid"
-        data-ad-layout-key="-gc+3r+68-9q-29"
         data-ad-client="ca-pub-2038243209448310"
-        data-ad-slot="6151980699"
+        data-ad-slot="6079435296"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
       ></ins>
-      <script></script>
-    </div>
+    </>
   );
 };
 
-export default AdComponentGrid;
+export default AdComponentDisplay;

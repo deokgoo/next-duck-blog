@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-const AdComponentMultiFlex = () => {
+const AdComponentInArticle = () => {
   useEffect(() => {
     setTimeout(() => {
       try {
@@ -23,14 +23,14 @@ const AdComponentMultiFlex = () => {
       ></script>
       <ins
         className="adsbygoogle"
-        style={{ display: 'block' }}
+        style={{ display: 'block', textAlign: 'center' }}
+        data-ad-layout="in-article"
+        data-ad-format="fluid"
         data-ad-client="ca-pub-2038243209448310"
-        data-ad-slot="6079435296"
-        data-ad-format="auto"
-        data-full-width-responsive="true"
+        data-ad-slot="4907054773"
       ></ins>
     </>
   );
 };
 
-export default AdComponentMultiFlex;
+export default AdComponentInArticle;
