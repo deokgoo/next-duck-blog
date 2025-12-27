@@ -2,7 +2,7 @@
 title: 'RAG 시스템이란? 왜 모두가 RAG로 AI 툴을 만들까'
 date: '2025-11-09'
 tags: ['RAG', 'AI', 'LLM', 'web', 'LangChain', 'LlamaIndex']
-draft: false
+draft: true
 summary: 'RAG(Retrieval-Augmented Generation) 시스템이 왜 필요한지, 어떻게 작동하는지, 그리고 RAG를 쉽게 구현할 수 있는 다양한 서비스들을 소개합니다.'
 ---
 
@@ -59,12 +59,12 @@ RAG(Retrieval-Augmented Generation)는 **검색(Retrieval)**과 **생성(Generat
 
 ```mermaid
 graph LR
-    A[사용자 질문] --> B[벡터 임베딩 변환]
-    B --> C[벡터 DB 검색]
-    C --> D[관련 문서 검색]
-    D --> E[컨텍스트 + 질문]
+    A[User Question] --> B[Vector Embedding]
+    B --> C[Vector DB Search]
+    C --> D[Document Retrieval]
+    D --> E[Context + Question]
     E --> F[LLM]
-    F --> G[답변 생성]
+    F --> G[Generate Answer]
 ```
 
 1. **사용자 질문을 벡터로 변환**: 질문을 숫자 배열(벡터)로 변환합니다.
@@ -119,9 +119,9 @@ Thomson Reuters는 RAG를 활용해 고객 지원팀이 방대한 내부 데이�
 
 법률 회사에서는 RAG를 통해 수천 개의 판례와 법률 문서를 검색하고, 변호사에게 관련 정보를 제공합니다.
 
-### 5. 코드베이스 이해 (Grab의 A\* bot)
+### 5. 코드베이스 이해 (Grab의 A* bot)
 
-Grab은 사기 조사를 위해 A\* bot이라는 RAG 기반 시스템을 만들었습니다. Slack을 통해 질문하면 관련 쿼리를 실행하고 결과를 요약해줍니다.
+Grab은 사기 조사를 위해 A* bot이라는 RAG 기반 시스템을 만들었습니다. Slack을 통해 질문하면 관련 쿼리를 실행하고 결과를 요약해줍니다.
 
 ## RAG 아키텍처의 진화 (2025년 트렌드)
 
