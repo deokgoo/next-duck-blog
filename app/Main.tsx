@@ -2,7 +2,8 @@ import Link from '@/components/Link';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
 import { formatDate } from 'pliny/utils/formatDate';
-import NewsletterForm from 'pliny/ui/NewsletterForm';
+// import NewsletterForm from 'pliny/ui/NewsletterForm'; // 한국어 버전으로 교체
+import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
 
 const MAX_DISPLAY = 10; // 5개 → 10개로 증가
 
@@ -77,7 +78,10 @@ export default function Home({ posts }) {
       )}
       {siteMetadata.newsletter?.provider && (
         <div className="flex items-center justify-center pt-4">
-          <NewsletterForm />
+          <KoreanNewsletterForm
+            compact={true}
+            showBenefits={false}
+          />
         </div>
       )}
     </>

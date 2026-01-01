@@ -1,6 +1,6 @@
 import TOCInline from 'pliny/ui/TOCInline';
 import Pre from 'pliny/ui/Pre';
-import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm';
+// import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'; // 제거: 한국어 버전으로 교체
 import type { MDXComponents } from 'mdx/types';
 import Image from './Image';
 import CustomLink from './Link';
@@ -11,6 +11,7 @@ import SOLIDChecklistModal from './SOLIDChecklistModal';
 import ChromeDevToolsMCPSetupModal from './ChromeDevToolsMCPSetupModal';
 import CodeComparison from './CodeComparison';
 import Mermaid from './Mermaid';
+import KoreanNewsletterForm from './KoreanNewsletterForm';
 
 const PreWithMermaid = (props) => {
   const { children, className, ...rest } = props;
@@ -39,7 +40,15 @@ export const components: MDXComponents = {
   a: CustomLink,
   pre: PreWithMermaid,
   table: TableWrapper,
-  BlogNewsletterForm,
+
+  // 뉴스레터 폼들 (담백하고 유연하게)
+  BlogNewsletterForm: KoreanNewsletterForm, // 🎯 기본 컴포넌트를 한국어로 교체!
+  KoreanNewsletterForm, // 명시적 한국어 버전
+  EnglishNewsletterForm: (props) => <KoreanNewsletterForm language="en" {...props} />, // 영어 버전
+  CompactNewsletterForm: (props) => <KoreanNewsletterForm compact={true} showBenefits={false} {...props} />, // 컴팩트 버전
+  SimpleNewsletterForm: (props) => <KoreanNewsletterForm showBenefits={false} {...props} />, // 혜택 목록 없는 간단 버전
+  MinimalNewsletterForm: (props) => <KoreanNewsletterForm compact={true} showBenefits={false} title="뉴스레터 구독" subtitle="새 글을 받아보세요" {...props} />, // 최소한의 정보만
+
   Expand: ExpandableSection,
   SOLIDChecklistModal,
   ChromeDevToolsMCPSetupModal,
