@@ -176,8 +176,8 @@ export const generateStaticParams = async () => {
   return allBlogs.map((p) => ({ slug: p.slug.split('/') }));
 };
 ```
-- 빌드 시 모든 포스트를 정적 HTML로 사전 생성
-- 매우 빠른 페이지 로딩 (CDN 캐시 가능)
+- 빌드 시 모든 포스트를 정적 HTML로 사전 생성합니다
+- 매우 빠른 페이지 로딩을 제공합니다 (CDN 캐시 가능)
 
 ---
 
@@ -233,8 +233,8 @@ graph TD
 - `media.giphy.com`, `i.giphy.com` - GIF
 
 ### 보안 정책 (CSP)
-Google AdSense, Giscus (댓글), Google Analytics 등의 스크립트 허용.
-추가 서비스 사용 시 `next.config.js`의 CSP 업데이트 필요.
+Google AdSense, Giscus (댓글), Google Analytics 등의 스크립트를 허용합니다.
+추가 서비스 사용 시 `next.config.js`의 CSP를 업데이트해야 합니다.
 
 ### Tailwind CSS 설정
 
@@ -288,19 +288,19 @@ Google AdSense, Giscus (댓글), Google Analytics 등의 스크립트 허용.
 ## API 엔드포인트
 
 ### `POST /api/blog/save`
-블로그 에디터에서 포스트 임시저장 (Firebase)
+블로그 에디터에서 포스트 임시저장을 처리합니다 (Firebase)
 
 ### `POST /api/images/upload`
-이미지 업로드 처리
+이미지 업로드를 처리합니다
 
 ### `POST /api/blog-ideas`
-블로그 아이디어 저장
+블로그 아이디어를 저장합니다
 
 ### `GET/POST /api/blog-ideas/auth`
-인증 (예: 비밀번호 검증)
+인증을 처리합니다 (예: 비밀번호 검증)
 
 ### `POST /api/newsletter`
-뉴스레터 구독
+뉴스레터 구독을 처리합니다
 
 ---
 
@@ -420,33 +420,33 @@ graph TD
 ## 배포 (Vercel)
 
 ### 자동 배포 설정
-- **Main 브랜치:** 자동으로 프로덕션 배포
-- **Preview:** PR마다 Preview URL 생성
+- **Main 브랜치:** 자동으로 프로덕션 배포됩니다
+- **Preview:** PR마다 Preview URL을 생성합니다
 
 ### 배포 체크리스트
-1. `.env` 환경변수 설정 (Vercel 대시보드)
-2. `contentlayer.config.ts` 검증
-3. 빌드 성공 확인: `npm run build`
-4. Git push → Vercel 자동 배포
+1. `.env` 환경변수를 설정합니다 (Vercel 대시보드)
+2. `contentlayer.config.ts`를 검증합니다
+3. 빌드 성공을 확인합니다: `npm run build`
+4. Git push → Vercel 자동 배포됩니다
 
 ---
 
 ## 성능 최적화
 
 ### 이미지 최적화
-- Next.js `<Image />` 컴포넌트 사용 (자동 크기 최적화)
-- WebP/AVIF 형식 지원
-- 반응형 이미지 (deviceSizes, imageSizes)
+- Next.js `<Image />` 컴포넌트를 사용합니다 (자동 크기 최적화)
+- WebP/AVIF 형식을 지원합니다
+- 반응형 이미지를 제공합니다 (deviceSizes, imageSizes)
 
 ### 번들 크기
-- 필요한 의존성만 사용
-- 번들 분석: `ANALYZE=true npm run build`
-- 동적 import 활용
+- 필요한 의존성만을 사용합니다
+- 번들 분석을 지원합니다: `ANALYZE=true npm run build`
+- 동적 import를 활용합니다
 
 ### 캐싱
-- SSG로 정적 페이지 사전 생성
-- CDN 캐시: 이미지, CSS, JS
-- ISR (Incremental Static Regeneration) 미사용 (순수 SSG)
+- SSG로 정적 페이지를 사전 생성합니다
+- CDN 캐시를 활용합니다: 이미지, CSS, JS
+- ISR (Incremental Static Regeneration)을 미사용합니다 (순수 SSG)
 
 ---
 
@@ -466,6 +466,22 @@ graph TD
 ---
 
 ## 블로그 작성 팁
+
+### 문체 및 어투 가이드라인
+**격식 있는 문어체 사용**
+- "~습니다", "~었습니다", "~됩니다" 등 격식 있는 문어체를 사용합니다
+- "~해요", "~어요", "~거든요", "~잖아요" 등 요체는 피합니다
+- 전문적이고 신뢰감 있는 톤을 유지합니다
+
+**나쁜 예시:**
+```
+이 기능을 사용해봤는데 정말 좋더라고요. 성능이 많이 올라가거든요.
+```
+
+**좋은 예시:**
+```
+이 기능을 사용한 결과 성능이 크게 향상되었습니다.
+```
 
 ### 실무 기반 콘텐츠 우선
 - 실제 프로젝트에서 겪은 문제 해결기

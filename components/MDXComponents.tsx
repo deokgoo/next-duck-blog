@@ -49,6 +49,7 @@ export const components: MDXComponents = {
   SimpleNewsletterForm: (props) => <KoreanNewsletterForm showBenefits={false} {...props} />, // 혜택 목록 없는 간단 버전
   MinimalNewsletterForm: (props) => <KoreanNewsletterForm compact={true} showBenefits={false} title="뉴스레터 구독" subtitle="새 글을 받아보세요" {...props} />, // 최소한의 정보만
 
+  ExpandableSection,
   Expand: ExpandableSection,
   SOLIDChecklistModal,
   ChromeDevToolsMCPSetupModal,
