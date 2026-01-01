@@ -12,6 +12,7 @@ import ScrollTopAndComment from '@/components/ScrollTopAndComment';
 import Head from 'next/head';
 import AdComponentInArticle from '@/components/AdComponentInArticle';
 import AdComponentDisplay from '@/components/AdComponentDisplay';
+import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`;
 const discussUrl = (path) =>
@@ -120,6 +121,13 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                   id="comment"
                 >
                   <Comments slug={slug} />
+                </div>
+              )}
+              {siteMetadata.newsletter?.provider && (
+                <div className="flex items-center justify-center pt-6 pb-6">
+                  <KoreanNewsletterForm
+                    showBenefits={true}
+                  />
                 </div>
               )}
             </div>
