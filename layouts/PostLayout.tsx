@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
-import { CoreContent } from 'pliny/utils/contentlayer';
-import type { Blog, Authors } from 'contentlayer/generated';
+import { CoreContent, Post as Blog, Authors } from '@/lib/types';
 import Comments from '@/components/Comments';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
@@ -34,8 +33,9 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { filePath, path, slug, date, title, tags } = content;
-  const basePath = path.split('/')[0];
+  const { slug, date, title, tags } = content;
+  const path = `blog/${slug}`;
+  const basePath = 'blog';
 
   return (
     <SectionContainer>
@@ -111,8 +111,6 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                 <Link href={discussUrl(path)} rel="nofollow">
                   Discuss on Twitter
                 </Link>
-                {` • `}
-                <Link href={editUrl(filePath)}>View on GitHub</Link>
               </div>
               <AdComponentDisplay />
               {siteMetadata.comments && (

@@ -4,22 +4,22 @@
 import { usePathname } from 'next/navigation';
 import { slug } from 'github-slugger';
 import { formatDate } from 'pliny/utils/formatDate';
-import { CoreContent } from 'pliny/utils/contentlayer';
-import type { Blog } from 'contentlayer/generated';
+import { CoreContent } from '@/lib/types';
+import type { Post as Blog } from '@/lib/types';
 import Link from '@/components/Link';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
-import tagData from 'app/tag-data.json';
-
 interface PaginationProps {
   totalPages: number;
   currentPage: number;
 }
+
 interface ListLayoutProps {
   posts: CoreContent<Blog>[];
   title: string;
   initialDisplayPosts?: CoreContent<Blog>[];
   pagination?: PaginationProps;
+  tags?: Record<string, number>;
 }
 
 function Pagination({ totalPages, currentPage }: PaginationProps) {
@@ -67,9 +67,10 @@ export default function ListLayoutWithTags({
   title,
   initialDisplayPosts = [],
   pagination,
+  tags = {},
 }: ListLayoutProps) {
   const pathname = usePathname();
-  const tagCounts = tagData as Record<string, number>;
+  const tagCounts = tags;
   const tagKeys = Object.keys(tagCounts);
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a]);
 
@@ -122,9 +123,10 @@ export default function ListLayoutWithTags({
           <div>
             <ul>
               {displayPosts.map((post) => {
-                const { path, date, title, summary, tags } = post;
+                const { slug, date, title, summary, tags } = post;
+                const path = `blog/${slug}`;
                 return (
-                  <li key={path} className="py-5">
+                  <li key={slug} className="py-5">
                     <article className="flex flex-col space-y-2 xl:space-y-0">
                       <dl>
                         <dt className="sr-only">Published on</dt>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { storage } from '@/lib/firebaseAdmin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,104 +44,48 @@ export async function POST(request: NextRequest) {
       .substring(0, 50); // 최대 50자로 제한
     const fileName = `${timestamp}-${cleanName}.${extension}`;
 
-    // 기존 패턴에 맞는 폴더 구조 생성
-    let targetFolder = folderName || 'general';
+    // 기본 버킷 참조
+    const bucket = storage.bucket();
+    
+    // 폴더 경로 설정 (Storage내 경로)
+    // 기존 로직 유지: 한글 폴더명 -> 영어 변환 로직은 복잡도를 위해 생략하거나 필요시 추가 가능
+    // 여기서는 folderName을 그대로 사용 (Firebase Storage는 폴더 개념이 없지만 경로로 시뮬레이션)
+    // 보안을 위해 folderName을 정제
+    const safeFolderName = (folderName || 'general').replace(/[^a-zA-Z0-9-_]/g, '-');
+    const filePath = `images/${safeFolderName}/${fileName}`;
+    const fileRef = bucket.file(filePath);
 
-    // 한글 슬러그를 영어로 변환
-    if (folderName) {
-      targetFolder = folderName
-        .toLowerCase()
-        .replace(/[가-힣]/g, (match) => {
-          // 주요 한글 단어만 영어로 변환
-          const koreanToEnglish: Record<string, string> = {
-            리뷰: 'review',
-            블로그: 'blog',
-            개발: 'development',
-            프로그래밍: 'programming',
-            웹: 'web',
-            리액트: 'react',
-            자바스크립트: 'javascript',
-            타입스크립트: 'typescript',
-            넥스트: 'nextjs',
-            여행: 'travel',
-            회고: 'retrospective',
-            알고리즘: 'algorithm',
-            데이터베이스: 'database',
-            서버: 'server',
-            클라이언트: 'client',
-            프론트엔드: 'frontend',
-            백엔드: 'backend',
-            디자인: 'design',
-            성능: 'performance',
-            최적화: 'optimization',
-            보안: 'security',
-            테스트: 'test',
-            배포: 'deployment',
-            도구: 'tools',
-            가이드: 'guide',
-            튜토리얼: 'tutorial',
-            팁: 'tips',
-            문제: 'problem',
-            해결: 'solution',
-            오류: 'error',
-            버그: 'bug',
-            수정: 'fix',
-            업데이트: 'update',
-            새로운: 'new',
-            비교: 'comparison',
-            분석: 'analysis',
-            연구: 'research',
-            실험: 'experiment',
-            예제: 'example',
-            코드: 'code',
-            라이브러리: 'library',
-            프레임워크: 'framework',
-            패키지: 'package',
-            모듈: 'module',
-            컴포넌트: 'component',
-            이미지: 'image',
-            파일: 'file',
-            문서: 'document',
-            포스트: 'post',
-            글: 'article',
-            제목: 'title',
-            설명: 'description',
-            요약: 'summary',
-            사용자: 'user',
-            개발자: 'developer',
-            디자이너: 'designer',
-          };
-          return koreanToEnglish[match] || match;
-        })
-        .replace(/[^a-zA-Z0-9가-힣]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
-    }
-
-    const imagePath = path.join(process.cwd(), 'public', 'static', 'images', targetFolder);
-    const filePath = path.join(imagePath, fileName);
-
-    // 폴더가 없으면 생성
-    try {
-      await mkdir(imagePath, { recursive: true });
-    } catch (error) {
-      // 폴더가 이미 존재하는 경우 무시
-    }
-
-    // 파일을 버퍼로 변환하여 저장
+    // 파일을 버퍼로 변환
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    await writeFile(filePath, buffer);
+    // Firebase Storage에 업로드
+    await fileRef.save(buffer, {
+      metadata: {
+        contentType: file.type,
+      },
+      public: true, // 공개적으로 접근 가능하게 설정
+    });
 
-    // 웹에서 접근 가능한 URL 생성
-    const imageUrl = `/static/images/${targetFolder}/${fileName}`;
+    // 공개 URL 생성
+    // 방법 1: public: true로 설정하고 publicUrl() 사용 (GCS 리전 문제로 안될 수 있음)
+    // 방법 2: Firebase Storage URL 포맷 직접 구성 (https://firebasestorage.googleapis.com/v0/b/[bucket]/o/[path]?alt=media)
+    // 방법 3: Google Storage API URL (https://storage.googleapis.com/[bucket]/[path]) -> public: true 필요
+
+    // 여기서는 가장 호환성이 좋은 방법 3 사용 (next/image 도메인 설정 필요할 수 있음)
+    // 또는 방법 2가 Firebase 클라이언트와 호환성이 좋음
+    const bucketName = bucket.name;
+    const encodedPath = encodeURIComponent(filePath);
+    // Firebase Client SDK 스타일 URL (토큰 없이 접근 가능하려면 규칙 설정 필요, public: true면 Google Storage URL도 가능)
+    
+    // public() 호출로 ACL을 공개로 설정했으므로 publicUrl을 사용하거나 구성
+    const publicUrl = `https://storage.googleapis.com/${bucketName}/${filePath}`;
 
     return NextResponse.json({
       success: true,
-      url: imageUrl,
+      url: publicUrl,
       fileName: fileName,
-      folderName: targetFolder,
+      folderName: safeFolderName,
       size: file.size,
       type: file.type,
     });

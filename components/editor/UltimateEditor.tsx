@@ -7,25 +7,21 @@ import {
   X,
   Check,
   Sparkles,
-  BookOpen,
-  Map,
-  Star,
-  PenTool,
   Keyboard,
-  Palette,
+  FileText,
+  LayoutTemplate,
+  Eye,
 } from 'lucide-react';
 import MetadataPanel from './MetadataPanel';
 import MarkdownEditor from './MarkdownEditor';
+import TemplateSelector from './TemplateSelector';
+import RealPreviewModal from './RealPreviewModal';
+import SaveTemplateModal from './SaveTemplateModal';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-interface Template {
-  id: string;
-  name: string;
-  description: string;
-  content: string;
-  metadata: Partial<MDXMetadata>;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-}
+import { Post } from '@/lib/types';
+import { Template } from '@/lib/db/templates';
 
 interface MDXMetadata {
   title: string;
@@ -34,165 +30,33 @@ interface MDXMetadata {
   summary: string;
   draft: boolean;
   slug: string;
+  layout?: string;
+  images?: string[];
 }
 
-const templates: Template[] = [
-  {
-    id: 'technical-blog',
-    name: '기술 블로그',
-    description: '기술 관련 포스트를 위한 템플릿',
-    icon: BookOpen,
-    color: 'blue',
-    content: `# 기술 제목
-
-## 개요
-이 포스트에서는 [기술명]에 대해 설명합니다.
-
-## 문제 상황
-어떤 문제를 해결하고자 했는지 설명해주세요.
-
-## 해결 방법
-\`\`\`javascript
-// 코드 예시
-const solution = "여기에 코드를 작성하세요";
-\`\`\`
-
-## 결과
-구현한 결과와 성과를 설명해주세요.
-
-## 결론
-배운 점이나 추후 개선사항을 정리해주세요.`,
-    metadata: {
-      tags: ['기술', '개발', '프로그래밍'],
-      title: '새로운 기술 포스트',
-      summary: '기술 관련 내용을 정리한 포스트입니다.',
-      draft: true,
-    },
-  },
-  {
-    id: 'travel-blog',
-    name: '여행 블로그',
-    description: '여행 경험을 공유하는 포스트',
-    icon: Map,
-    color: 'green',
-    content: `# 여행지 제목
-
-## 여행 정보
-- **여행 기간**: 
-- **여행 인원**: 
-- **예산**: 
-
-## 여행 일정
-
-### 1일차
-아침부터 저녁까지의 일정을 작성해주세요.
-
-![여행 사진](이미지 URL)
-
-### 2일차
-두 번째 날의 경험을 공유해주세요.
-
-## 추천 포인트
-- 꼭 가봐야 할 곳
-- 맛집 추천
-- 주의사항
-
-## 마무리
-여행 후기와 추천 여부를 작성해주세요.`,
-    metadata: {
-      tags: ['여행', '경험', '추천'],
-      title: '새로운 여행 포스트',
-      summary: '여행 경험을 공유하는 포스트입니다.',
-      draft: true,
-    },
-  },
-  {
-    id: 'review-blog',
-    name: '리뷰 블로그',
-    description: '제품이나 서비스 리뷰 포스트',
-    icon: Star,
-    color: 'yellow',
-    content: `# 제품/서비스 리뷰
-
-## 기본 정보
-- **제품명**: 
-- **가격**: 
-- **구매처**: 
-- **평점**: ⭐⭐⭐⭐⭐
-
-## 첫인상
-처음 사용했을 때의 느낌을 적어주세요.
-
-## 장점
-- 좋았던 점 1
-- 좋았던 점 2
-- 좋았던 점 3
-
-## 단점
-- 아쉬웠던 점 1
-- 아쉬웠던 점 2
-
-## 사용 경험
-실제 사용해본 후의 상세한 경험을 공유해주세요.
-
-## 총평
-전반적인 평가와 추천 여부를 작성해주세요.`,
-    metadata: {
-      tags: ['리뷰', '제품', '추천'],
-      title: '새로운 리뷰 포스트',
-      summary: '제품/서비스 리뷰 포스트입니다.',
-      draft: true,
-    },
-  },
-  {
-    id: 'daily-blog',
-    name: '일상 블로그',
-    description: '일상과 생각을 공유하는 포스트',
-    icon: PenTool,
-    color: 'purple',
-    content: `# 오늘의 이야기
-
-## 오늘 하루
-
-오늘 어떤 일이 있었는지 자유롭게 적어보세요.
-
-## 느낀 점
-
-하루를 마무리하며 든 생각들을 정리해보세요.
-
-## 내일의 계획
-
-내일은 무엇을 해볼까요?
-
----
-
-*작성일: ${new Date().toLocaleDateString('ko-KR')}*`,
-    metadata: {
-      tags: ['일상', '회고', '생각'],
-      title: '오늘의 이야기',
-      summary: '일상을 기록하고 생각을 정리한 포스트입니다.',
-      draft: true,
-    },
-  },
-];
 
 interface UltimateEditorProps {
+  initialData?: Post | null;
   className?: string;
 }
 
-export default function UltimateEditor({ className = '' }: UltimateEditorProps) {
+export default function UltimateEditor({ initialData, className = '' }: UltimateEditorProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   // 메타데이터 상태
   const [metadata, setMetadata] = useState<MDXMetadata>({
-    title: '',
-    date: new Date().toISOString().split('T')[0],
-    tags: [],
-    summary: '',
-    draft: false,
-    slug: '',
+    title: initialData?.title || '',
+    date: initialData?.date || new Date().toISOString().split('T')[0],
+    tags: initialData?.tags || [],
+    summary: initialData?.summary || '',
+    draft: initialData?.draft ?? false,
+    slug: initialData?.slug || '',
+    layout: initialData?.layout || 'PostLayout',
+    images: initialData?.images || [],
   });
 
   // 마크다운 콘텐츠 상태
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(initialData?.content || '');
   const [isLoading, setIsLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -201,11 +65,29 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
   const [hasChanges, setHasChanges] = useState(false);
 
   // UI 상태
-  const [showTemplates, setShowTemplates] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  
+  // 확인 모달 상태
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    action: () => void;
+    isDangerous?: boolean;
+    confirmText?: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    action: () => {},
+    isDangerous: false,
+  });
 
   // Refs
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // 통계 계산
   const stats = {
@@ -218,57 +100,121 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
     ),
   };
 
-  // 자동 저장 (로컬 스토리지)
-  const handleAutoSave = useCallback(() => {
+  // 서버 자동 저장 상태
+  const [serverAutoSaveStatus, setServerAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const serverAutoSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  // 스토리지 키 생성 함수
+  const getStorageKey = (type: 'metadata' | 'content', slug?: string) => {
+    const keySlug = slug || 'new';
+    return `draft_${keySlug}_${type}`;
+  };
+
+  // 로컬 자동 저장 (기존 로직)
+  const handleLocalAutoSave = useCallback(() => {
     if (hasChanges) {
       setAutoSaveStatus('saving');
 
       try {
-        localStorage.setItem('ultimate-editor-metadata', JSON.stringify(metadata));
-        localStorage.setItem('ultimate-editor-content', content);
+        const currentSlug = metadata.slug;
+        localStorage.setItem(getStorageKey('metadata', currentSlug), JSON.stringify(metadata));
+        localStorage.setItem(getStorageKey('content', currentSlug), content);
 
         setTimeout(() => {
           setAutoSaveStatus('saved');
-          // setLastAutoSaved(new Date());
-
-          setTimeout(() => {
-            setAutoSaveStatus('idle');
-          }, 2000);
+          setTimeout(() => setAutoSaveStatus('idle'), 2000);
         }, 500);
       } catch (error) {
-        console.error('자동 저장 실패:', error);
+        console.error('Local auto-save failed:', error);
         setAutoSaveStatus('idle');
       }
     }
   }, [metadata, content, hasChanges]);
 
-  // 자동 저장 타이머 설정
+  // 서버 자동 저장 (신규 로직)
+  const handleServerAutoSave = useCallback(async () => {
+    // 조건: 변경사항이 있고, 제목이 있어야 함
+    if (!hasChanges || !metadata.title.trim()) return;
+    
+    // 조건: 'published' 상태인 기존 글은 자동 저장하지 않음 (실수 방지)
+    // 단, 새 글(slug 없음)이거나 draft 상태면 저장
+    const isNewPost = !initialData?.slug; // 초기 데이터가 없으면 새 글로 간주 (단, 수정 중인 새 글일 수도 있음)
+    // 더 정확히: slug가 없거나, metadata.draft가 true일 때만
+    
+    // *중요*: 이미 발행된 글(initialData.draft === false)은 절대 자동 저장하면 안됨.
+    // 하지만 사용자가 '발행됨' 상태에서 '초안'으로 바꿨다면? -> 저장 가능
+    // 반대로 '초안'에서 '발행됨'으로 바꿨다면? -> 저장 가능 (의도적 변경)
+    
+    // 안전장치: 초기 상태가 'published'였다면, 사용자가 명시적으로 저장하기 전까지는 자동 저장 막기?
+    // 기획: "오직 '새 글'이나 '초안(Draft)' 상태인 글에만 DB 자동 저장이 작동"
+    
+    if (!metadata.draft && initialData?.slug) {
+        // 기존 글이고, 현재 상태가 Published라면 자동 저장 스킵
+        return;
+    }
+
+    setServerAutoSaveStatus('saving');
+    
+    try {
+        // API 호출 (기존 save API 사용)
+        const response = await fetch('/api/blog/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ metadata, content }),
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            // 새 글이었다면 슬러그 업데이트 (중요: URL 변경은 하지 않음, 사용자 경험 위해)
+            if (!metadata.slug && result.slug) {
+                setMetadata(prev => ({ ...prev, slug: result.slug }));
+                // URL을 조용히 업데이트? -> 아니오, 꼬일 수 있음. 그냥 내부 state만 업데이트.
+            }
+            setServerAutoSaveStatus('saved');
+            setTimeout(() => setServerAutoSaveStatus('idle'), 3000);
+            setLastSaved(new Date());
+        } else {
+            setServerAutoSaveStatus('error');
+        }
+    } catch (error) {
+        console.error('Server auto-save failed:', error);
+        setServerAutoSaveStatus('error');
+    }
+  }, [metadata, content, hasChanges, initialData]);
+
+  // 자동 저장 타이머 설정 (로컬 + 서버)
   useEffect(() => {
     if (hasChanges) {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-
-      autoSaveTimeoutRef.current = setTimeout(() => {
-        handleAutoSave();
-      }, 2000);
+        // 1. 로컬 저장 (짧은 주기: 2초)
+        if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current);
+        autoSaveTimeoutRef.current = setTimeout(handleLocalAutoSave, 2000);
+        
+        // 2. 서버 저장 (긴 주기: 30초)
+        if (serverAutoSaveTimeoutRef.current) clearTimeout(serverAutoSaveTimeoutRef.current);
+        serverAutoSaveTimeoutRef.current = setTimeout(handleServerAutoSave, 30000);
     }
 
     return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
+      if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current);
+      if (serverAutoSaveTimeoutRef.current) clearTimeout(serverAutoSaveTimeoutRef.current);
     };
-  }, [hasChanges, handleAutoSave]);
+  }, [hasChanges, handleLocalAutoSave, handleServerAutoSave]);
 
-  // 로컬 스토리지에서 복원
+  // 로컬 스토리지에서 복원 (검수: initialData가 없을 때만 실행)
   useEffect(() => {
+    if (initialData) return;
+
+    // URL에서 슬러그 확인
+    const slugFromUrl = searchParams.get('slug') || undefined;
+
     try {
-      const savedMetadata = localStorage.getItem('ultimate-editor-metadata');
-      const savedContent = localStorage.getItem('ultimate-editor-content');
+      const savedMetadata = localStorage.getItem(getStorageKey('metadata', slugFromUrl));
+      const savedContent = localStorage.getItem(getStorageKey('content', slugFromUrl));
 
       if (savedMetadata) {
-        setMetadata(JSON.parse(savedMetadata));
+        const parsedMetadata = JSON.parse(savedMetadata);
+        // 슬러그가 URL과 일치하는지 또는 둘 다 없는지 확인 (더 정교한 체크 가능)
+        setMetadata(parsedMetadata);
       }
 
       if (savedContent) {
@@ -277,7 +223,81 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
     } catch (error) {
       console.error('데이터 복원 실패:', error);
     }
-  }, []);
+  }, [initialData]);
+
+  // Slug detection from URL for client-side fetching
+  useEffect(() => {
+    const slugFromUrl = searchParams.get('slug');
+    
+    // URL에 슬러그가 있으면 해당 포스트 데이터 로드
+    if (slugFromUrl && !initialData) {
+      // 이미 로컬 스토리지에서 로드된 데이터가 있고, 그 데이터의 슬러그가 url의 슬러그와 같다면 스킵할 수도 있음
+      // 하지만 서버 데이터가 우선순위가 높을 수 있으므로 (또는 충돌 처리)
+      // 여기서는 서버 데이터를 가져오되, 로컬에 저장된 draft가 더 최신이면 물어보는 로직이 있으면 좋음.
+      // 현재는 간단하게 서버 데이터가 있으면 덮어씌움 (단, hasChanges가 false일 때만?)
+      
+      const fetchPostData = async () => {
+        setIsLoading(true);
+        try {
+          const res = await fetch(`/api/blog/get?slug=${slugFromUrl}`);
+          if (res.ok) {
+            const data = await res.json();
+            const post = data.post;
+            
+            // TODO: 로컬 draft와 비교 로직 추가 가능
+            
+            setMetadata({
+              title: post.title,
+              date: post.date,
+              tags: post.tags,
+              summary: post.summary,
+              draft: post.draft,
+              slug: post.slug,
+              layout: post.layout || 'PostLayout',
+              images: post.images || [],
+            });
+            setContent(post.content);
+            
+            // 데이터 로드 후에는 변경 사항 없음으로 초기화
+            setHasChanges(false); 
+          }
+        } catch (err) {
+          console.error('Failed to fetch initial post data:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      // 변경사항이 없거나, 막 진입했을 때만 페칭
+      if (!hasChanges) {
+         fetchPostData();
+      }
+    } else if (!slugFromUrl && !initialData) {
+        // 새 글 작성 모드인데, 기존에 'new' draft가 있으면 복원 (위의 useEffect에서 처리됨)
+        // 하지만 만약 URL이 없는 상태로 왔는데 상태가 비어있지 않다면? (이전 state가 남아있는 경우)
+        // 리셋 필요
+        
+        // 이 부분은 별도 useEffect로 분리하거나, 위 복원 로직과 통합 필요.
+        // 여기서는 URL 변경 시 상태 리셋을 보장하기 위해 추가.
+        
+        // *중요*: 컴포넌트가 마운트될 때 draft_new를 복원하는 로직은 위의 useEffect에서 수행됨.
+        // 여기서는 페이지 이동(CSR)으로 인해 slug가 사라졌을 때만 리셋을 고려.
+    }
+  }, [initialData, searchParams]); // 의존성 배열에서 hasChanges 제거 (무한 루프 방지)
+
+  // URL 변경 감지하여 새 글 모드일 때 리셋 (Client Side Navigation 대응)
+  useEffect(() => {
+      const slugFromUrl = searchParams.get('slug');
+      
+      if (!slugFromUrl && !initialData) {
+          // 새 글 모드
+          // 만약 현재 state에 슬러그가 있다면 (이전 글을 보고 있었다면) 리셋
+          if (metadata.slug && metadata.slug !== '') {
+             handleNewDocument(false); // don't confirm, just reset logic usage
+          }
+      }
+  }, [searchParams, initialData]);
+
 
   const handleMetadataChange = (newMetadata: MDXMetadata) => {
     setMetadata(newMetadata);
@@ -289,16 +309,29 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
     setHasChanges(true);
   };
 
-  const applyTemplate = (template: Template) => {
-    setContent(template.content);
-    setMetadata((prev) => ({
-      ...prev,
-      ...template.metadata,
-      date: prev.date, // 날짜는 현재 날짜 유지
-    }));
+  const handleTemplateSelect = (templateContent: string) => {
+    if (hasChanges) {
+        setConfirmModal({
+            isOpen: true,
+            title: '탬플릿 적용 확인',
+            message: '현재 작성 중인 내용이 탬플릿으로 대체됩니다. 계속하시겠습니까?',
+            action: () => {
+                setContent(templateContent);
+                setHasChanges(true);
+                setShowTemplateSelector(false);
+            },
+            isDangerous: true,
+            confirmText: '덮어쓰기',
+        });
+        return;
+    }
+    
+    // 변경사항이 없으면 바로 적용
+    setContent(templateContent);
     setHasChanges(true);
-    setShowTemplates(false);
+    setShowTemplateSelector(false);
   };
+
 
   const handleSave = async () => {
     if (!metadata.title.trim()) {
@@ -331,11 +364,31 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
       setSaveStatus('saved');
       setLastSaved(new Date());
       setHasChanges(false);
+      
+      // 저장 성공 시 해당 draft 삭제 (더 이상 임시 저장이 아님)
+      const currentSlug = metadata.slug || ((result.slug) as string); // 저장 후 생성된 슬러그
+      localStorage.removeItem(getStorageKey('metadata', currentSlug));
+      localStorage.removeItem(getStorageKey('content', currentSlug));
+      
+      // 만약 새 글이었다면 'new' 키도 삭제
+      if (!metadata.slug) {
+          localStorage.removeItem(getStorageKey('metadata'));
+          localStorage.removeItem(getStorageKey('content'));
+          
+          // 메타데이터에 슬러그 업데이트 (이제 기존 글임)
+          setMetadata(prev => ({...prev, slug: currentSlug}));
+          
+          // URL 업데이트 (선택 사항: history.replaceState 등)
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.set('slug', currentSlug);
+          window.history.replaceState({}, '', newUrl.toString());
+      }
 
-      // 저장 성공 메시지를 3초 후에 숨김
+      // 저장 성공 메시지를 1.5초 보여준 뒤 리스트로 이동
       setTimeout(() => {
         setSaveStatus('idle');
-      }, 3000);
+        router.push('/admin');
+      }, 1500);
     } catch (error) {
       console.error('저장 실패:', error);
       setSaveStatus('error');
@@ -349,31 +402,67 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
     }
   };
 
-  const handleNewDocument = () => {
-    if (hasChanges) {
-      const confirmDiscard = window.confirm(
-        '저장하지 않은 변경사항이 있습니다. 새 문서를 만들시겠습니까?'
-      );
-      if (!confirmDiscard) return;
+  const handleNewDocument = (confirm = true) => {
+    const startNewDocument = () => {
+        setMetadata({
+            title: '',
+            date: new Date().toISOString().split('T')[0],
+            tags: [],
+            summary: '',
+            draft: false,
+            slug: '',
+            layout: 'PostLayout',
+            images: [],
+        });
+        setContent('');
+        setHasChanges(false);
+        setSaveStatus('idle');
+        setLastSaved(null);
+        
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('slug');
+        window.history.pushState({}, '', newUrl.toString());
+
+        localStorage.removeItem(getStorageKey('metadata'));
+        localStorage.removeItem(getStorageKey('content'));
+    };
+
+    if (confirm && hasChanges) {
+        setConfirmModal({
+            isOpen: true,
+            title: '새 문서 작성',
+            message: '저장하지 않은 변경사항이 있습니다. 새 문서를 만드시겠습니까?',
+            action: startNewDocument,
+            isDangerous: true,
+            confirmText: '새 문서 만들기',
+        });
+        return;
     }
 
-    setMetadata({
-      title: '',
-      date: new Date().toISOString().split('T')[0],
-      tags: [],
-      summary: '',
-      draft: false,
-      slug: '',
-    });
-    setContent('');
-    setHasChanges(false);
-    setSaveStatus('idle');
-    setLastSaved(null);
-    // setLastAutoSaved(null);
+    startNewDocument();
+  };
 
-    // 로컬 스토리지 정리
-    localStorage.removeItem('ultimate-editor-metadata');
-    localStorage.removeItem('ultimate-editor-content');
+  const handleTemplateCreate = async (templateData: Omit<Template, 'id' | 'createdAt'>) => {
+    try {
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(templateData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save template');
+      }
+
+      alert('탬플릿이 저장되었습니다.');
+      setShowSaveTemplateModal(false);
+    } catch (error) {
+      console.error('Failed to create template:', error);
+      alert('탬플릿 저장 중 오류가 발생했습니다.');
+      throw error; // Re-throw to let modal handle loading state if needed
+    }
   };
 
   // 키보드 단축키
@@ -388,10 +477,6 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
           case 'n':
             e.preventDefault();
             handleNewDocument();
-            break;
-          case 't':
-            e.preventDefault();
-            setShowTemplates(true);
             break;
           case '/':
             if (e.shiftKey) {
@@ -410,9 +495,9 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 ${className}`}
+      className={`min-h-screen bg-white dark:bg-black ${className}`}
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full max-w-[1920px]">
         {/* 깔끔한 헤더 */}
         <div className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-lg dark:border-slate-700 dark:bg-slate-900/80">
           <div className="px-6 py-4">
@@ -420,14 +505,14 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
               {/* 로고와 제목 */}
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
-                    <Sparkles className="h-5 w-5 text-white" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black dark:bg-white text-white dark:text-black">
+                    <FileText className="h-5 w-5" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                      Ultimate MDX Editor
+                    <h1 className="text-lg font-bold text-slate-900 dark:text-white">
+                      포스트 작성
                     </h1>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {stats.words}개 단어 • {stats.readingTime}분 읽기
                     </p>
                   </div>
@@ -436,34 +521,72 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
 
               {/* 액션 버튼들 */}
               <div className="flex items-center space-x-2">
-                {/* 자동 저장 상태 */}
+                {/* 로컬 자동 저장 상태 */}
                 {autoSaveStatus === 'saving' && (
                   <div className="flex items-center space-x-2 rounded-lg bg-blue-50 px-3 py-1 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
                     <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-blue-600 dark:border-blue-400"></div>
-                    <span className="text-xs font-medium">자동 저장 중</span>
+                    <span className="text-xs font-medium">Local Saving</span>
                   </div>
                 )}
 
                 {autoSaveStatus === 'saved' && (
                   <div className="flex items-center space-x-2 rounded-lg bg-green-50 px-3 py-1 text-green-600 dark:bg-green-900/20 dark:text-green-400">
                     <Check className="h-3 w-3" />
-                    <span className="text-xs font-medium">자동 저장됨</span>
+                    <span className="text-xs font-medium">Local Saved</span>
                   </div>
                 )}
 
-                {/* 템플릿 */}
+                {/* 서버 자동 저장 상태 */}
+                {serverAutoSaveStatus === 'saving' && (
+                  <div className="flex items-center space-x-2 rounded-lg bg-purple-50 px-3 py-1 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
+                    <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-purple-600 dark:border-purple-400"></div>
+                    <span className="text-xs font-medium">Cloud Saving</span>
+                  </div>
+                )}
+
+                {serverAutoSaveStatus === 'saved' && (
+                  <div className="flex items-center space-x-2 rounded-lg bg-purple-50 px-3 py-1 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400">
+                    <Check className="h-3 w-3" />
+                    <span className="text-xs font-medium">Cloud Saved</span>
+                  </div>
+                )}
+
+                {/* 탬플릿 버튼 */}
+                <div className="flex items-center space-x-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
+                    <button
+                        onClick={() => setShowTemplateSelector(true)}
+                        className="flex items-center space-x-2 rounded px-2 py-1.5 text-sm font-medium text-slate-700 hover:bg-white hover:text-black hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                        title="탬플릿 불러오기"
+                    >
+                        <LayoutTemplate className="h-4 w-4" />
+                        <span>불러오기</span>
+                    </button>
+                    <div className="h-4 w-px bg-slate-300 dark:bg-slate-600"></div>
+                    <button
+                        onClick={() => setShowSaveTemplateModal(true)}
+                        disabled={!content.trim()}
+                        className="flex items-center space-x-2 rounded px-2 py-1.5 text-sm font-medium text-slate-700 hover:bg-white hover:text-black hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                        title="현재 내용을 탬플릿으로 저장"
+                    >
+                        <Save className="h-4 w-4" />
+                        <span>탬플릿 저장</span>
+                    </button>
+                </div>
+
+
+                {/* 미리보기 버튼 (New) */}
                 <button
-                  onClick={() => setShowTemplates(true)}
-                  className="flex items-center space-x-2 rounded-lg bg-purple-50 px-3 py-2 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:hover:bg-purple-900/40"
-                  title="템플릿 선택 (Ctrl+T)"
+                  onClick={() => setShowPreview(true)}
+                  className="flex items-center space-x-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  title="실전 미리보기"
                 >
-                  <Palette className="h-4 w-4" />
-                  <span>템플릿</span>
+                  <Eye className="h-4 w-4" />
+                  <span>미리보기</span>
                 </button>
 
                 {/* 새 문서 */}
                 <button
-                  onClick={handleNewDocument}
+                  onClick={() => handleNewDocument()}
                   className="flex items-center space-x-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                   title="새 문서 (Ctrl+N)"
                 >
@@ -475,7 +598,7 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
                 <button
                   onClick={handleSave}
                   disabled={isLoading || !metadata.title.trim()}
-                  className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="flex items-center space-x-2 rounded-lg bg-black px-4 py-2 font-medium text-white transition-all hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                   title="저장 (Ctrl+S)"
                 >
                   <Save className="h-4 w-4" />
@@ -565,64 +688,6 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
         </div>
       </div>
 
-      {/* 템플릿 모달 */}
-      {showTemplates && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-800">
-            <div className="flex items-center justify-between border-b border-slate-200 p-6 dark:border-slate-700">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">템플릿 선택</h3>
-              <button
-                onClick={() => setShowTemplates(false)}
-                className="rounded-lg p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
-              >
-                <X className="h-5 w-5 text-slate-500" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {templates.map((template) => {
-                  const IconComponent = template.icon;
-                  return (
-                    <div
-                      key={template.id}
-                      className="group cursor-pointer rounded-xl border border-slate-200 p-6 transition-all duration-200 hover:border-blue-300 hover:shadow-lg dark:border-slate-700 dark:hover:border-blue-600"
-                      onClick={() => applyTemplate(template)}
-                    >
-                      <div className="flex items-start space-x-4">
-                        <div
-                          className={`flex h-12 w-12 items-center justify-center rounded-xl bg-${template.color}-100 dark:bg-${template.color}-900/20 transition-transform group-hover:scale-110`}
-                        >
-                          <IconComponent
-                            className={`h-6 w-6 text-${template.color}-600 dark:text-${template.color}-400`}
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="mb-2 font-semibold text-slate-900 dark:text-white">
-                            {template.name}
-                          </h4>
-                          <p className="mb-3 text-sm text-slate-600 dark:text-slate-400">
-                            {template.description}
-                          </p>
-                          <div className="flex flex-wrap gap-1">
-                            {template.metadata.tags?.map((tag) => (
-                              <span
-                                key={tag}
-                                className={`px-2 py-1 bg-${template.color}-50 dark:bg-${template.color}-900/20 text-${template.color}-700 dark:text-${template.color}-300 rounded-md text-xs font-medium`}
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 키보드 단축키 모달 */}
       {showShortcuts && (
@@ -652,12 +717,6 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
                       <span className="text-slate-600 dark:text-slate-400">새 문서</span>
                       <code className="rounded bg-slate-100 px-2 py-1 font-mono text-slate-800 dark:bg-slate-700 dark:text-slate-200">
                         Ctrl+N
-                      </code>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">템플릿 선택</span>
-                      <code className="rounded bg-slate-100 px-2 py-1 font-mono text-slate-800 dark:bg-slate-700 dark:text-slate-200">
-                        Ctrl+T
                       </code>
                     </div>
                     <div className="flex items-center justify-between">
@@ -702,6 +761,44 @@ export default function UltimateEditor({ className = '' }: UltimateEditorProps) 
           </div>
         </div>
       )}
+
+      {/* 탬플릿 선택 모달 */}
+      <TemplateSelector
+        isOpen={showTemplateSelector}
+        onClose={() => setShowTemplateSelector(false)}
+        onSelect={handleTemplateSelect}
+      />
+
+      {/* 탬플릿 저장 모달 */}
+      <SaveTemplateModal
+        isOpen={showSaveTemplateModal}
+        onClose={() => setShowSaveTemplateModal(false)}
+        onSave={handleTemplateCreate}
+        initialContent={content}
+      />
+
+      {/* 실전 미리보기 모달 */}
+      <RealPreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={metadata.title}
+        date={metadata.date}
+        tags={metadata.tags}
+        summary={metadata.summary}
+        content={content}
+        slug={metadata.slug}
+      />
+
+      {/* 확인 모달 */}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.action}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        isDangerous={confirmModal.isDangerous}
+        confirmText={confirmModal.confirmText}
+      />
     </div>
   );
 }

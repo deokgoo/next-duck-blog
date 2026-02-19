@@ -1,20 +1,17 @@
-const { withContentlayer } = require('next-contentlayer2');
-
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
-// You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is pagead2.googlesyndication.com tpc.googlesyndication.com www.google.com www.googletagmanager.com *.google.com ep2.adtrafficquality.google;
-  style-src 'self' 'unsafe-inline';
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://apis.google.com https://www.gstatic.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src * blob: data:;
   media-src *.s3.amazonaws.com;
-  connect-src *;
-  font-src 'self';
-  frame-src giscus.app pagead2.googlesyndication.com googleads.g.doubleclick.net tpc.googlesyndication.com www.google.com www.googletagmanager.com *.google.com;
-`;
+  connect-src * https://*.googleapis.com https://*.google.com https://*.firebaseio.com https://*.firebase.com;
+  font-src 'self' https://fonts.gstatic.com;
+  frame-src giscus.app https://www.google.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://apis.google.com https://*.firebaseapp.com;
+`
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
@@ -45,61 +42,60 @@ const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
   {
     key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains',
+    value: 'max-age=31536000; includeSubDomains; preload',
   },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
   {
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=()',
   },
 ];
 
-/**
- * @type {import('next/dist/next-server/server/config').NextConfig}
- **/
-module.exports = () => {
-  const plugins = [withContentlayer, withBundleAnalyzer];
-  return plugins.reduce((acc, next) => next(acc), {
-    reactStrictMode: true,
-    pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    eslint: {
-      dirs: ['app', 'components', 'layouts', 'scripts'],
-      ignoreDuringBuilds: true,
-    },
-    images: {
-      deviceSizes: [320, 420, 768, 1024, 1040, 1200, 1440], // 더 큰 사이즈 추가
-      imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512, 768, 1040], // 1040 추가
-      formats: ['image/avif', 'image/webp'], // 최신 포맷 지원
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'picsum.photos',
-        },
-        {
-          protocol: 'https',
-          hostname: 'media.giphy.com',
-        },
-        {
-          protocol: 'https',
-          hostname: 'i.giphy.com',
-        },
-      ],
-    },
-    async headers() {
-      return [
-        {
-          source: '/(.*)',
-          headers: securityHeaders,
-        },
-      ];
-    },
-    webpack: (config, options) => {
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ['@svgr/webpack'],
-      });
+module.exports = withBundleAnalyzer({
+  reactStrictMode: true,
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+  outputFileTracingRoot: __dirname,
 
-      return config;
-    },
-  });
-};
+  images: {
+    deviceSizes: [320, 420, 768, 1024, 1040, 1200, 1440], // 더 큰 사이즈 추가
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512, 768, 1040], // 1040 추가
+    formats: ['image/avif', 'image/webp'], // 최신 포맷 지원
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.giphy.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.giphy.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+    ],
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: securityHeaders,
+      },
+    ];
+  },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
+    return config;
+  },
+});

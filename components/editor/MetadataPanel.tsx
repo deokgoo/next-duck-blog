@@ -73,14 +73,14 @@ export default function MetadataPanel({
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
         <div className="flex items-center space-x-2">
-          <Settings className="h-5 w-5 text-blue-600" />
+          <Settings className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white">포스트 메타데이터</h2>
         </div>
         <div className="flex items-center space-x-2">
           {onPreview && (
             <button
               onClick={onPreview}
-              className="rounded-md bg-blue-100 px-3 py-1 text-sm text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
+              className="rounded-md bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             >
               <Eye className="mr-1 h-4 w-4" />
               미리보기
@@ -89,7 +89,7 @@ export default function MetadataPanel({
           {onSave && (
             <button
               onClick={onSave}
-              className="rounded-md bg-green-100 px-3 py-1 text-sm text-green-700 transition-colors hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800"
+              className="rounded-md bg-black px-3 py-1 text-sm text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
               <Save className="mr-1 h-4 w-4" />
               저장
@@ -140,7 +140,7 @@ export default function MetadataPanel({
                   type="text"
                   value={metadata.slug || ''}
                   onChange={(e) => updateMetadata('slug', e.target.value)}
-                  className="flex-1 rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="flex-1 rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   placeholder="URL 슬러그 (선택사항)"
                 />
                 <button
@@ -205,7 +205,7 @@ export default function MetadataPanel({
               id="summary"
               value={metadata.summary}
               onChange={(e) => updateMetadata('summary', e.target.value)}
-              className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               rows={3}
               placeholder="포스트 요약을 입력하세요 (검색엔진과 소셜미디어에서 표시됩니다)"
             />
@@ -226,7 +226,7 @@ export default function MetadataPanel({
               {metadata.tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                  className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-800 dark:bg-gray-700 dark:text-gray-200"
                 >
                   {tag}
                   <button
@@ -245,12 +245,12 @@ export default function MetadataPanel({
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addTag()}
-                className="flex-1 rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="flex-1 rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 placeholder="태그를 입력하고 Enter를 누르세요"
               />
               <button
                 onClick={addTag}
-                className="rounded-md bg-blue-600 px-3 py-2 text-white transition-colors hover:bg-blue-700"
+                className="rounded-md bg-gray-900 px-3 py-2 text-white transition-colors hover:bg-black dark:bg-gray-100 dark:text-black dark:hover:bg-white"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -268,7 +268,7 @@ export default function MetadataPanel({
                   type="checkbox"
                   checked={metadata.draft}
                   onChange={(e) => updateMetadata('draft', e.target.checked)}
-                  className="rounded text-blue-600 focus:ring-blue-500"
+                  className="rounded text-gray-600 focus:ring-gray-500"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">초안으로 저장</span>
               </label>
@@ -299,7 +299,7 @@ export default function MetadataPanel({
                 {metadata.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="rounded bg-blue-200 px-1 py-0.5 text-xs text-blue-800 dark:bg-blue-800 dark:text-blue-200"
+                    className="rounded bg-gray-200 px-1 py-0.5 text-xs text-gray-800 dark:bg-gray-700 dark:text-gray-200"
                   >
                     #{tag}
                   </span>

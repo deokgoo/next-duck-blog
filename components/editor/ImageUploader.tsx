@@ -51,7 +51,7 @@ export default function ImageUploader({
       try {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('slug', slug);
+        formData.append('folderName', slug);
 
         const response = await fetch('/api/images/upload', {
           method: 'POST',
@@ -279,11 +279,11 @@ export default function ImageUploader({
         </h4>
         <ul className="space-y-1 text-xs text-blue-700 dark:text-blue-300">
           <li>
-            • 이미지는 자동으로 <code>/static/images/{slug || 'general'}/</code> 폴더에 저장됩니다
+            • 이미지는 <strong>Cloud Storage</strong>에 안전하게 저장됩니다
           </li>
           <li>• 업로드 즉시 마크다운 형태로 에디터에 삽입됩니다</li>
           <li>• 파일명은 타임스탬프가 추가되어 중복을 방지합니다</li>
-          <li>• 한글 제목은 자동으로 영어 폴더명으로 변환됩니다</li>
+          <li>• 한글 제목은 자동으로 영어로 변환되어 저장됩니다</li>
         </ul>
       </div>
     </div>

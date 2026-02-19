@@ -183,7 +183,7 @@ export default function AdvancedWysiwygEditor({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // 단어 수와 읽기 시간 계산
   const calculateStats = useCallback((text: string) => {

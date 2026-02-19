@@ -2,10 +2,10 @@ import 'css/prism.css';
 import 'katex/dist/katex.css';
 
 import { components } from '@/components/MDXComponents';
-import { MDXLayoutRenderer } from 'pliny/mdx-components';
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer';
-import { allBlogs, allAuthors } from 'contentlayer/generated';
-import type { Authors, Blog } from 'contentlayer/generated';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import { getAllPosts, getPostBySlug } from '@/lib/firestore';
+import { sortPosts, coreContent, allAuthors } from '@/lib/types';
+import type { Authors, Post as Blog } from '@/lib/types';
 import PostSimple from '@/layouts/PostSimple';
 import PostLayout from '@/layouts/PostLayout';
 import PostBanner from '@/layouts/PostBanner';
@@ -13,6 +13,12 @@ import PostModern from '@/layouts/PostModern';
 import { Metadata } from 'next';
 import siteMetadata from '@/data/siteMetadata';
 import { notFound } from 'next/navigation';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeKatex from 'rehype-katex';
+import rehypePrismPlus from 'rehype-prism-plus';
 
 const defaultLayout = 'PostLayout';
 const layouts = {
@@ -22,13 +28,12 @@ const layouts = {
   PostModern,
 };
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] };
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>;
 }): Promise<Metadata | undefined> {
+  const params = await props.params;
   const slug = decodeURI(params.slug.join('/'));
-  const post = allBlogs.find((p) => p.slug === slug);
+  const post = await getPostBySlug(slug);
   const authorList = post?.authors || ['default'];
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author);
@@ -76,36 +81,55 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  const paths = allBlogs.map((p) => ({ slug: p.slug.split('/') }));
-
+  const posts = await getAllPosts();
+  const paths = posts.map((p) => ({ slug: p.slug.split('/') }));
   return paths;
 };
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params;
   const slug = decodeURI(params.slug.join('/'));
-  // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allBlogs));
+  const allPosts = await getAllPosts();
+  const sortedCoreContents = sortPosts(allPosts);
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug);
+  
   if (postIndex === -1) {
     return notFound();
   }
 
-  const prev = sortedCoreContents[postIndex + 1];
-  const next = sortedCoreContents[postIndex - 1];
-  const post = allBlogs.find((p) => p.slug === slug) as Blog;
+  const prevItem = sortedCoreContents[postIndex + 1];
+  const nextItem = sortedCoreContents[postIndex - 1];
+  const postItem = sortedCoreContents[postIndex];
+
+  // Add path to prev/next for layout compatibility
+  const prev = prevItem ? { ...prevItem, path: `blog/${prevItem.slug}` } : undefined;
+  const next = nextItem ? { ...nextItem, path: `blog/${nextItem.slug}` } : undefined;
+  
+  // Add readingTime to post
+  const wordCount = postItem.content.split(/\s+/gu).length;
+  const readingTime = { minutes: Math.ceil(wordCount / 200) };
+  const post = { ...postItem, readingTime };
+  
   const authorList = post?.authors || ['default'];
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author);
     return coreContent(authorResults as Authors);
   });
   const mainContent = coreContent(post);
-  const jsonLd = post.structuredData;
-  jsonLd['author'] = authorDetails.map((author) => {
-    return {
+  
+  // Structured Data (JSON-LD) - basic fallback if not in post
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    datePublished: post.date,
+    dateModified: post.lastmod || post.date,
+    description: post.summary,
+    author: authorDetails.map((author) => ({
       '@type': 'Person',
       name: author.name,
-    };
-  });
+    })),
+  };
 
   const Layout = layouts[post.layout || defaultLayout];
 
@@ -116,7 +140,21 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Layout content={mainContent} authorDetails={authorDetails} next={next} prev={prev}>
-        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+        <MDXRemote
+          source={post.content}
+          components={components}
+          options={{
+            mdxOptions: {
+              remarkPlugins: [remarkGfm, remarkMath],
+              rehypePlugins: [
+                rehypeSlug,
+                rehypeAutolinkHeadings,
+                rehypeKatex,
+                [rehypePrismPlus, { ignoreMissing: true }],
+              ],
+            },
+          }}
+        />
       </Layout>
     </>
   );

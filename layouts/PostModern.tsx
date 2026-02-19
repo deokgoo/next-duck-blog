@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { CoreContent } from 'pliny/utils/contentlayer';
-import type { Blog, Authors } from 'contentlayer/generated';
+import type { Post as Blog, Authors } from '@/lib/types';
 import Comments from '@/components/Comments';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
@@ -26,8 +26,9 @@ interface LayoutProps {
 }
 
 export default function PostModern({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { filePath, path, slug, date, title, tags, readingTime } = content;
-  const basePath = path.split('/')[0];
+  const { slug, date, title, tags, readingTime } = content;
+  const path = `blog/${slug}`;
+  const basePath = 'blog';
 
   return (
     <SectionContainer>
