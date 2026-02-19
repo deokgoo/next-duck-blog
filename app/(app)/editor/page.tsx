@@ -1,11 +1,9 @@
-'use client';
-
 import UltimateEditor from '@/components/editor/UltimateEditor';
 
-export default function EditorPage() {
+export default async function EditorPage() {
   return (
     <div className="min-h-screen">
-      <UltimateEditor />
+      <UltimateEditor initialData={null} />
     </div>
   );
 }

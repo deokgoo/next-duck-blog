@@ -15,14 +15,14 @@ import {
 const COLLECTION_NAME = 'blog-ideas';
 
 // 인증 확인 함수
-function checkAuth() {
-  const cookieStore = cookies();
+async function checkAuth() {
+  const cookieStore = await cookies();
   const authCookie = cookieStore.get('blog-ideas-auth');
   return authCookie?.value === 'true';
 }
 
 export async function GET() {
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -41,7 +41,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -83,7 +83,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!checkAuth()) {
+  if (!(await checkAuth())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

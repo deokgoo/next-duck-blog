@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Menu, RadioGroup, Transition } from '@headlessui/react';
 
@@ -34,9 +34,9 @@ const Monitor = () => (
     viewBox="0 0 20 20"
     fill="none"
     stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     className="h-6 w-6 text-gray-900 dark:text-gray-100"
   >
     <rect x="3" y="3" width="14" height="10" rx="2" ry="2"></rect>
@@ -46,13 +46,27 @@ const Monitor = () => (
 );
 
 const ThemeSwitch = () => {
+  const [mounted, setMounted] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
+
+  // When mounted on client, now we can show the UI
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return (
+      <div className="mr-5">
+        <div className="h-6 w-6" />
+      </div>
+    );
+  }
 
   return (
     <div className="mr-5">
       <Menu as="div" className="relative inline-block text-left">
         <div>
-          <Menu.Button>{resolvedTheme === 'dark' ? <Moon /> : <Sun />}</Menu.Button>
+          <Menu.Button aria-label="Theme Switcher">
+            {resolvedTheme === 'dark' ? <Moon /> : <Sun />}
+          </Menu.Button>
         </div>
         <Transition
           as={Fragment}
