@@ -52,18 +52,22 @@ export async function GET(request: NextRequest) {
 export async function POST() {
   try {
     const allPosts = (await getAllPosts()).filter(isPostPublishedAndReady);
-    const tagCount: Record<string, number> = {};
+
+    // slug 기준으로 그룹핑 (Next.js, nextjs 등 slug가 같은 태그를 하나로 합침)
+    const tagMap: Record<string, { tag: string; slug: string; count: number }> = {};
 
     allPosts.forEach((post) => {
       (post.tags || []).forEach((tag) => {
-        const key = tag.trim();
-        tagCount[key] = (tagCount[key] || 0) + 1;
+        const rawTag = tag.trim();
+        const tagSlug = slugify(rawTag);
+        if (!tagMap[tagSlug]) {
+          tagMap[tagSlug] = { tag: rawTag, slug: tagSlug, count: 0 };
+        }
+        tagMap[tagSlug].count += 1;
       });
     });
 
-    const tags = Object.entries(tagCount)
-      .sort(([, a], [, b]) => b - a)
-      .map(([tag, count]) => ({ tag, count, slug: slugify(tag) }));
+    const tags = Object.values(tagMap).sort((a, b) => b.count - a.count);
 
     return NextResponse.json({ tags });
   } catch (error) {
