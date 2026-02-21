@@ -8,7 +8,7 @@ if (!admin.apps.length) {
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
       }),
-      storageBucket: 'duck-blog.appspot.com',
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
     });
   } catch (error) {
     console.error('Firebase admin initialization error', error);
@@ -17,6 +17,6 @@ if (!admin.apps.length) {
 
 import { getFirestore } from 'firebase-admin/firestore';
 
-export const db = getFirestore(admin.app(), 'blog-db');
+export const db = getFirestore(admin.app(), process.env.FIREBASE_DATABASE_ID || '(default)');
 export const storage = admin.storage();
 export const adminAuth = admin.auth();

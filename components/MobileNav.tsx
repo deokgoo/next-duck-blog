@@ -3,16 +3,21 @@
 import { useState } from 'react';
 import Link from './Link';
 import headerNavLinks from '@/data/headerNavLinks';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 const MobileNav = () => {
   const [navShow, setNavShow] = useState(false);
+  const { isAuthorized } = useAuth();
+
+  const visibleLinks = headerNavLinks.filter(
+    (link) => !link.adminOnly || isAuthorized
+  );
 
   const onToggleNav = () => {
     setNavShow((status) => {
       if (status) {
         document.body.style.overflow = 'auto';
       } else {
-        // Prevent scrolling
         document.body.style.overflow = 'hidden';
       }
       return !status;
@@ -57,7 +62,7 @@ const MobileNav = () => {
           </button>
         </div>
         <nav className="fixed mt-8 h-full">
-          {headerNavLinks.map((link) => (
+          {visibleLinks.map((link) => (
             <div key={link.title} className="px-12 py-4">
               <Link
                 href={link.href}

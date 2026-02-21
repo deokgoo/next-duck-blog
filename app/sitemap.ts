@@ -2,14 +2,14 @@ import siteMetadata from '@/data/siteMetadata';
 import { getAllPosts } from '@/lib/firestore';
 import { MetadataRoute } from 'next';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl;
   const cleanSlug = (slug: string) => slug.trim();
 
   // 기본 라우트 (높은 우선순위)
-  const routes = ['', 'blog', 'projects', 'tags'].map((route) => ({
+  const routes = ['', 'blog', 'projects', 'about', 'search'].map((route) => ({
     url: `${siteUrl}/${cleanSlug(route)}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: 'daily' as const,

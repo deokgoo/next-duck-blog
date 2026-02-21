@@ -1,14 +1,13 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'duck blog | 기술 블로그',
-  author: 'Deokgoo',
-  headerTitle: 'duck blog',
-  description:
-    'duck blog는 최신 웹 개발, 소프트웨어 엔지니어링, 그리고 다양한 취미생활에 관한 깊이 있는 정보와 유용한 팁을 공유합니다. 기술 트렌드, 실용적인 개발 팁, 엔지니어링 이슈, 흥미로운 취미 이야기까지 한 곳에서 만나보세요!"',
+  title: 'My Blog',
+  author: 'Blog Author',
+  headerTitle: 'My Blog',
+  description: 'A personal blog sharing thoughts on web development, software engineering, and more.',
   language: 'ko-KR',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://duck-blog.vercel.app',
-  siteRepo: 'https://github.com/your-username/your-repo-name',
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://your-blog.vercel.app',
+  siteRepo: process.env.NEXT_PUBLIC_SITE_REPO || 'https://github.com/your-username/your-repo-name',
   siteLogo: '/static/images/logo.png',
   image: '/static/images/avatar.jpg',
   socialBanner: '/static/images/main-logo-no-bg.png',
@@ -42,12 +41,12 @@ const siteMetadata = {
     //   posthogProjectApiKey: '', // e.g. 123e4567-e89b-12d3-a456-426614174000
     // },
     googleAnalytics: {
-      googleAnalyticsId: 'G-PN28LVMCKG',
+      googleAnalyticsId: process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || '',
     },
     plausibleDataDomain: '', // e.g. tailwind-nextjs-starter-blog.vercel.app
     simpleAnalytics: false, // true or false
     umamiWebsiteId: '', // e.g. 123e4567-e89b-12d3-a456-426614174000
-    naverWebMasterId: '3884d7b87ded12a75e3e2ba6a101a34bebcf4715', // naver web master verification code
+    naverWebMasterId: process.env.NEXT_PUBLIC_NAVER_WEBMASTER_ID || '', // naver web master verification code
   },
   newsletter: {
     // supports mailchimp, buttondown, convertkit, klaviyo, revue, emailoctopus

@@ -1,6 +1,8 @@
 import 'css/tailwind.css';
 import 'pliny/search/algolia.css';
 
+export const dynamic = 'force-dynamic';
+
 import { Space_Grotesk, Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import { Analytics, AnalyticsConfig } from 'pliny/analytics';
@@ -104,7 +106,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff" />
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
-        <meta name="google-adsense-account" content="ca-pub-2038243209448310" />
+        {process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID && (
+          <meta name="google-adsense-account" content={process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID} />
+        )}
       </head>
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-gray-950 dark:text-white">

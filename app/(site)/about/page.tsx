@@ -4,6 +4,8 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components';
 import AuthorLayout from '@/layouts/AuthorLayout';
 import { genPageMetadata } from 'app/seo';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = genPageMetadata({ title: 'About' });
 
 export default async function Page() {
