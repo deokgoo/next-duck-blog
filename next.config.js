@@ -92,6 +92,15 @@ module.exports = withBundleAnalyzer({
       },
     ];
   },
+  // Next.js 16+ Turbopack과 Custom Webpack 설정 충돌 경고 무시
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
   webpack: (config) => {
     config.module.rules.push({
       test: /\.svg$/,
