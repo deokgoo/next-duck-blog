@@ -1,5 +1,5 @@
 import siteMetadata from '@/data/siteMetadata';
-import { getAllPosts } from '@/lib/firestore';
+import { getAllPosts, isPostPublishedAndReady } from '@/lib/firestore';
 import { MetadataRoute } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -18,9 +18,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const allBlogs = await getAllPosts();
 
-  // 블로그 포스트 (중간 우선순위)
+  // 블로그 포스트 (중간 우선순위) - published 상태이고 날짜가 지난 포스트만
   const blogRoutes = allBlogs
-    .filter((post) => post.status === 'published')
+    .filter((post) => isPostPublishedAndReady(post))
     .map((post) => ({
       url: `${siteUrl}/blog/${cleanSlug(post.slug)}`,
       lastModified: new Date(post.lastmod || post.date).toISOString(),
