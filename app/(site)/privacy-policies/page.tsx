@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import siteMetadata from '@/data/siteMetadata';
 
 const PrivacyPolicy: React.FC = () => {
   return (
@@ -72,8 +73,8 @@ const PrivacyPolicy: React.FC = () => {
         <section className="mb-6">
           <h2 className="mb-3 text-2xl font-semibold">7. Contact Us</h2>
           <p>
-            If you have any questions about this Privacy Policy, please contact us at
-            <strong>kkddgg1001@gmail.com</strong>
+            If you have any questions about this Privacy Policy, please contact us at{' '}
+            <strong>{siteMetadata.email}</strong>
           </p>
         </section>
       </div>

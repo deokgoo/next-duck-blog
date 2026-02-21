@@ -7,6 +7,7 @@ import { MDXRemote } from 'next-mdx-remote';
 import { components } from '@/components/MDXComponents';
 import PostLayout from '@/layouts/PostLayout';
 import { CoreContent, Post, Authors } from '@/lib/types';
+import siteMetadata from '@/data/siteMetadata';
 
 interface RealPreviewModalProps {
   isOpen: boolean;
@@ -71,30 +72,27 @@ export default function RealPreviewModal({
     date,
     tags,
     summary,
+    content,
     slug: slug || 'preview-slug',
     lastmod: date,
-    draft: true,
+    status: 'draft',
     layout: 'PostLayout',
-    bibliography: '',
-    canonicalUrl: '',
     authors: ['default'],
   };
 
-  // Mock author details (can be fetched or hardcoded for preview)
+  // Mock author details
   const authorDetails: CoreContent<Authors>[] = [
     {
-      name: 'Preview Author', // Replace with dynamic if available
-      avatar: '/static/images/avatar.png',
-      occupation: 'Writer',
-      company: 'Next.js Blog',
-      email: 'address@yoursite.com',
-      twitter: 'https://twitter.com/Twitter',
-      linkedin: 'https://www.linkedin.com',
-      github: 'https://github.com',
+      name: siteMetadata.author || 'Author',
+      avatar: '/static/images/avatar.jpg',
+      occupation: 'Developer',
+      company: '',
+      email: siteMetadata.email || '',
+      twitter: siteMetadata.twitter || '',
+      linkedin: siteMetadata.linkedin || '',
+      github: siteMetadata.github || '',
       layout: 'AuthorLayout',
       slug: 'default',
-      date: '',
-      title: '',
     },
   ];
 

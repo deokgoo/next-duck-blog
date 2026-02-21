@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
+import { verifyAuth } from '@/lib/auth/serverAuth';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!(await verifyAuth(request))) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+
     const { content, metadata } = await request.json();
 
     // 슬러그 생성 (제목 기반)
@@ -19,11 +24,12 @@ export async function POST(request: NextRequest) {
       slug,
       title: metadata.title,
       date: metadata.date,
+      createdAt: metadata.createdAt,
       tags: metadata.tags || [],
       summary: metadata.summary || '',
       body: { code: '', raw: content }, // MDXRemote 호환성 고려 (raw content 저장)
       content: content, // 최상위 content 필드 (검색 및 마이그레이션 스크립트 호환용)
-      draft: metadata.draft ?? false,
+      status: metadata.draft ? 'draft' : 'published',
       layout: metadata.layout || 'PostLayout',
       images: metadata.images || [],
       lastmod: new Date().toISOString(),

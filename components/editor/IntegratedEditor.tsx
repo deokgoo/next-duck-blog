@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Save, FileText, Clock, AlignLeft, Hash } from 'lucide-react';
+import { useAuth } from '@/lib/auth/AuthContext';
 import MetadataPanel from './MetadataPanel';
 import MarkdownEditor from './MarkdownEditor';
 
@@ -10,6 +11,7 @@ interface IntegratedEditorProps {
 }
 
 export default function IntegratedEditor({ className = '' }: IntegratedEditorProps) {
+  const { user } = useAuth();
   // 메타데이터 상태
   const [metadata, setMetadata] = useState({
     title: '',
@@ -85,11 +87,13 @@ export default function IntegratedEditor({ className = '' }: IntegratedEditorPro
     setSaveStatus('saving');
 
     try {
+      const token = await user?.getIdToken();
       // MDX 파일 저장
       const response = await fetch('/api/blog/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           ...metadata,

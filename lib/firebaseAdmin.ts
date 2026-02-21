@@ -19,3 +19,4 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 export const db = getFirestore(admin.app(), 'blog-db');
 export const storage = admin.storage();
+export const adminAuth = admin.auth();

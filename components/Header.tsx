@@ -6,20 +6,29 @@ import MobileNav from './MobileNav';
 import ThemeSwitch from './ThemeSwitch';
 import SearchButton from './SearchButton';
 import Image from 'next/image';
+import { getAuthorBySlug } from '@/lib/firestore';
 
-const Header = () => {
+const Header = async () => {
+  const authorData = await getAuthorBySlug('default');
+  const headerTitle = authorData?.blogTitle || siteMetadata.headerTitle;
+  const siteLogo = authorData?.siteLogo || Logo;
+
   return (
     <header className="flex items-center justify-between py-10">
       <div>
-        <Link href="/" aria-label={siteMetadata.headerTitle}>
+        <Link href="/" aria-label={typeof headerTitle === 'string' ? headerTitle : 'Blog'}>
           <div className="flex items-center justify-between">
             <div className="mr-3">
-              <Image src={Logo} alt={''} />
+              {typeof siteLogo === 'string' ? (
+                <img src={siteLogo} alt="Logo" className="h-8 w-auto object-contain" />
+              ) : (
+                <Image src={siteLogo} alt="Logo" width={32} height={32} className="h-8 w-auto object-contain" />
+              )}
             </div>
-            {typeof siteMetadata.headerTitle === 'string' ? (
-              <div className="h-6 text-2xl font-semibold sm:block">{siteMetadata.headerTitle}</div>
+            {typeof headerTitle === 'string' ? (
+              <div className="h-6 text-2xl font-semibold sm:block">{headerTitle}</div>
             ) : (
-              siteMetadata.headerTitle
+              headerTitle
             )}
           </div>
         </Link>

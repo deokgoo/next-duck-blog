@@ -8,12 +8,12 @@ const siteMetadata = {
   language: 'ko-KR',
   theme: 'system', // system, dark or light
   siteUrl: 'https://duck-blog.vercel.app',
-  siteRepo: 'https://github.com/deokgoo/next-duck-blog',
+  siteRepo: 'https://github.com/your-username/your-repo-name',
   siteLogo: '/static/images/logo.png',
   image: '/static/images/avatar.jpg',
   socialBanner: '/static/images/main-logo-no-bg.png',
   mastodon: 'https://mastodon.social/@mastodonuser',
-  email: 'kkddgg1001@gmail.com',
+  email: 'your.email@example.com',
   github: 'https://github.com',
   x: 'https://twitter.com/x',
   // twitter: 'https://twitter.com/Twitter',
@@ -63,7 +63,7 @@ const siteMetadata = {
     giscusConfig: {
       // Visit the link below, and follow the steps in the 'configuration' section
       // https://giscus.app/
-      repo: process.env.NEXT_PUBLIC_GISCUS_REPO || 'deokgoo/next-duck-blog',
+      repo: process.env.NEXT_PUBLIC_GISCUS_REPO || 'your-username/your-repo-name',
       repositoryId: process.env.NEXT_PUBLIC_GISCUS_REPOSITORY_ID || '',
       category: process.env.NEXT_PUBLIC_GISCUS_CATEGORY || 'General',
       categoryId: process.env.NEXT_PUBLIC_GISCUS_CATEGORY_ID || '',

@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
+import { verifyAuth } from '@/lib/auth/serverAuth';
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   try {
+    if (!(await verifyAuth(request))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { slug } = await request.json();
 
     if (!slug) {
@@ -17,8 +22,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    // Delete the document
-    await docRef.delete();
+    // Delete the document (logical via status update)
+    await docRef.update({ status: 'deleted' });
 
     return NextResponse.json({ message: 'Post deleted successfully' });
   } catch (error) {

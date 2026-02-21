@@ -5,12 +5,32 @@ import { Post, Authors } from './types';
 export type { Post, Authors }; // Re-export for convenience if needed, but better to import from types
 export * from './types'; // Re-export everything from types
 
+// Helper to check if a post is fully published (status is published and date has passed)
+export function isPostPublishedAndReady(post: Post): boolean {
+  // Backwards compatibility: if status is undefined, check draft
+  if (post.status) {
+    if (post.status !== 'published') return false;
+  } else {
+    // If no status is defined (older posts), check the old 'draft' boolean directly
+    const isDraft = (post as any).draft;
+    // If it explicitly was marked draft true, it's not ready
+    if (isDraft === true || String(isDraft) === 'true') return false;
+  }
+  
+  // Local time (or server time) comparison
+  // Since date is stored as YYYY-MM-DDTHH:mm, we can safely parse it
+  if (!post.date) return false;
+  return new Date(post.date).getTime() <= Date.now();
+}
+
 export async function getAllPosts(): Promise<Post[]> {
   const snapshot = await db.collection('posts')
     .orderBy('date', 'desc')
     .get();
 
-  return snapshot.docs.map(doc => doc.data() as Post);
+  return snapshot.docs
+    .map(doc => doc.data() as Post)
+    .filter(post => post.status !== 'deleted');
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
@@ -22,7 +42,27 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     .get();
 
   if (snapshot.empty) return null;
-  return snapshot.docs[0].data() as Post;
+  const post = snapshot.docs[0].data() as Post;
+  return post.status === 'deleted' ? null : post;
+}
+
+export async function getAuthorBySlug(slug: string): Promise<Authors | null> {
+  const docRef = db.collection('authors').doc(slug);
+  const docSnap = await docRef.get();
+
+  if (!docSnap.exists) {
+    // If not found in DB, fallback to the hardcoded mock for seamless transition
+    // Need to dynamically import to prevent circular dependency if they import firestore
+    const { allAuthors } = await import('./types');
+    const author = allAuthors.find((p) => p.slug === slug);
+    return author || null;
+  }
+  return docSnap.data() as Authors;
+}
+
+export async function updateAuthor(slug: string, data: Partial<Authors>): Promise<void> {
+  const docRef = db.collection('authors').doc(slug);
+  await docRef.set(data, { merge: true });
 }
 
 export async function getAllTags(): Promise<Record<string, number>> {
@@ -30,7 +70,7 @@ export async function getAllTags(): Promise<Record<string, number>> {
   const tagCount: Record<string, number> = {};
   
   posts.forEach(post => {
-    if (post.draft) return;
+    if (!isPostPublishedAndReady(post)) return;
     post.tags.forEach(tag => {
       const formattedTag = tag.trim(); // Keep original case for display but consistent
       const key = formattedTag.toLowerCase();

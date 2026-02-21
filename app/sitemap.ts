@@ -2,6 +2,8 @@ import siteMetadata from '@/data/siteMetadata';
 import { getAllPosts } from '@/lib/firestore';
 import { MetadataRoute } from 'next';
 
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl;
   const cleanSlug = (slug: string) => slug.trim();
@@ -18,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 블로그 포스트 (중간 우선순위)
   const blogRoutes = allBlogs
-    .filter((post) => !post.draft)
+    .filter((post) => post.status === 'published')
     .map((post) => ({
       url: `${siteUrl}/blog/${cleanSlug(post.slug)}`,
       lastModified: new Date(post.lastmod || post.date).toISOString(),

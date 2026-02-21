@@ -1,11 +1,11 @@
 import ListLayout from '@/layouts/ListLayoutWithTags';
 import { allCoreContent, sortPosts } from '@/lib/types';
-import { getAllPosts, getAllTags } from '@/lib/firestore';
+import { getAllPosts, getAllTags, isPostPublishedAndReady } from '@/lib/firestore';
 
 const POSTS_PER_PAGE = 5;
 
 export const generateStaticParams = async () => {
-  const allBlogs = await getAllPosts();
+  const allBlogs = (await getAllPosts()).filter(isPostPublishedAndReady);
   const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE);
   const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }));
 
@@ -14,7 +14,7 @@ export const generateStaticParams = async () => {
 
 export default async function Page(props: { params: Promise<{ page: string }> }) {
   const params = await props.params;
-  const allBlogs = await getAllPosts();
+  const allBlogs = (await getAllPosts()).filter(isPostPublishedAndReady);
   const posts = allCoreContent(sortPosts(allBlogs));
   const pageNumber = parseInt(params.page as string);
   const initialDisplayPosts = posts.slice(

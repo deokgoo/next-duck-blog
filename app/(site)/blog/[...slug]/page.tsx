@@ -3,7 +3,7 @@ import 'katex/dist/katex.css';
 
 import { components } from '@/components/MDXComponents';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { getAllPosts, getPostBySlug } from '@/lib/firestore';
+import { getAllPosts, getPostBySlug, getAuthorBySlug, isPostPublishedAndReady } from '@/lib/firestore';
 import { sortPosts, coreContent, allAuthors } from '@/lib/types';
 import type { Authors, Post as Blog } from '@/lib/types';
 import PostSimple from '@/layouts/PostSimple';
@@ -34,11 +34,17 @@ export async function generateMetadata(props: {
   const params = await props.params;
   const slug = decodeURI(params.slug.join('/'));
   const post = await getPostBySlug(slug);
+
+  if (!post || !isPostPublishedAndReady(post)) {
+    return;
+  }
   const authorList = post?.authors || ['default'];
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author);
-    return coreContent(authorResults as Authors);
-  });
+  const authorDetails = await Promise.all(
+    authorList.map(async (authorSlug) => {
+      const authorResults = await getAuthorBySlug(authorSlug);
+      return coreContent((authorResults || allAuthors.find((p) => p.slug === authorSlug) || allAuthors[0]) as Authors);
+    })
+  );
   if (!post) {
     return;
   }
@@ -81,7 +87,7 @@ export async function generateMetadata(props: {
 }
 
 export const generateStaticParams = async () => {
-  const posts = await getAllPosts();
+  const posts = (await getAllPosts()).filter(isPostPublishedAndReady);
   const paths = posts.map((p) => ({ slug: p.slug.split('/') }));
   return paths;
 };
@@ -89,7 +95,7 @@ export const generateStaticParams = async () => {
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;
   const slug = decodeURI(params.slug.join('/'));
-  const allPosts = await getAllPosts();
+  const allPosts = (await getAllPosts()).filter(isPostPublishedAndReady);
   const sortedCoreContents = sortPosts(allPosts);
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug);
   
@@ -111,10 +117,13 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const post = { ...postItem, readingTime };
   
   const authorList = post?.authors || ['default'];
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author);
-    return coreContent(authorResults as Authors);
-  });
+  const authorDetails = await Promise.all(
+    authorList.map(async (authorSlug) => {
+      const authorResults = await getAuthorBySlug(authorSlug);
+      // fallback if Firestore returns null and mock isn't found
+      return coreContent((authorResults || allAuthors.find(a => a.slug === authorSlug) || allAuthors[0]) as Authors);
+    })
+  );
   const mainContent = coreContent(post);
   
   // Structured Data (JSON-LD) - basic fallback if not in post

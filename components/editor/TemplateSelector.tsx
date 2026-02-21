@@ -7,6 +7,7 @@ import { Template } from '@/lib/db/templates';
 // import { getTemplates, seedInitialTemplates } from '@/lib/db/templates'; // Legacy client-side, now moved to API
 import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import EditTemplateModal from './EditTemplateModal';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 interface TemplateSelectorProps {
   isOpen: boolean;
@@ -15,11 +16,20 @@ interface TemplateSelectorProps {
 }
 
 export default function TemplateSelector({ isOpen, onClose, onSelect }: TemplateSelectorProps) {
+  const { user } = useAuth();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   
   const [error, setError] = useState<string | null>(null);
+
+  const getHeaders = async (includeContentType = true) => {
+    const token = await user?.getIdToken();
+    const headers: Record<string, string> = {};
+    if (includeContentType) headers['Content-Type'] = 'application/json';
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  };
   
   // 상태: 수정 모달
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
@@ -44,7 +54,8 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/templates');
+      const headers = await getHeaders(false);
+      const response = await fetch('/api/templates', { headers });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -95,9 +106,10 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
                     },
                 ];
 
+                const headers = await getHeaders();
                 await fetch('/api/templates', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     body: JSON.stringify(initialTemplates)
                 });
                 
@@ -114,8 +126,10 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
 
   const deleteTemplate = async (id: string) => {
     try {
+        const headers = await getHeaders(false);
         const response = await fetch(`/api/templates?id=${id}`, {
             method: 'DELETE',
+            headers,
         });
         if (!response.ok) throw new Error('Failed to delete');
         await fetchTemplates();
@@ -137,9 +151,10 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
   };
 
   const handleUpdateTemplate = async (id: string, updates: Partial<Template>) => {
+      const headers = await getHeaders();
       const response = await fetch('/api/templates', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ id, ...updates }),
       });
       

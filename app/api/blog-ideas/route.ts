@@ -1,38 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { db } from '@/lib/firebase';
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  deleteDoc,
-  query,
-  orderBy 
-} from 'firebase/firestore';
+import { db } from '@/lib/firebaseAdmin';
+import { verifyAuth } from '@/lib/auth/serverAuth';
 
 const COLLECTION_NAME = 'blog-ideas';
 
-// 인증 확인 함수
-async function checkAuth() {
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get('blog-ideas-auth');
-  return authCookie?.value === 'true';
-}
-
-export async function GET() {
-  if (!(await checkAuth())) {
+export async function GET(request: NextRequest) {
+  if (!(await verifyAuth(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
-    const querySnapshot = await getDocs(q);
-    const ideas = querySnapshot.docs.map(doc => ({
+    const snapshot = await db
+      .collection(COLLECTION_NAME)
+      .orderBy('createdAt', 'desc')
+      .get();
+      
+    const ideas = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+    
     return NextResponse.json({ ideas });
   } catch (error) {
     console.error('Firebase GET error:', error);
@@ -41,40 +28,38 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await checkAuth())) {
+  if (!(await verifyAuth(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    console.log('POST request received');
     const newIdea = await request.json();
-    console.log('New idea:', newIdea);
     
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+    const docRef = db.collection(COLLECTION_NAME).doc();
+    await docRef.set({
       ...newIdea,
       createdAt: new Date().toISOString()
     });
-    console.log('Document added with ID:', docRef.id);
     
     return NextResponse.json({ success: true, id: docRef.id });
   } catch (error) {
     console.error('Firebase POST error:', error);
     return NextResponse.json({ 
       success: false, 
-      error: error.message 
+      error: error instanceof Error ? error.message : 'Unknown error' 
     }, { status: 500 });
   }
 }
 
 export async function PATCH(request: NextRequest) {
-  if (!(await checkAuth())) {
+  if (!(await verifyAuth(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const { id, ...updates } = await request.json();
-    const docRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(docRef, updates);
+    await db.collection(COLLECTION_NAME).doc(id).update(updates);
+    
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Firebase PATCH error:', error);
@@ -83,13 +68,13 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!(await checkAuth())) {
+  if (!(await verifyAuth(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const { id } = await request.json();
-    await deleteDoc(doc(db, COLLECTION_NAME, id));
+    await db.collection(COLLECTION_NAME).doc(id).delete();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Firebase DELETE error:', error);

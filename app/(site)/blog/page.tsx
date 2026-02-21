@@ -1,6 +1,6 @@
 import ListLayout from '@/layouts/ListLayoutWithTags';
 import { allCoreContent, sortPosts } from '@/lib/types';
-import { getAllPosts, getAllTags } from '@/lib/firestore';
+import { getAllPosts, getAllTags, isPostPublishedAndReady } from '@/lib/firestore';
 import { genPageMetadata } from 'app/seo';
 
 const POSTS_PER_PAGE = 5;
@@ -8,7 +8,7 @@ const POSTS_PER_PAGE = 5;
 export const metadata = genPageMetadata({ title: 'Blog' });
 
 export default async function BlogPage() {
-  const posts = await getAllPosts();
+  const posts = (await getAllPosts()).filter(isPostPublishedAndReady);
   const sortedPosts = sortPosts(posts);
   const initialDisplayPosts = allCoreContent(sortedPosts.slice(0, POSTS_PER_PAGE));
   const pagination = {

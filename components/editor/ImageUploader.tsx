@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { Upload, Image, X, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 interface ImageUploaderProps {
   slug?: string;
@@ -20,6 +21,7 @@ export default function ImageUploader({
   onImageInsert,
   className = '',
 }: ImageUploaderProps) {
+  const { user } = useAuth();
   const [uploadState, setUploadState] = useState<UploadState>({
     status: 'idle',
     progress: 0,
@@ -53,8 +55,12 @@ export default function ImageUploader({
         formData.append('file', file);
         formData.append('folderName', slug);
 
+        const token = await user?.getIdToken();
         const response = await fetch('/api/images/upload', {
           method: 'POST',
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: formData,
         });
 
