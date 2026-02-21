@@ -86,7 +86,7 @@ const siteMetadata = {
   search: {
     provider: 'kbar', // kbar or algolia
     kbarConfig: {
-      searchDocumentsPath: 'search.json', // path to load documents to search
+      searchDocumentsPath: '', // 동적 API 검색 사용 중 (search.json 미사용)
     },
     // provider: 'algolia',
     // algoliaConfig: {
