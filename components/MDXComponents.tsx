@@ -1,5 +1,12 @@
-import TOCInline from 'pliny/ui/TOCInline';
+import TOCInlinePliny from 'pliny/ui/TOCInline';
 import Pre from 'pliny/ui/Pre';
+
+// next-mdx-remote는 contentlayer와 달리 toc 데이터를 자동 생성하지 않습니다.
+// pliny의 TOCInline은 toc가 undefined이면 .filter()에서 crash하므로 안전하게 처리합니다.
+const TOCInline = (props: Parameters<typeof TOCInlinePliny>[0]) => {
+  if (!props.toc || !Array.isArray(props.toc)) return null;
+  return <TOCInlinePliny {...props} />;
+};
 // import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'; // 제거: 한국어 버전으로 교체
 import type { MDXComponents } from 'mdx/types';
 import Image from './Image';
