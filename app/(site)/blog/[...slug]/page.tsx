@@ -86,9 +86,9 @@ export async function generateMetadata(props: {
   };
 }
 
-// ISR: 1시간(3600초) 캐싱 후 자동 갱신
-// 글 저장/삭제 시 revalidatePath로 즉시 캐시 무효화됨
-export const revalidate = 3600;
+// revalidate = false: 영구 캐시 (서버 재시작 또는 revalidatePath 호출 전까지 유지)
+// 어드민에서 글 저장/삭제/상태변경 시 revalidatePath로 즉시 무효화되므로 타임 기반 만료 불필요
+export const revalidate = false;
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;
