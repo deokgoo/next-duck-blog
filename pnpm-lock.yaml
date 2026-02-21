@@ -29,6 +29,12 @@ importers:
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
+      '@types/node':
+        specifier: ^25.2.3
+        version: 25.2.3
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.21(postcss@8.5.6)
@@ -140,6 +146,9 @@ importers:
       tailwindcss:
         specifier: ^3.4.4
         version: 3.4.17
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -147,12 +156,6 @@ importers:
       '@babel/eslint-parser':
         specifier: ^7.28.6
         version: 7.28.6(@babel/core@7.28.0)(eslint@9.39.2(jiti@1.21.7))
-      '@types/node':
-        specifier: ^25.2.3
-        version: 25.2.3
-      '@types/react':
-        specifier: ^19.2.14
-        version: 19.2.14
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.56.0
         version: 8.56.0(@typescript-eslint/parser@8.56.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
@@ -174,9 +177,6 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
 packages:
 
