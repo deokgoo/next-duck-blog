@@ -3,6 +3,8 @@ import { allCoreContent, sortPosts } from '@/lib/types';
 import { getAllPosts, getAllTags, isPostPublishedAndReady } from '@/lib/firestore';
 import { genPageMetadata } from 'app/seo';
 
+export const dynamic = 'force-dynamic';
+
 const POSTS_PER_PAGE = 5;
 
 export const metadata = genPageMetadata({ title: 'Blog' });

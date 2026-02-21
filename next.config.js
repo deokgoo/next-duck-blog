@@ -76,6 +76,16 @@ module.exports = withBundleAnalyzer({
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        // Google Search Console HTML 검증 파일을 API로 처리
+        // 환경변수 GOOGLE_SITE_VERIFICATION_ID 설정 시 자동 동작
+        source: '/:googlefile(google[a-z0-9]+\\.html)',
+        destination: '/api/google-site-verification',
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -2,6 +2,8 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Metadata } from 'next';
 import AdminNav from './AdminNav';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   robots: {
     index: false,

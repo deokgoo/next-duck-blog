@@ -44,3 +44,16 @@ yarn-error.log*
 .env.production.local
 
 .contentlayer
+
+# IDE / AI Tool configs (로컬 전용)
+.serena/
+.claude/
+.amazonq/
+.vscode/
+
+# Blog-specific personal data (개인 데이터 - git에 포함하지 않음)
+blog-ideas.json
+public/search.json
+
+# Google Search Console verification (개인별로 발급, 직접 추가)
+public/google*.html
