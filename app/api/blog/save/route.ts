@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { verifyAuth } from '@/lib/auth/serverAuth';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,8 +28,8 @@ export async function POST(request: NextRequest) {
       createdAt: metadata.createdAt,
       tags: metadata.tags || [],
       summary: metadata.summary || '',
-      body: { code: '', raw: content }, // MDXRemote 호환성 고려 (raw content 저장)
-      content: content, // 최상위 content 필드 (검색 및 마이그레이션 스크립트 호환용)
+      body: { code: '', raw: content },
+      content: content,
       status: metadata.draft ? 'draft' : 'published',
       layout: metadata.layout || 'PostLayout',
       images: metadata.images || [],
@@ -37,6 +38,11 @@ export async function POST(request: NextRequest) {
 
     // Firestore에 문서 저장 (덮어쓰기)
     await db.collection('posts').doc(slug).set(postData);
+
+    // 캐시 즉시 무효화 - 저장한 글과 목록 페이지를 바로 갱신
+    revalidatePath(`/blog/${slug}`);
+    revalidatePath('/blog');
+    revalidatePath('/');
 
     return NextResponse.json({
       success: true,

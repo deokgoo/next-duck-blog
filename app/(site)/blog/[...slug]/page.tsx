@@ -86,11 +86,9 @@ export async function generateMetadata(props: {
   };
 }
 
-export const generateStaticParams = async () => {
-  const posts = (await getAllPosts()).filter(isPostPublishedAndReady);
-  const paths = posts.map((p) => ({ slug: p.slug.split('/') }));
-  return paths;
-};
+// ISR: 1시간(3600초) 캐싱 후 자동 갱신
+// 글 저장/삭제 시 revalidatePath로 즉시 캐시 무효화됨
+export const revalidate = 3600;
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;

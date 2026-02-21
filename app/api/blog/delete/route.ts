@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { verifyAuth } from '@/lib/auth/serverAuth';
+import { revalidatePath } from 'next/cache';
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -14,7 +15,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
     }
 
-    // Check if document exists first
     const docRef = db.collection('posts').doc(slug);
     const doc = await docRef.get();
 
@@ -22,8 +22,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    // Delete the document (logical via status update)
+    // 논리 삭제 (status를 'deleted'로 변경)
     await docRef.update({ status: 'deleted' });
+
+    // 캐시 즉시 무효화
+    revalidatePath(`/blog/${slug}`);
+    revalidatePath('/blog');
+    revalidatePath('/');
 
     return NextResponse.json({ message: 'Post deleted successfully' });
   } catch (error) {
