@@ -22,7 +22,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Post } from '@/lib/types';
 import { Template } from '@/lib/db/templates';
-
+import { saveDraft, getDraft, removeDraft, SavedDraft } from '@/lib/utils/localStorage';
 interface MDXMetadata {
   title: string;
   date: string;
@@ -30,6 +30,7 @@ interface MDXMetadata {
   summary: string;
   draft: boolean;
   slug: string;
+  createdAt?: string; // Written Date
   layout?: string;
   images?: string[];
 }
@@ -43,14 +44,18 @@ interface UltimateEditorProps {
 export default function UltimateEditor({ initialData, className = '' }: UltimateEditorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // 메타데이터 상태
+  const defaultDate = new Date();
+  // Adjust to local time timezone offset then format exactly as YYYY-MM-DDTHH:mm
+  const localIsoString = new Date(defaultDate.getTime() - defaultDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
   const [metadata, setMetadata] = useState<MDXMetadata>({
     title: initialData?.title || '',
-    date: initialData?.date || new Date().toISOString().split('T')[0],
+    date: initialData?.date || localIsoString,
     tags: initialData?.tags || [],
     summary: initialData?.summary || '',
-    draft: initialData?.draft ?? false,
+    draft: initialData?.status === 'draft',
     slug: initialData?.slug || '',
+    createdAt: initialData?.createdAt || defaultDate.toISOString().split('T')[0],
     layout: initialData?.layout || 'PostLayout',
     images: initialData?.images || [],
   });
@@ -112,13 +117,19 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
 
   // 로컬 자동 저장 (기존 로직)
   const handleLocalAutoSave = useCallback(() => {
-    if (hasChanges) {
+    // 새 글 작성 시에만 자동 저장 동작
+    // BUG FIX: initialData is always null, so we must check metadata.slug which is fetched from server for existing posts.
+    // If metadata has a slug, that means it's an existing post (either from initialData or fetched later).
+    // Wait, metadata.slug is '' for new posts. For existing posts, it's the post slug.
+    const isNewPost = !metadata.slug;
+
+    if (hasChanges && isNewPost) {
       setAutoSaveStatus('saving');
 
       try {
         const currentSlug = metadata.slug;
-        localStorage.setItem(getStorageKey('metadata', currentSlug), JSON.stringify(metadata));
-        localStorage.setItem(getStorageKey('content', currentSlug), content);
+        saveDraft(getStorageKey('metadata', currentSlug), metadata);
+        saveDraft(getStorageKey('content', currentSlug), content);
 
         setTimeout(() => {
           setAutoSaveStatus('saved');
@@ -129,27 +140,17 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
         setAutoSaveStatus('idle');
       }
     }
-  }, [metadata, content, hasChanges]);
+  }, [metadata, content, hasChanges, metadata.slug]);
 
   // 서버 자동 저장 (신규 로직)
   const handleServerAutoSave = useCallback(async () => {
     // 조건: 변경사항이 있고, 제목이 있어야 함
     if (!hasChanges || !metadata.title.trim()) return;
     
-    // 조건: 'published' 상태인 기존 글은 자동 저장하지 않음 (실수 방지)
-    // 단, 새 글(slug 없음)이거나 draft 상태면 저장
-    const isNewPost = !initialData?.slug; // 초기 데이터가 없으면 새 글로 간주 (단, 수정 중인 새 글일 수도 있음)
-    // 더 정확히: slug가 없거나, metadata.draft가 true일 때만
+    // 조건: 새 글 작성 시에만 자동 저장 동작 (수정 모드에선 비활성화)
+    const isNewPost = !metadata.slug; 
     
-    // *중요*: 이미 발행된 글(initialData.draft === false)은 절대 자동 저장하면 안됨.
-    // 하지만 사용자가 '발행됨' 상태에서 '초안'으로 바꿨다면? -> 저장 가능
-    // 반대로 '초안'에서 '발행됨'으로 바꿨다면? -> 저장 가능 (의도적 변경)
-    
-    // 안전장치: 초기 상태가 'published'였다면, 사용자가 명시적으로 저장하기 전까지는 자동 저장 막기?
-    // 기획: "오직 '새 글'이나 '초안(Draft)' 상태인 글에만 DB 자동 저장이 작동"
-    
-    if (!metadata.draft && initialData?.slug) {
-        // 기존 글이고, 현재 상태가 Published라면 자동 저장 스킵
+    if (!isNewPost) {
         return;
     }
 
@@ -200,90 +201,44 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
     };
   }, [hasChanges, handleLocalAutoSave, handleServerAutoSave]);
 
-  // 로컬 스토리지에서 복원 (검수: initialData가 없을 때만 실행)
+  // 로컬 스토리지에서 복원
   useEffect(() => {
     if (initialData) return;
 
     // URL에서 슬러그 확인
     const slugFromUrl = searchParams.get('slug') || undefined;
 
+    // 새 글 작성이 아닌 경우(URL에 슬러그가 있는 경우) 복원 로직 건너뜀
+    // 참고: SSR 단계에서 데이터를 불러오지 못해 initialData가 없는데 slug가 있다면 존재하지 않는 글일 확률이 높음.
+    if (slugFromUrl) return;
+
     try {
-      const savedMetadata = localStorage.getItem(getStorageKey('metadata', slugFromUrl));
-      const savedContent = localStorage.getItem(getStorageKey('content', slugFromUrl));
+      const savedMetadataDraft = getDraft<MDXMetadata>(getStorageKey('metadata', slugFromUrl));
+      const savedContentDraft = getDraft<string>(getStorageKey('content', slugFromUrl));
 
-      if (savedMetadata) {
-        const parsedMetadata = JSON.parse(savedMetadata);
-        // 슬러그가 URL과 일치하는지 또는 둘 다 없는지 확인 (더 정교한 체크 가능)
-        setMetadata(parsedMetadata);
-      }
+      if (savedMetadataDraft || savedContentDraft) {
+        const latestTime = savedMetadataDraft?.savedAt || savedContentDraft?.savedAt;
+        const formattedTime = latestTime ? new Date(latestTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
+        
+        const shouldRestore = window.confirm(`이전에 작성 중이던 임시 저장된 글이 있습니다 (${formattedTime}). 불러오시겠습니까?`);
 
-      if (savedContent) {
-        setContent(savedContent);
+        if (shouldRestore) {
+          if (savedMetadataDraft?.data) {
+            setMetadata(savedMetadataDraft.data);
+          }
+          if (savedContentDraft?.data) {
+            setContent(savedContentDraft.data);
+          }
+        } else {
+          // 거부할 경우 임시 저장 삭제
+          removeDraft(getStorageKey('metadata', slugFromUrl));
+          removeDraft(getStorageKey('content', slugFromUrl));
+        }
       }
     } catch (error) {
       console.error('데이터 복원 실패:', error);
     }
-  }, [initialData]);
-
-  // Slug detection from URL for client-side fetching
-  useEffect(() => {
-    const slugFromUrl = searchParams.get('slug');
-    
-    // URL에 슬러그가 있으면 해당 포스트 데이터 로드
-    if (slugFromUrl && !initialData) {
-      // 이미 로컬 스토리지에서 로드된 데이터가 있고, 그 데이터의 슬러그가 url의 슬러그와 같다면 스킵할 수도 있음
-      // 하지만 서버 데이터가 우선순위가 높을 수 있으므로 (또는 충돌 처리)
-      // 여기서는 서버 데이터를 가져오되, 로컬에 저장된 draft가 더 최신이면 물어보는 로직이 있으면 좋음.
-      // 현재는 간단하게 서버 데이터가 있으면 덮어씌움 (단, hasChanges가 false일 때만?)
-      
-      const fetchPostData = async () => {
-        setIsLoading(true);
-        try {
-          const res = await fetch(`/api/blog/get?slug=${slugFromUrl}`);
-          if (res.ok) {
-            const data = await res.json();
-            const post = data.post;
-            
-            // TODO: 로컬 draft와 비교 로직 추가 가능
-            
-            setMetadata({
-              title: post.title,
-              date: post.date,
-              tags: post.tags,
-              summary: post.summary,
-              draft: post.draft,
-              slug: post.slug,
-              layout: post.layout || 'PostLayout',
-              images: post.images || [],
-            });
-            setContent(post.content);
-            
-            // 데이터 로드 후에는 변경 사항 없음으로 초기화
-            setHasChanges(false); 
-          }
-        } catch (err) {
-          console.error('Failed to fetch initial post data:', err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      
-      // 변경사항이 없거나, 막 진입했을 때만 페칭
-      if (!hasChanges) {
-         fetchPostData();
-      }
-    } else if (!slugFromUrl && !initialData) {
-        // 새 글 작성 모드인데, 기존에 'new' draft가 있으면 복원 (위의 useEffect에서 처리됨)
-        // 하지만 만약 URL이 없는 상태로 왔는데 상태가 비어있지 않다면? (이전 state가 남아있는 경우)
-        // 리셋 필요
-        
-        // 이 부분은 별도 useEffect로 분리하거나, 위 복원 로직과 통합 필요.
-        // 여기서는 URL 변경 시 상태 리셋을 보장하기 위해 추가.
-        
-        // *중요*: 컴포넌트가 마운트될 때 draft_new를 복원하는 로직은 위의 useEffect에서 수행됨.
-        // 여기서는 페이지 이동(CSR)으로 인해 slug가 사라졌을 때만 리셋을 고려.
-    }
-  }, [initialData, searchParams]); // 의존성 배열에서 hasChanges 제거 (무한 루프 방지)
+  }, [initialData, searchParams]);
 
   // URL 변경 감지하여 새 글 모드일 때 리셋 (Client Side Navigation 대응)
   useEffect(() => {
@@ -367,13 +322,13 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
       
       // 저장 성공 시 해당 draft 삭제 (더 이상 임시 저장이 아님)
       const currentSlug = metadata.slug || ((result.slug) as string); // 저장 후 생성된 슬러그
-      localStorage.removeItem(getStorageKey('metadata', currentSlug));
-      localStorage.removeItem(getStorageKey('content', currentSlug));
+      removeDraft(getStorageKey('metadata', currentSlug));
+      removeDraft(getStorageKey('content', currentSlug));
       
       // 만약 새 글이었다면 'new' 키도 삭제
       if (!metadata.slug) {
-          localStorage.removeItem(getStorageKey('metadata'));
-          localStorage.removeItem(getStorageKey('content'));
+          removeDraft(getStorageKey('metadata'));
+          removeDraft(getStorageKey('content'));
           
           // 메타데이터에 슬러그 업데이트 (이제 기존 글임)
           setMetadata(prev => ({...prev, slug: currentSlug}));
@@ -404,9 +359,10 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
 
   const handleNewDocument = (confirm = true) => {
     const startNewDocument = () => {
+        const localIsoStringForReset = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
         setMetadata({
             title: '',
-            date: new Date().toISOString().split('T')[0],
+            date: localIsoStringForReset,
             tags: [],
             summary: '',
             draft: false,
@@ -423,8 +379,8 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
         newUrl.searchParams.delete('slug');
         window.history.pushState({}, '', newUrl.toString());
 
-        localStorage.removeItem(getStorageKey('metadata'));
-        localStorage.removeItem(getStorageKey('content'));
+        removeDraft(getStorageKey('metadata'));
+        removeDraft(getStorageKey('content'));
     };
 
     if (confirm && hasChanges) {

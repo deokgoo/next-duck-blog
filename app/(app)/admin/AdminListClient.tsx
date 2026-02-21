@@ -47,11 +47,41 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
   const [activeTab, setActiveTab] = useState<TabType>('all');
 
   const filteredPosts = posts.filter((post) => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'published') return !post.draft;
-    if (activeTab === 'draft') return post.draft;
-    return true;
+    if (activeTab === 'all') return post.status !== 'deleted';
+    if (activeTab === 'published') return post.status === 'published';
+    if (activeTab === 'draft') return post.status === 'draft';
+    return post.status !== 'deleted';
   });
+
+  const getDisplayStatus = (post: Post) => {
+    if (post.status === 'draft') return 'draft';
+    if (new Date(post.date).getTime() > Date.now()) return 'scheduled';
+    return 'published';
+  };
+
+  const toggleStatus = async (post: Post) => {
+    try {
+      // If draft, switch to published. If published/scheduled, switch to draft.
+      const newStatus = post.status === 'draft' ? 'published' : 'draft';
+      
+      const res = await fetch('/api/blog/status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ slug: post.slug, status: newStatus }),
+      });
+
+      if (res.ok) {
+        setPosts(posts.map(p => p.slug === post.slug ? { ...p, status: newStatus } : p));
+      } else {
+        alert('상태 변경에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error toggling status:', error);
+      alert('오류가 발생했습니다.');
+    }
+  };
 
   const confirmDelete = async () => {
     if (!deletingSlug || isHandlingDelete.current) return;
@@ -62,10 +92,12 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
     setIsDeleting(true);
 
     try {
+      const token = await user?.getIdToken();
       const res = await fetch('/api/blog/delete', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ slug }),
       });
@@ -118,31 +150,13 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
             </button>
           ))}
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 rounded-full bg-white pl-1 pr-3 py-1 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-sm">
-            {user?.photoURL ? (
-              <NextImage 
-                src={user.photoURL} 
-                alt="User Avatar" 
-                width={28} 
-                height={28} 
-                className="rounded-full"
-              />
-            ) : (
-              <div className="h-7 w-7 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
-            )}
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-              {user?.email}
-            </span>
-          </div>
-          <button
-            onClick={logout}
-            className="rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 border border-gray-200 transition-all dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 dark:hover:bg-red-900/20 dark:hover:text-red-400 shadow-sm"
-          >
-            Logout
-          </button>
-        </div>
+        
+        <Link
+          href="/admin/editor"
+          className="rounded-lg bg-black px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-100 shadow-lg shadow-black/10 active:scale-95"
+        >
+          New Post
+        </Link>
       </div>
 
       <div className="w-full">
@@ -179,24 +193,62 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
                               {post.title}
                             </Link>
                         </div>
-                        {post.draft ? (
-                            <span className="inline-flex items-center rounded-full border border-gray-300 dark:border-gray-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                              Draft
-                            </span>
-                        ) : (
-                            <span className="inline-flex items-center rounded-full bg-black dark:bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white dark:text-black">
-                              Published
-                            </span>
+                        {getDisplayStatus(post) === 'draft' && (
+                            <button 
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
+                              className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-gray-300 dark:border-gray-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            >
+                              <span className="mr-1 h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                              비전시 (Draft)
+                            </button>
+                        )}
+                        {getDisplayStatus(post) === 'scheduled' && (
+                            <div className="relative group/status flex">
+                              <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
+                                className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-yellow-300 bg-yellow-50 dark:border-yellow-600/50 dark:bg-yellow-900/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors"
+                              >
+                                <span className="mr-1 h-1.5 w-1.5 rounded-full bg-yellow-500"></span>
+                                예약됨
+                              </button>
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden w-max group-hover/status:block z-50">
+                                <div className="relative bg-gray-900 dark:bg-gray-100 text-white dark:text-black text-[10px] font-medium leading-relaxed rounded-md py-1.5 px-2.5 shadow-xl text-center">
+                                  예정: {formatDate(post.date, siteMetadata.locale)} {new Date(post.date).toLocaleTimeString(siteMetadata.locale, { hour: '2-digit', minute: '2-digit' })}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
+                                </div>
+                              </div>
+                            </div>
+                        )}
+                        {getDisplayStatus(post) === 'published' && (
+                            <div className="relative group/status flex">
+                              <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
+                                className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-green-300 bg-green-50 dark:border-green-600/50 dark:bg-green-900/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
+                              >
+                                <span className="mr-1 h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                                전시 중
+                              </button>
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden w-max group-hover/status:block z-50">
+                                <div className="relative bg-gray-900 dark:bg-gray-100 text-white dark:text-black text-[10px] font-medium leading-relaxed rounded-md py-1.5 px-2.5 shadow-xl text-center">
+                                  전시: {formatDate(post.date, siteMetadata.locale)} {new Date(post.date).toLocaleTimeString(siteMetadata.locale, { hour: '2-digit', minute: '2-digit' })}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
+                                </div>
+                              </div>
+                            </div>
                         )}
                     </div>
-                    <div className="text-xs text-gray-400 mt-1.5 font-mono">{post.slug}</div>
+                    <div className="text-xs text-gray-400 mt-1.5 font-mono flex gap-2">
+                        <span>{post.slug}</span>
+                    </div>
                   </td>
-                  <td className="px-6 py-5 text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                    {formatDate(post.date, siteMetadata.locale)}
+                  <td className="px-6 py-5 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {post.createdAt ? formatDate(post.createdAt, siteMetadata.locale) : formatDate(post.date, siteMetadata.locale)}
+                    </div>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-wrap gap-1.5">
-                      {post.tags.map((tag) => (
+                      {post.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag}
                           className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400 border border-transparent rounded uppercase"
@@ -204,12 +256,30 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
                           {tag}
                         </span>
                       ))}
+                      {post.tags.length > 3 && (
+                        <div className="relative group/tooltip">
+                          <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold text-gray-400 bg-gray-50 dark:bg-gray-900 dark:text-gray-500 border border-gray-200 dark:border-gray-800 rounded cursor-help">
+                            +{post.tags.length - 3}
+                          </span>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden w-max max-w-[200px] group-hover/tooltip:block z-50">
+                            <div className="relative bg-gray-900 dark:bg-gray-100 text-white dark:text-black text-[10px] font-medium leading-relaxed rounded-md py-1.5 px-2.5 shadow-xl text-center break-words">
+                              <div className="flex flex-wrap gap-1 justify-center">
+                                {post.tags.slice(3).map(t => (
+                                  <span key={`hidden-${t}`} className="inline-flex px-1.5 py-0.5 bg-gray-800 dark:bg-gray-200 rounded text-[9px] font-bold uppercase">{t}</span>
+                                ))}
+                              </div>
+                              {/* 꼬리 (말풍선) */}
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right">
                     <div className="flex justify-end items-center gap-4">
                       <Link
-                        href={`/editor?slug=${post.slug}`}
+                        href={`/admin/editor?slug=${post.slug}`}
                         className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white font-bold text-xs uppercase tracking-tighter"
                       >
                         Edit

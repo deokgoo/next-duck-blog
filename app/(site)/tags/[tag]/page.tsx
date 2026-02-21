@@ -1,6 +1,6 @@
 import { slug } from 'github-slugger';
 import { allCoreContent, sortPosts } from '@/lib/types';
-import { getAllPosts, getAllTags } from '@/lib/firestore';
+import { getAllPosts, getAllTags, isPostPublishedAndReady } from '@/lib/firestore';
 import siteMetadata from '@/data/siteMetadata';
 import ListLayout from '@/layouts/ListLayoutWithTags';
 import { genPageMetadata } from 'app/seo';
@@ -37,7 +37,7 @@ export default async function TagPage(props: { params: Promise<{ tag: string }> 
   const tag = decodeURI(params.tag);
   // Capitalize first letter and convert space to dash
   const title = tag[0].toUpperCase() + tag.split(' ').join('-').slice(1);
-  const allBlogs = await getAllPosts();
+  const allBlogs = (await getAllPosts()).filter(isPostPublishedAndReady);
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag)))
   );

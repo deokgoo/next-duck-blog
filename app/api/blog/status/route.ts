@@ -2,16 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { verifyAuth } from '@/lib/auth/serverAuth';
 
-export async function DELETE(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     if (!(await verifyAuth(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { slug } = await request.json();
+    const { slug, status } = await request.json();
 
-    if (!slug) {
-      return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
+    if (!slug || !status) {
+      return NextResponse.json({ error: 'Slug and status are required' }, { status: 400 });
     }
 
     // Check if document exists first
@@ -22,12 +22,12 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    // Delete the document (logical via status update)
-    await docRef.update({ status: 'deleted' });
+    // Update the status
+    await docRef.update({ status });
 
-    return NextResponse.json({ message: 'Post deleted successfully' });
+    return NextResponse.json({ message: 'Post status updated successfully' });
   } catch (error) {
-    console.error('Error deleting post:', error);
-    return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });
+    console.error('Error updating post status:', error);
+    return NextResponse.json({ error: 'Failed to update post status' }, { status: 500 });
   }
 }

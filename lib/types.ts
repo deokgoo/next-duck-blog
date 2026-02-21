@@ -2,11 +2,12 @@
 export type Post = {
   slug: string;
   title: string;
-  date: string;
+  date: string; // Publish Time (전시 시작 시간)
+  createdAt?: string; // Written Date (작성 날짜)
   tags: string[];
   summary: string;
   content: string;
-  draft: boolean;
+  status?: 'published' | 'draft' | 'deleted';  // Replaces `draft: boolean`
   layout?: string;
   images?: string[];
   authors?: string[];
@@ -39,6 +40,12 @@ export type Authors = {
   github?: string;
   layout?: string;
   body?: { code: string };
+  // Blog Metadata
+  blogTitle?: string;
+  blogDescription?: string;
+  siteLogo?: string;
+  favicon?: string;
+  socialBanner?: string;
 };
 
 export function sortPosts(posts: Post[]): Post[] {
@@ -53,14 +60,14 @@ export function sortPosts(posts: Post[]): Post[] {
 export const allAuthors: Authors[] = [
   {
     slug: 'default',
-    name: 'Deokgoo Kim',
+    name: 'Template User',
     avatar: '/static/images/avatar.jpg',
-    occupation: 'FE Developer',
-    company: 'Oliveyoung',
-    email: 'kkddgg1001@gmail.com',
-    twitter: 'https://twitter.com/Twitter',
+    occupation: 'Developer',
+    company: 'Company',
+    email: 'your.email@example.com',
+    twitter: 'https://twitter.com/x',
     linkedin: 'https://www.linkedin.com',
-    github: 'https://github.com/deokgoo',
+    github: 'https://github.com/username',
     layout: 'AuthorLayout',
     body: { code: '' },
   },

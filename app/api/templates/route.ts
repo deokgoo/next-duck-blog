@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { Template } from '@/lib/db/templates';
+import { verifyAuth } from '@/lib/auth/serverAuth';
 
 const COLLECTION_NAME = 'templates';
 
 export async function GET(request: NextRequest) {
   try {
+    if (!(await verifyAuth(request))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const snapshot = await db
       .collection(COLLECTION_NAME)
       .orderBy('createdAt', 'desc')
@@ -28,6 +33,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!(await verifyAuth(request))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     
     // Check if it's a seed request or single create
@@ -65,6 +74,10 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    if (!(await verifyAuth(request))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -85,6 +98,10 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    if (!(await verifyAuth(request))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { id, ...updates } = body;
 

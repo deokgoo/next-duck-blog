@@ -11,6 +11,7 @@ export interface MDXMetadata {
   summary: string;
   layout?: string;
   slug?: string;
+  createdAt?: string; // Written Date
   images?: string[];
 }
 
@@ -154,19 +155,33 @@ export default function MetadataPanel({
             </div>
           </div>
 
-          {/* 날짜와 레이아웃 */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* 날짜, 레이아웃, 전시 상태 */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
+              <label
+                htmlFor="createdAt"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                <Calendar className="mr-1 inline h-4 w-4" />
+                작성 날짜 (Written Date)
+              </label>
+              <input
+                id="createdAt"
+                type="date"
+                value={metadata.createdAt || ''}
+                onChange={(e) => updateMetadata('createdAt', e.target.value)}
+                className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white mb-4"
+              />
               <label
                 htmlFor="date"
                 className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 <Calendar className="mr-1 inline h-4 w-4" />
-                발행일
+                전시 시작 시간 (Publish Time)
               </label>
               <input
                 id="date"
-                type="date"
+                type="datetime-local"
                 value={metadata.date}
                 onChange={(e) => updateMetadata('date', e.target.value)}
                 className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -183,13 +198,41 @@ export default function MetadataPanel({
                 id="layout"
                 value={metadata.layout || ''}
                 onChange={(e) => updateMetadata('layout', e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white mb-4"
               >
                 <option value="">기본 레이아웃</option>
                 <option value="PostLayout">포스트 레이아웃</option>
                 <option value="PostSimple">간단한 포스트</option>
                 <option value="PostBanner">배너 포스트</option>
               </select>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Settings className="mr-1 inline h-4 w-4" />
+                전시 여부
+              </label>
+              <div className="flex items-center space-x-3 mt-3">
+                <button
+                  type="button"
+                  onClick={() => updateMetadata('draft', !metadata.draft)}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    !metadata.draft ? 'bg-green-500' : 'bg-gray-400'
+                  }`}
+                >
+                  <span className="sr-only">전시 상태 토글</span>
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      !metadata.draft ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+                <span className={`text-sm font-medium ${!metadata.draft ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
+                  {metadata.draft ? '비전시 (Draft)' : '전시 (Published)'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-3 leading-relaxed">
+                비전시 상태일 경우 목록에 노출되지 않으며 수정 상태로 유지됩니다. 전시 상태이더라도 시작 시간이 지나지 않으면 예약됨 상태가 됩니다.
+              </p>
             </div>
           </div>
 
@@ -260,29 +303,39 @@ export default function MetadataPanel({
             </div>
           </div>
 
-          {/* 상태 설정 */}
-          <div className="flex items-center justify-between rounded-md bg-gray-50 p-3 dark:bg-gray-700">
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center space-x-2">
+          {/* 전시 설정 */}
+          <div className="flex flex-col gap-2 rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              전시 설정
+            </span>
+            <div className="flex items-center space-x-6">
+              <label className="flex items-center space-x-2 cursor-pointer">
                 <input
-                  type="checkbox"
-                  checked={metadata.draft}
-                  onChange={(e) => updateMetadata('draft', e.target.checked)}
-                  className="rounded text-gray-600 focus:ring-gray-500"
+                  type="radio"
+                  name="displayStatus"
+                  checked={!metadata.draft}
+                  onChange={() => updateMetadata('draft', false)}
+                  className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">초안으로 저장</span>
+                <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  전시 (Public)
+                </span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="displayStatus"
+                  checked={metadata.draft}
+                  onChange={() => updateMetadata('draft', true)}
+                  className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300"
+                />
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  비전시 (Private)
+                </span>
               </label>
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {metadata.draft ? (
-                <span className="rounded bg-yellow-100 px-2 py-1 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                  초안
-                </span>
-              ) : (
-                <span className="rounded bg-green-100 px-2 py-1 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  발행됨
-                </span>
-              )}
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              * 설정한 <strong>전시 시작 시간</strong>이 도래해야만 실제 사용자 화면에 노출됩니다.
             </div>
           </div>
 

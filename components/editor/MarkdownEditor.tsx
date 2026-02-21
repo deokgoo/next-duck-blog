@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Bold,
   Italic,
@@ -55,31 +55,55 @@ export default function MarkdownEditor({
   // 히스토리 관리
   const [history, setHistory] = useState<string[]>([content]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 통계 계산
   const stats = {
     characters: content.length,
     words: content.trim() ? content.trim().split(/\s+/).length : 0,
     lines: content.split('\n').length,
-    readingTime: Math.max(1, Math.ceil(content.trim().split(/\s+/).length / 200)),
+    readingTime: Math.max(1, Math.ceil((content.trim() ? content.trim().split(/\s+/).length : 0) / 200)),
   };
 
   useEffect(() => {
-    if (content !== history[historyIndex]) {
-      setHistory([content]);
-      setHistoryIndex(0);
+    // 외부에서 내용이 주입된 경우 (예: 로드, 템플릿 등) 및 동기화
+    if (content !== history[historyIndex] && !typingTimerRef.current) {
+      setHistory((prev) => {
+        // 최초 로드 시(빈 문자열로 시작했고 새 데이터 도착) 히스토리를 덮어씌움
+        if (prev.length === 1 && prev[0] === '' && content !== '') {
+          return [content];
+        }
+        const newHistory = [...prev.slice(0, historyIndex + 1), content];
+        if (newHistory.length > 50) newHistory.shift();
+        return newHistory;
+      });
+      setHistoryIndex((prev) => (history.length === 1 && history[0] === '' && content !== '' ? 0 : Math.min(prev + 1, 49)));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
-  const addToHistory = (newContent: string) => {
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(newContent);
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  };
+  const addToHistory = useCallback(
+    (newContent: string) => {
+      setHistory((prev) => {
+        if (prev[historyIndex] === newContent) return prev;
+        const newHistory = prev.slice(0, historyIndex + 1);
+        newHistory.push(newContent);
+        if (newHistory.length > 50) newHistory.shift();
+        return newHistory;
+      });
+      setHistoryIndex((prev) => Math.min(prev + 1, 49));
+    },
+    [historyIndex]
+  );
 
   const handleContentChange = (newContent: string) => {
     onContentChange(newContent);
+    // 타이핑 디바운스 처리
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+    typingTimerRef.current = setTimeout(() => {
+      addToHistory(newContent);
+      typingTimerRef.current = null;
+    }, 1000);
   };
 
   // 이미지 삽입 헬퍼 함수
@@ -244,8 +268,45 @@ export default function MarkdownEditor({
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = Array.from(e.clipboardData.items);
+    const imageItem = items.find(item => item.type.startsWith('image/'));
+    
+    if (imageItem) {
+      e.preventDefault();
+      const file = imageItem.getAsFile();
+      if (file) {
+        // 복사/붙여넣기 시 랜덤 이름 방지를 위해 명시적 부여
+        const ext = file.type.split('/')[1] || 'png';
+        const renamedFile = new File([file], `pasted-image-${Date.now()}.${ext}`, { type: file.type });
+        uploadImageFile(renamedFile);
+      }
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+    
+    if (imageFile) {
+      e.preventDefault();
+      uploadImageFile(imageFile);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    const hasFiles = e.dataTransfer.types.includes('Files');
+    if (hasFiles) {
+      e.preventDefault();
+    }
+  };
+
   const undo = () => {
     if (historyIndex > 0) {
+      if (typingTimerRef.current) {
+        clearTimeout(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
       onContentChange(history[newIndex]);
@@ -254,6 +315,10 @@ export default function MarkdownEditor({
 
   const redo = () => {
     if (historyIndex < history.length - 1) {
+      if (typingTimerRef.current) {
+        clearTimeout(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
       onContentChange(history[newIndex]);
@@ -686,6 +751,9 @@ export default function MarkdownEditor({
                 value={content}
                 onChange={(e) => handleContentChange(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
                 className="h-full w-full resize-none border-none bg-transparent p-4 font-mono text-sm leading-relaxed text-slate-900 placeholder-slate-400 outline-none dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder={placeholder}
                 spellCheck={false}
@@ -714,6 +782,9 @@ export default function MarkdownEditor({
             value={content}
             onChange={(e) => handleContentChange(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
             className="h-full w-full resize-none border-none bg-transparent p-6 font-mono text-sm leading-relaxed text-slate-900 placeholder-slate-400 outline-none dark:text-slate-100 dark:placeholder-slate-500"
             placeholder={placeholder}
             spellCheck={false}

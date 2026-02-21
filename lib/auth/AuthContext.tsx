@@ -11,11 +11,9 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
 
-// 허용된 관리자 이메일 목록
-const ALLOWED_EMAILS = [
-  'deokgoo.kim@gmail.com', // 사용자 이메일 (추정)
-  'kkddgg1001@gmail.com',  // 실제 사용자 이메일
-];
+// 환경 변수 설정에서 관리자 이메일 목록을 불러옵니다 (',' 로 구분)
+const ADMIN_EMAILS_ENV = process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
+const ALLOWED_EMAILS = ADMIN_EMAILS_ENV.split(',').map(email => email.trim()).filter(Boolean);
 
 interface AuthContextType {
   user: User | null;

@@ -55,6 +55,7 @@ module.exports = withBundleAnalyzer({
   reactStrictMode: true,
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   outputFileTracingRoot: __dirname,
+  turbopack: {},
 
   images: {
     deviceSizes: [320, 420, 768, 1024, 1040, 1200, 1440], // 더 큰 사이즈 추가

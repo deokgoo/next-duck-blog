@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     const post = await getPostBySlug(slug);
 
-    if (!post) {
+    if (!post || post.status === 'deleted') {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
