@@ -55,33 +55,25 @@ module.exports = withBundleAnalyzer({
   reactStrictMode: true,
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   outputFileTracingRoot: __dirname,
-  turbopack: {},
-
+  // Next.js 16+ Turbopack: SVG를 React 컴포넌트로 import할 수 있도록 설정
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
   images: {
-    deviceSizes: [320, 420, 768, 1024, 1040, 1200, 1440], // 더 큰 사이즈 추가
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512, 768, 1040], // 1040 추가
-    formats: ['image/avif', 'image/webp'], // 최신 포맷 지원
+    deviceSizes: [320, 420, 768, 1024, 1040, 1200, 1440],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512, 768, 1040],
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-      },
-      {
-        protocol: 'https',
-        hostname: 'media.giphy.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.giphy.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'storage.googleapis.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-      },
+      { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'media.giphy.com' },
+      { protocol: 'https', hostname: 'i.giphy.com' },
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
   },
   async headers() {
@@ -91,15 +83,6 @@ module.exports = withBundleAnalyzer({
         headers: securityHeaders,
       },
     ];
-  },
-  // Next.js 16+ Turbopack과 Custom Webpack 설정 충돌 경고 무시
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
   },
   webpack: (config) => {
     config.module.rules.push({
