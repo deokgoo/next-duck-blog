@@ -1,4 +1,4 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
 
-# npx --no-install lint-staged
+# Windows 호환 파일명 검사
+sh "$(git rev-parse --show-toplevel)/scripts/check-filenames.sh"
