@@ -3,7 +3,12 @@ import 'katex/dist/katex.css';
 
 import { components } from '@/components/MDXComponents';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { getAllPosts, getPostBySlug, getAuthorBySlug, isPostPublishedAndReady } from '@/lib/firestore';
+import {
+  getAllPosts,
+  getPostBySlug,
+  getAuthorBySlug,
+  isPostPublishedAndReady,
+} from '@/lib/firestore';
 import { sortPosts, coreContent, allAuthors } from '@/lib/types';
 import type { Authors, Post as Blog } from '@/lib/types';
 import PostSimple from '@/layouts/PostSimple';
@@ -42,7 +47,9 @@ export async function generateMetadata(props: {
   const authorDetails = await Promise.all(
     authorList.map(async (authorSlug) => {
       const authorResults = await getAuthorBySlug(authorSlug);
-      return coreContent((authorResults || allAuthors.find((p) => p.slug === authorSlug) || allAuthors[0]) as Authors);
+      return coreContent(
+        (authorResults || allAuthors.find((p) => p.slug === authorSlug) || allAuthors[0]) as Authors
+      );
     })
   );
   if (!post) {
@@ -86,7 +93,7 @@ export async function generateMetadata(props: {
   };
 }
 
-export const revalidate = false; // 수동 캐시 무효화만 사용 (revalidatePath)
+export const revalidate = false; // ISR 1시간 주기 재검증 + 수동 캐시 무효화 (revalidatePath)
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;
@@ -94,7 +101,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const allPosts = (await getAllPosts()).filter(isPostPublishedAndReady);
   const sortedCoreContents = sortPosts(allPosts);
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug);
-  
+
   if (postIndex === -1) {
     return notFound();
   }
@@ -106,22 +113,24 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   // Add path to prev/next for layout compatibility
   const prev = prevItem ? { ...prevItem, path: `blog/${prevItem.slug}` } : undefined;
   const next = nextItem ? { ...nextItem, path: `blog/${nextItem.slug}` } : undefined;
-  
+
   // Add readingTime to post
   const wordCount = postItem.content.split(/\s+/gu).length;
   const readingTime = { minutes: Math.ceil(wordCount / 200) };
   const post = { ...postItem, readingTime };
-  
+
   const authorList = post?.authors || ['default'];
   const authorDetails = await Promise.all(
     authorList.map(async (authorSlug) => {
       const authorResults = await getAuthorBySlug(authorSlug);
       // fallback if Firestore returns null and mock isn't found
-      return coreContent((authorResults || allAuthors.find(a => a.slug === authorSlug) || allAuthors[0]) as Authors);
+      return coreContent(
+        (authorResults || allAuthors.find((a) => a.slug === authorSlug) || allAuthors[0]) as Authors
+      );
     })
   );
   const mainContent = coreContent(post);
-  
+
   // Structured Data (JSON-LD) - basic fallback if not in post
   const jsonLd = {
     '@context': 'https://schema.org',
