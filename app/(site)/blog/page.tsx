@@ -3,7 +3,7 @@ import { allCoreContent, sortPosts } from '@/lib/types';
 import { getAllPosts, getAllTags, isPostPublishedAndReady } from '@/lib/firestore';
 import { genPageMetadata } from 'app/seo';
 
-export const revalidate = false; // ISR 1시간 주기 재검증 + 수동 캐시 무효화
+export const revalidate = 31536000; // 1년 — 사실상 영구 캐시, revalidatePath()로 수동 갱신 // ISR 1시간 주기 재검증 + 수동 캐시 무효화
 
 const POSTS_PER_PAGE = 5;
 
