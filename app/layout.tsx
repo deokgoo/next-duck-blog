@@ -1,7 +1,7 @@
 import 'css/tailwind.css';
 import 'pliny/search/algolia.css';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = false; // 수동 캐시 무효화만 사용
 
 import { Space_Grotesk, Inter } from 'next/font/google';
 import localFont from 'next/font/local';

@@ -4,7 +4,7 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components';
 import AuthorLayout from '@/layouts/AuthorLayout';
 import { genPageMetadata } from 'app/seo';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400; // 24시간 캐시 (정적 페이지)
 
 export const metadata = genPageMetadata({ title: 'About' });
 

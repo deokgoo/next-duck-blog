@@ -2,7 +2,7 @@ import siteMetadata from '@/data/siteMetadata';
 import { getAllPosts, isPostPublishedAndReady } from '@/lib/firestore';
 import { MetadataRoute } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // 1시간 캐시
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl;
