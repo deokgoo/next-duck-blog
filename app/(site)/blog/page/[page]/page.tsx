@@ -2,7 +2,7 @@ import ListLayout from '@/layouts/ListLayoutWithTags';
 import { allCoreContent, sortPosts } from '@/lib/types';
 import { getAllPosts, getAllTags, isPostPublishedAndReady } from '@/lib/firestore';
 
-export const revalidate = false; // 수동 캐시 무효화만 사용
+export const revalidate = false; // ISR 1시간 주기 재검증 + 수동 캐시 무효화
 
 const POSTS_PER_PAGE = 5;
 

@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { db } from './firebaseAdmin';
 import { Post, Authors } from './types';
 
@@ -16,35 +17,28 @@ export function isPostPublishedAndReady(post: Post): boolean {
     // If it explicitly was marked draft true, it's not ready
     if (isDraft === true || String(isDraft) === 'true') return false;
   }
-  
+
   // Local time (or server time) comparison
   // Since date is stored as YYYY-MM-DDTHH:mm, we can safely parse it
   if (!post.date) return false;
   return new Date(post.date).getTime() <= Date.now();
 }
 
-export async function getAllPosts(): Promise<Post[]> {
-  const snapshot = await db.collection('posts')
-    .orderBy('date', 'desc')
-    .get();
+export const getAllPosts = cache(async (): Promise<Post[]> => {
+  const snapshot = await db.collection('posts').orderBy('date', 'desc').get();
 
-  return snapshot.docs
-    .map(doc => doc.data() as Post)
-    .filter(post => post.status !== 'deleted');
-}
+  return snapshot.docs.map((doc) => doc.data() as Post).filter((post) => post.status !== 'deleted');
+});
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
   // We stored slug as a field, but also as the doc ID (sanitized)
   // Querying by field 'slug' is safer as doc ID might differ slightly
-  const snapshot = await db.collection('posts')
-    .where('slug', '==', slug)
-    .limit(1)
-    .get();
+  const snapshot = await db.collection('posts').where('slug', '==', slug).limit(1).get();
 
   if (snapshot.empty) return null;
   const post = snapshot.docs[0].data() as Post;
   return post.status === 'deleted' ? null : post;
-}
+});
 
 export async function getAuthorBySlug(slug: string): Promise<Authors | null> {
   const docRef = db.collection('authors').doc(slug);
@@ -65,26 +59,23 @@ export async function updateAuthor(slug: string, data: Partial<Authors>): Promis
   await docRef.set(data, { merge: true });
 }
 
-export async function getAllTags(): Promise<Record<string, number>> {
+export const getAllTags = cache(async (): Promise<Record<string, number>> => {
   const posts = await getAllPosts();
   const tagCount: Record<string, number> = {};
-  
-  posts.forEach(post => {
+
+  posts.forEach((post) => {
     if (!isPostPublishedAndReady(post)) return;
-    post.tags.forEach(tag => {
+    post.tags.forEach((tag) => {
       const formattedTag = tag.trim(); // Keep original case for display but consistent
       const key = formattedTag.toLowerCase();
       // We might want to store the original casing too, but for counting let's use lower
       // For now, let's just count. If we need a map of slug -> display, we can add that later.
-      // Actually, existing code uses slug(t) which lowercases it. 
+      // Actually, existing code uses slug(t) which lowercases it.
       // Let's just count occurrences of the raw tag for now, or normalize to kebab-case?
       // Contentlayer usually does this. Let's stick to simple counting.
       tagCount[formattedTag] = (tagCount[formattedTag] || 0) + 1;
     });
   });
-  
+
   return tagCount;
-}
-
-
-
+});

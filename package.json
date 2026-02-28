@@ -19,6 +19,8 @@
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.13",
     "@types/mdx": "^2.0.13",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19.2.14",
     "autoprefixer": "^10.4.19",
     "cross-env": "^7.0.3",
     "esbuild": "0.20.2",
@@ -56,10 +58,8 @@
     "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",
     "tailwindcss": "^3.4.4",
-    "unist-util-visit": "^5.0.0",
     "typescript": "^5.9.3",
-    "@types/react": "^19.2.14",
-    "@types/node": "^25.2.3"
+    "unist-util-visit": "^5.0.0"
   },
   "lint-staged": {
     "*.+(js|jsx|ts|tsx)": [
@@ -73,10 +73,13 @@
     "@babel/eslint-parser": "^7.28.6",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
+    "@vitejs/plugin-react": "^5.1.4",
     "dotenv": "^17.3.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-mdx": "^3.6.2",
     "eslint-plugin-prettier": "^5.5.5",
-    "gray-matter": "^4.0.3"
+    "fast-check": "^4.5.3",
+    "gray-matter": "^4.0.3",
+    "vitest": "^4.0.18"
   }
 }
