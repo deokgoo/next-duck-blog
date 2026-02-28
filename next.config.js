@@ -10,8 +10,8 @@ const ContentSecurityPolicy = `
   media-src *.s3.amazonaws.com;
   connect-src * https://*.googleapis.com https://*.google.com https://*.firebaseio.com https://*.firebase.com;
   font-src 'self' https://fonts.gstatic.com;
-  frame-src giscus.app https://www.google.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://apis.google.com https://*.firebaseapp.com;
-`
+  frame-src giscus.app https://www.google.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://apis.google.com https://*.firebaseapp.com https://ep2.adtrafficquality.google;
+`;
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
