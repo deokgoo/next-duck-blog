@@ -2,7 +2,7 @@ import ListLayout from '@/layouts/ListLayoutWithTags';
 import { allCoreContent, sortPosts } from '@/lib/types';
 import { getAllPosts, getAllTags, isPostPublishedAndReady } from '@/lib/firestore';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = false; // 수동 캐시 무효화만 사용
 
 const POSTS_PER_PAGE = 5;
 

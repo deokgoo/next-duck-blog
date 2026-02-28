@@ -2,7 +2,7 @@ import { sortPosts, allCoreContent } from '@/lib/types';
 import { getAllPosts, isPostPublishedAndReady } from '@/lib/firestore';
 import Main from './Main';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = false; // 수동 캐시 무효화만 사용
 
 export default async function Page() {
   const allPosts = await getAllPosts();

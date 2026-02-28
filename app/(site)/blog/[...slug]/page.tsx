@@ -86,7 +86,7 @@ export async function generateMetadata(props: {
   };
 }
 
-export const dynamic = 'force-dynamic';
+export const revalidate = false; // 수동 캐시 무효화만 사용 (revalidatePath)
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;
