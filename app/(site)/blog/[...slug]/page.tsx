@@ -92,8 +92,14 @@ export async function generateMetadata(props: {
     },
   };
 }
+export async function generateStaticParams() {
+  const posts = (await getAllPosts()).filter(isPostPublishedAndReady);
+  return posts.map((post) => ({
+    slug: post.slug.split('/'),
+  }));
+}
 
-export const revalidate = false; // ISR 1시간 주기 재검증 + 수동 캐시 무효화 (revalidatePath)
+export const revalidate = 31536000; // 1년 — 사실상 영구 캐시, revalidatePath()로 수동 갱신 // ISR 1시간 주기 재검증 + 수동 캐시 무효화 (revalidatePath)
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;
