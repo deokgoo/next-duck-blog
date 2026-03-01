@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { Plus, X, Calendar, Hash, FileText, Settings, Save, Eye } from 'lucide-react';
+import LayoutThumbnailPicker from './LayoutThumbnailPicker';
+import BannerImageSetting from './BannerImageSetting';
 
 export interface MDXMetadata {
   title: string;
@@ -32,6 +34,16 @@ export default function MetadataPanel({
 }: MetadataPanelProps) {
   const [newTag, setNewTag] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const bannerImageUrl = metadata.images?.[0] || '';
+  const isPostBanner = metadata.layout === 'PostBanner';
+
+  const handleBannerImageChange = (url: string) => {
+    const newImages = url
+      ? [url, ...(metadata.images?.slice(1) || [])]
+      : metadata.images?.slice(1) || [];
+    onMetadataChange({ ...metadata, images: newImages });
+  };
 
   const addTag = () => {
     if (newTag.trim() && !metadata.tags.includes(newTag.trim())) {
@@ -170,7 +182,7 @@ export default function MetadataPanel({
                 type="date"
                 value={metadata.createdAt || ''}
                 onChange={(e) => updateMetadata('createdAt', e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white mb-4"
+                className="mb-4 w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
               <label
                 htmlFor="date"
@@ -188,30 +200,18 @@ export default function MetadataPanel({
               />
             </div>
             <div>
-              <label
-                htmlFor="layout"
-                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                레이아웃
-              </label>
-              <select
-                id="layout"
-                value={metadata.layout || ''}
-                onChange={(e) => updateMetadata('layout', e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white mb-4"
-              >
-                <option value="">기본 레이아웃</option>
-                <option value="PostLayout">포스트 레이아웃</option>
-                <option value="PostSimple">간단한 포스트</option>
-                <option value="PostBanner">배너 포스트</option>
-              </select>
+              <LayoutThumbnailPicker
+                selectedLayout={metadata.layout || 'PostLayout'}
+                bannerImageUrl={bannerImageUrl}
+                onLayoutChange={(layout) => updateMetadata('layout', layout)}
+              />
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 <Settings className="mr-1 inline h-4 w-4" />
                 전시 여부
               </label>
-              <div className="flex items-center space-x-3 mt-3">
+              <div className="mt-3 flex items-center space-x-3">
                 <button
                   type="button"
                   onClick={() => updateMetadata('draft', !metadata.draft)}
@@ -226,15 +226,33 @@ export default function MetadataPanel({
                     }`}
                   />
                 </button>
-                <span className={`text-sm font-medium ${!metadata.draft ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
+                <span
+                  className={`text-sm font-medium ${!metadata.draft ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}
+                >
                   {metadata.draft ? '비전시 (Draft)' : '전시 (Published)'}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 mt-3 leading-relaxed">
-                비전시 상태일 경우 목록에 노출되지 않으며 수정 상태로 유지됩니다. 전시 상태이더라도 시작 시간이 지나지 않으면 예약됨 상태가 됩니다.
+              <p className="mt-3 text-xs leading-relaxed text-gray-400">
+                비전시 상태일 경우 목록에 노출되지 않으며 수정 상태로 유지됩니다. 전시 상태이더라도
+                시작 시간이 지나지 않으면 예약됨 상태가 됩니다.
               </p>
             </div>
           </div>
+
+          {/* 배너 이미지 설정 */}
+          <BannerImageSetting
+            imageUrl={bannerImageUrl}
+            slug={metadata.slug || ''}
+            isPostBanner={isPostBanner}
+            onImageChange={handleBannerImageChange}
+          />
+
+          {/* PostBanner 선택 + 배너 이미지 미설정 시 안내 메시지 */}
+          {isPostBanner && !bannerImageUrl && (
+            <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+              PostBanner 레이아웃을 선택하셨습니다. 배너 이미지를 설정하면 포스트 상단에 표시됩니다.
+            </div>
+          )}
 
           {/* 요약 */}
           <div>
@@ -305,29 +323,29 @@ export default function MetadataPanel({
 
           {/* 전시 설정 */}
           <div className="flex flex-col gap-2 rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <span className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               전시 설정
             </span>
             <div className="flex items-center space-x-6">
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex cursor-pointer items-center space-x-2">
                 <input
                   type="radio"
                   name="displayStatus"
                   checked={!metadata.draft}
                   onChange={() => updateMetadata('draft', false)}
-                  className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                  className="h-4 w-4 border-gray-300 text-green-600 focus:ring-green-500"
                 />
                 <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
                   전시 (Public)
                 </span>
               </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex cursor-pointer items-center space-x-2">
                 <input
                   type="radio"
                   name="displayStatus"
                   checked={metadata.draft}
                   onChange={() => updateMetadata('draft', true)}
-                  className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300"
+                  className="h-4 w-4 border-gray-300 text-gray-600 focus:ring-gray-500"
                 />
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   비전시 (Private)
