@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Save, FileText, Clock, AlignLeft, Hash } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import MetadataPanel from './MetadataPanel';
@@ -28,6 +28,10 @@ export default function IntegratedEditor({ className = '' }: IntegratedEditorPro
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Refs for slug tracking and save mutex
+  const originalSlugRef = useRef('');
+  const isSavingRef = useRef(false);
 
   // 자동 저장 (로컬 스토리지)
   useEffect(() => {
@@ -83,6 +87,10 @@ export default function IntegratedEditor({ className = '' }: IntegratedEditorPro
       return;
     }
 
+    // 저장 뮤텍스: 동시 저장 방지
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
+
     setIsLoading(true);
     setSaveStatus('saving');
 
@@ -98,6 +106,7 @@ export default function IntegratedEditor({ className = '' }: IntegratedEditorPro
         body: JSON.stringify({
           ...metadata,
           content,
+          previousSlug: originalSlugRef.current,
         }),
       });
 
@@ -107,6 +116,11 @@ export default function IntegratedEditor({ className = '' }: IntegratedEditorPro
       }
 
       const result = await response.json();
+
+      // 성공 시 originalSlugRef 업데이트
+      if (result.slug) {
+        originalSlugRef.current = result.slug;
+      }
 
       setSaveStatus('saved');
       setLastSaved(new Date());
@@ -123,6 +137,7 @@ export default function IntegratedEditor({ className = '' }: IntegratedEditorPro
       setSaveStatus('error');
       alert(error instanceof Error ? error.message : '저장에 실패했습니다.');
     } finally {
+      isSavingRef.current = false;
       setIsLoading(false);
 
       // 상태 초기화
