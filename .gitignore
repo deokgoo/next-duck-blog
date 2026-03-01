@@ -57,3 +57,4 @@ public/search.json
 
 # Google Search Console verification (개인별로 발급, 직접 추가)
 public/google*.html
+ads.txt
