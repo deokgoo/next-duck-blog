@@ -26,13 +26,10 @@ export function isPostPublishedAndReady(post: Post): boolean {
 
 export const getAllPosts = cache(async (): Promise<Post[]> => {
   const snapshot = await db.collection('posts').orderBy('date', 'desc').get();
-
   return snapshot.docs.map((doc) => doc.data() as Post).filter((post) => post.status !== 'deleted');
 });
 
 export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
-  // We stored slug as a field, but also as the doc ID (sanitized)
-  // Querying by field 'slug' is safer as doc ID might differ slightly
   const snapshot = await db.collection('posts').where('slug', '==', slug).limit(1).get();
 
   if (snapshot.empty) return null;
@@ -45,8 +42,6 @@ export async function getAuthorBySlug(slug: string): Promise<Authors | null> {
   const docSnap = await docRef.get();
 
   if (!docSnap.exists) {
-    // If not found in DB, fallback to the hardcoded mock for seamless transition
-    // Need to dynamically import to prevent circular dependency if they import firestore
     const { allAuthors } = await import('./types');
     const author = allAuthors.find((p) => p.slug === slug);
     return author || null;

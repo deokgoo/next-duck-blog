@@ -1,4 +1,3 @@
-
 export type Post = {
   slug: string;
   title: string;
@@ -7,7 +6,7 @@ export type Post = {
   tags: string[];
   summary: string;
   content: string;
-  status?: 'published' | 'draft' | 'deleted';  // Replaces `draft: boolean`
+  status?: 'published' | 'draft' | 'deleted'; // Replaces `draft: boolean`
   layout?: string;
   images?: string[];
   authors?: string[];
@@ -46,6 +45,8 @@ export type Authors = {
   siteLogo?: string;
   favicon?: string;
   socialBanner?: string;
+  // 포스트/푸터에 표시할 소셜 링크 종류 (예: ['github', 'email'])
+  visibleSocials?: string[];
 };
 
 export function sortPosts(posts: Post[]): Post[] {
