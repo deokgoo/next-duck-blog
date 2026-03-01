@@ -96,6 +96,8 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
 
   // Refs
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const originalSlugRef = useRef(initialData?.slug || '');
+  const isSavingRef = useRef(false);
 
   // 통계 계산
   const stats = {
@@ -152,6 +154,9 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
     // 조건: 변경사항이 있고, 제목이 있어야 함
     if (!hasChanges || !metadata.title.trim()) return;
 
+    // 저장 뮤텍스: 동시 저장 방지
+    if (isSavingRef.current) return;
+
     // 조건: 새 글 작성 시에만 자동 저장 동작 (수정 모드에선 비활성화)
     const isNewPost = !metadata.slug;
 
@@ -159,6 +164,7 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
       return;
     }
 
+    isSavingRef.current = true;
     setServerAutoSaveStatus('saving');
 
     try {
@@ -170,7 +176,7 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ metadata, content }),
+        body: JSON.stringify({ metadata, content, previousSlug: originalSlugRef.current }),
       });
 
       if (response.ok) {
@@ -179,6 +185,10 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
         if (!metadata.slug && result.slug) {
           setMetadata((prev) => ({ ...prev, slug: result.slug }));
           // URL을 조용히 업데이트? -> 아니오, 꼬일 수 있음. 그냥 내부 state만 업데이트.
+        }
+        // 성공 시 originalSlugRef 업데이트
+        if (result.slug) {
+          originalSlugRef.current = result.slug;
         }
         setServerAutoSaveStatus('saved');
         setTimeout(() => setServerAutoSaveStatus('idle'), 3000);
@@ -189,6 +199,8 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
     } catch (error) {
       console.error('Server auto-save failed:', error);
       setServerAutoSaveStatus('error');
+    } finally {
+      isSavingRef.current = false;
     }
   }, [metadata, content, hasChanges, initialData]);
 
@@ -305,6 +317,10 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
       return;
     }
 
+    // 저장 뮤텍스: 동시 저장 방지
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
+
     setIsLoading(true);
     setSaveStatus('saving');
 
@@ -319,6 +335,7 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
         body: JSON.stringify({
           metadata,
           content,
+          previousSlug: originalSlugRef.current,
         }),
       });
 
@@ -328,6 +345,11 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
 
       const result = await response.json();
       console.log('저장 완료:', result);
+
+      // 성공 시 originalSlugRef 업데이트
+      if (result.slug) {
+        originalSlugRef.current = result.slug;
+      }
 
       setSaveStatus('saved');
       setLastSaved(new Date());
@@ -366,6 +388,7 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
         setSaveStatus('idle');
       }, 3000);
     } finally {
+      isSavingRef.current = false;
       setIsLoading(false);
     }
   };

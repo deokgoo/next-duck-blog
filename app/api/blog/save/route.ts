@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { content, metadata } = await request.json();
+    const { content, metadata, previousSlug } = await request.json();
 
     // 슬러그 생성 (제목 기반)
     const slug =
@@ -36,8 +36,18 @@ export async function POST(request: NextRequest) {
       lastmod: new Date().toISOString(),
     };
 
-    // Firestore에 문서 저장 (덮어쓰기)
-    await db.collection('posts').doc(slug).set(postData);
+    // Firestore에 문서 저장
+    if (previousSlug && previousSlug !== slug) {
+      // slug가 변경된 경우: 이전 문서 삭제 + 새 문서 생성을 원자적으로 수행
+      await db.runTransaction(async (transaction: FirebaseFirestore.Transaction) => {
+        transaction.delete(db.collection('posts').doc(previousSlug));
+        transaction.set(db.collection('posts').doc(slug), postData);
+      });
+      revalidatePath(`/blog/${previousSlug}`);
+    } else {
+      // 기존 동작: 덮어쓰기
+      await db.collection('posts').doc(slug).set(postData);
+    }
 
     // 캐시 즉시 무효화 - 저장한 글과 목록 페이지를 바로 갱신
     revalidatePath(`/blog/${slug}`);
