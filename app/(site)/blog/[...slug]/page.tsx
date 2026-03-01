@@ -104,17 +104,20 @@ export const revalidate = 31536000; // 1년 — 사실상 영구 캐시, revalid
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;
   const slug = decodeURI(params.slug.join('/'));
+
+  // 해당 포스트를 직접 조회 (slug 기반)
+  const postItem = await getPostBySlug(slug);
+  if (!postItem || postItem.status === 'deleted') {
+    return notFound();
+  }
+
+  // prev/next 계산을 위해 전체 목록 조회
   const allPosts = (await getAllPosts()).filter(isPostPublishedAndReady);
   const sortedCoreContents = sortPosts(allPosts);
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug);
 
-  if (postIndex === -1) {
-    return notFound();
-  }
-
-  const prevItem = sortedCoreContents[postIndex + 1];
-  const nextItem = sortedCoreContents[postIndex - 1];
-  const postItem = sortedCoreContents[postIndex];
+  const prevItem = postIndex >= 0 ? sortedCoreContents[postIndex + 1] : undefined;
+  const nextItem = postIndex >= 0 ? sortedCoreContents[postIndex - 1] : undefined;
 
   // Add path to prev/next for layout compatibility
   const prev = prevItem ? { ...prevItem, path: `blog/${prevItem.slug}` } : undefined;
