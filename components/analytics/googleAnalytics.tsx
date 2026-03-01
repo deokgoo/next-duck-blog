@@ -6,11 +6,13 @@ const GAScript = () => {
   return (
     <>
       <Head>
-        {/* google search console 인증을 위함 */}
-        <meta
-          name="google-site-verification"
-          content="b_LbgCHHUhfkQ-P2Ug9l9U-e6Pyp6n8hzmR9aubp8Ec"
-        />
+        {/* Google Search Console 인증을 위함 */}
+        {process.env.GOOGLE_SITE_VERIFICATION_ID && (
+          <meta
+            name="google-site-verification"
+            content={process.env.GOOGLE_SITE_VERIFICATION_ID}
+          />
+        )}
       </Head>
       <Script
         strategy="lazyOnload"
