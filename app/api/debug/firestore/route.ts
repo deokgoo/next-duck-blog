@@ -20,6 +20,30 @@ export async function GET() {
       postCount: snapshot.size,
       slugs: snapshot.docs.map((doc) => doc.data().slug),
     };
+
+    // 특정 slug 직접 조회
+    const targetSlug = 'change-blog-to-next-16';
+    const targetSnapshot = await db
+      .collection('posts')
+      .where('slug', '==', targetSlug)
+      .limit(1)
+      .get();
+    results.targetPost = targetSnapshot.empty
+      ? { status: '❌ not found', slug: targetSlug }
+      : {
+          status: '✅ found',
+          slug: targetSlug,
+          data: {
+            title: targetSnapshot.docs[0].data().title,
+            status: targetSnapshot.docs[0].data().status,
+            date: targetSnapshot.docs[0].data().date,
+          },
+        };
+
+    // 전체 post 수
+    const allSnapshot = await db.collection('posts').get();
+    results.totalPosts = allSnapshot.size;
+    results.allSlugs = allSnapshot.docs.map((doc) => doc.data().slug);
   } catch (error: any) {
     results.firestore = {
       status: '❌ error',
