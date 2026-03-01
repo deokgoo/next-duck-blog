@@ -113,7 +113,8 @@ export default function ListLayout({
         <ul>
           {!filteredBlogPosts.length && 'No posts found.'}
           {displayPosts.map((post) => {
-            const { slug, date, title, summary, tags } = post;
+            const { slug, date, title, summary, tags, createdAt } = post;
+            const displayDate = createdAt || date;
             const path = `blog/${slug}`;
             return (
               <li key={slug} className="py-4">
@@ -121,7 +122,9 @@ export default function ListLayout({
                   <dl>
                     <dt className="sr-only">Published on</dt>
                     <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                      <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
+                      <time dateTime={displayDate}>
+                        {formatDate(displayDate, siteMetadata.locale)}
+                      </time>
                     </dd>
                   </dl>
                   <div className="space-y-3 xl:col-span-3">

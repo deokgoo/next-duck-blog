@@ -26,7 +26,8 @@ interface LayoutProps {
 }
 
 export default function PostModern({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { slug, date, title, tags, readingTime } = content;
+  const { slug, date, title, tags, readingTime, createdAt } = content;
+  const displayDate = createdAt || date;
   const path = `blog/${slug}`;
   const basePath = 'blog';
 
@@ -45,8 +46,8 @@ export default function PostModern({ content, authorDetails, next, prev, childre
               </div>
               <PageTitle>{title}</PageTitle>
               <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                <time dateTime={date}>
-                  {new Date(date).toLocaleDateString(siteMetadata.locale, postDateTemplate)}
+                <time dateTime={displayDate}>
+                  {new Date(displayDate).toLocaleDateString(siteMetadata.locale, postDateTemplate)}
                 </time>
                 {readingTime && <span>• {Math.ceil(readingTime.minutes)}분 읽기</span>}
               </div>
@@ -134,10 +135,8 @@ export default function PostModern({ content, authorDetails, next, prev, childre
       )}
 
       {siteMetadata.newsletter?.provider && (
-        <div className="flex items-center justify-center pt-6 pb-6">
-          <KoreanNewsletterForm
-            showBenefits={true}
-          />
+        <div className="flex items-center justify-center pb-6 pt-6">
+          <KoreanNewsletterForm showBenefits={true} />
         </div>
       )}
     </SectionContainer>

@@ -17,7 +17,8 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, next, prev, children }: LayoutProps) {
-  const { slug, date, title } = content;
+  const { slug, date, title, createdAt } = content;
+  const displayDate = createdAt || date;
 
   return (
     <SectionContainer>
@@ -30,7 +31,9 @@ export default function PostLayout({ content, next, prev, children }: LayoutProp
                 <div>
                   <dt className="sr-only">Published on</dt>
                   <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                    <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
+                    <time dateTime={displayDate}>
+                      {formatDate(displayDate, siteMetadata.locale)}
+                    </time>
                   </dd>
                 </div>
               </dl>
@@ -49,10 +52,8 @@ export default function PostLayout({ content, next, prev, children }: LayoutProp
               </div>
             )}
             {siteMetadata.newsletter?.provider && (
-              <div className="flex items-center justify-center pt-6 pb-6">
-                <KoreanNewsletterForm
-                  showBenefits={true}
-                />
+              <div className="flex items-center justify-center pb-6 pt-6">
+                <KoreanNewsletterForm showBenefits={true} />
               </div>
             )}
             <footer>

@@ -22,7 +22,8 @@ export default function Home({ posts }) {
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {!posts.length && 'No posts found.'}
           {posts.slice(0, MAX_DISPLAY).map((post) => {
-            const { slug, date, title, summary, tags } = post;
+            const { slug, date, title, summary, tags, createdAt } = post;
+            const displayDate = createdAt || date;
             return (
               <li key={slug} className="py-6">
                 <article>
@@ -31,7 +32,9 @@ export default function Home({ posts }) {
                       <dl>
                         <dt className="sr-only">Published on</dt>
                         <dd className="text-sm font-medium leading-6 text-gray-500 dark:text-gray-400">
-                          <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
+                          <time dateTime={displayDate}>
+                            {formatDate(displayDate, siteMetadata.locale)}
+                          </time>
                         </dd>
                       </dl>
                       <div className="space-y-2 xl:col-span-3">
@@ -78,10 +81,7 @@ export default function Home({ posts }) {
       )}
       {siteMetadata.newsletter?.provider && (
         <div className="flex items-center justify-center pt-4">
-          <KoreanNewsletterForm
-            compact={true}
-            showBenefits={false}
-          />
+          <KoreanNewsletterForm compact={true} showBenefits={false} />
         </div>
       )}
     </>

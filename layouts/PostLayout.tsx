@@ -33,7 +33,8 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { slug, date, title, tags } = content;
+  const { slug, date, title, tags, createdAt } = content;
+  const displayDate = createdAt || date;
   const path = `blog/${slug}`;
   const basePath = 'blog';
 
@@ -55,8 +56,11 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                 <div>
                   <dt className="sr-only">Published on</dt>
                   <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                    <time dateTime={date}>
-                      {new Date(date).toLocaleDateString(siteMetadata.locale, postDateTemplate)}
+                    <time dateTime={displayDate}>
+                      {new Date(displayDate).toLocaleDateString(
+                        siteMetadata.locale,
+                        postDateTemplate
+                      )}
                     </time>
                   </dd>
                 </div>
@@ -122,10 +126,8 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                 </div>
               )}
               {siteMetadata.newsletter?.provider && (
-                <div className="flex items-center justify-center pt-6 pb-6">
-                  <KoreanNewsletterForm
-                    showBenefits={true}
-                  />
+                <div className="flex items-center justify-center pb-6 pt-6">
+                  <KoreanNewsletterForm showBenefits={true} />
                 </div>
               )}
             </div>

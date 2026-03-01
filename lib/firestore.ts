@@ -6,22 +6,14 @@ import { Post, Authors } from './types';
 export type { Post, Authors }; // Re-export for convenience if needed, but better to import from types
 export * from './types'; // Re-export everything from types
 
-// Helper to check if a post is fully published (status is published and date has passed)
+// status가 published인지 확인 (날짜 필터링 없음)
 export function isPostPublishedAndReady(post: Post): boolean {
-  // Backwards compatibility: if status is undefined, check draft
   if (post.status) {
-    if (post.status !== 'published') return false;
-  } else {
-    // If no status is defined (older posts), check the old 'draft' boolean directly
-    const isDraft = (post as any).draft;
-    // If it explicitly was marked draft true, it's not ready
-    if (isDraft === true || String(isDraft) === 'true') return false;
+    return post.status === 'published';
   }
-
-  // Local time (or server time) comparison
-  // Since date is stored as YYYY-MM-DDTHH:mm, we can safely parse it
-  if (!post.date) return false;
-  return new Date(post.date).getTime() <= Date.now();
+  // Backwards compatibility: status가 없는 이전 포스트는 draft 필드 확인
+  const isDraft = (post as any).draft;
+  return isDraft !== true && String(isDraft) !== 'true';
 }
 
 export const getAllPosts = cache(async (): Promise<Post[]> => {
