@@ -24,10 +24,9 @@ export async function POST(request: NextRequest) {
 
     await docRef.update({ status });
 
-    // 캐시 즉시 무효화 (publish/unpublish 모두 즉시 반영)
+    // 캐시 즉시 무효화 (publish/unpublish 모두 즉시 반영) - 루트는 제외하여 edge request 최소화
     revalidatePath(`/blog/${slug}`);
     revalidatePath('/blog');
-    revalidatePath('/');
 
     return NextResponse.json({ message: 'Post status updated successfully' });
   } catch (error) {

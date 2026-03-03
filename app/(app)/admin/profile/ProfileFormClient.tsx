@@ -9,9 +9,10 @@ import Link from 'next/link';
 
 interface ProfileFormClientProps {
   initialData: Authors;
+  allTags?: string[];
 }
 
-export default function ProfileFormClient({ initialData }: ProfileFormClientProps) {
+export default function ProfileFormClient({ initialData, allTags = [] }: ProfileFormClientProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<Authors>(initialData);
   const [isSaving, setIsSaving] = useState(false);
@@ -280,6 +281,51 @@ export default function ProfileFormClient({ initialData }: ProfileFormClientProp
           </div>
         </div>
       </div>
+
+      {/* Featured Tags Section */}
+      {allTags.length > 0 && (
+        <div className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-gray-100">
+            대표 태그 (Featured Tags)
+          </h3>
+          <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+            메인 페이지에 필터 버튼으로 표시할 태그를 선택하세요. 선택한 순서대로 표시됩니다.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {allTags.map((tag) => {
+              const selectedIndex = (formData.featuredTags || []).indexOf(tag);
+              const checked = selectedIndex !== -1;
+              return (
+                <label
+                  key={tag}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                    checked
+                      ? 'border-black bg-black/5 dark:border-white dark:bg-white/10'
+                      : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => {
+                      setFormData((prev) => {
+                        const current = prev.featuredTags || [];
+                        const isSelected = current.includes(tag);
+                        const next = isSelected
+                          ? current.filter((t) => t !== tag)
+                          : [...current, tag];
+                        return { ...prev, featuredTags: next };
+                      });
+                    }}
+                    className="rounded border-gray-300 text-black focus:ring-black dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-white"
+                  />
+                  {checked ? `${selectedIndex + 1}. ${tag}` : tag}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Blog Metadata Section */}
       <div className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">

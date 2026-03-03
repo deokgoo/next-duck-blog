@@ -47,6 +47,8 @@ export type Authors = {
   socialBanner?: string;
   // 포스트/푸터에 표시할 소셜 링크 종류 (예: ['github', 'email'])
   visibleSocials?: string[];
+  // 대표 태그 (메인 페이지 필터 버튼으로 표시)
+  featuredTags?: string[];
 };
 
 export function sortPosts(posts: Post[]): Post[] {

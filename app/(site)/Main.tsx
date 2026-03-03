@@ -1,13 +1,26 @@
+'use client';
+
+import { useState } from 'react';
 import Link from '@/components/Link';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
 import { formatDate } from 'pliny/utils/formatDate';
-// import NewsletterForm from 'pliny/ui/NewsletterForm'; // 한국어 버전으로 교체
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
+import { filterPostsByTag } from '@/lib/utils/filterPosts';
+import TagFilterBar from '@/components/TagFilterBar';
+import { Post } from '@/lib/types';
 
 const MAX_DISPLAY = 10; // 5개 → 10개로 증가
 
-export default function Home({ posts }) {
+interface MainProps {
+  posts: Post[];
+  featuredTags: string[];
+}
+
+export default function Home({ posts, featuredTags }: MainProps) {
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const filteredPosts = filterPostsByTag(posts, selectedTag);
+
   return (
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -19,9 +32,18 @@ export default function Home({ posts }) {
             {siteMetadata.description}
           </p>
         </div>
+        {featuredTags.length > 0 && (
+          <div className="py-4">
+            <TagFilterBar
+              tags={featuredTags}
+              selectedTag={selectedTag}
+              onSelectTag={setSelectedTag}
+            />
+          </div>
+        )}
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-          {!posts.length && 'No posts found.'}
-          {posts.slice(0, MAX_DISPLAY).map((post) => {
+          {!filteredPosts.length && 'No posts found.'}
+          {filteredPosts.slice(0, MAX_DISPLAY).map((post) => {
             const { slug, date, title, summary, tags, createdAt } = post;
             const displayDate = createdAt || date;
             return (
@@ -68,7 +90,7 @@ export default function Home({ posts }) {
           })}
         </ul>
       </div>
-      {posts.length > MAX_DISPLAY && (
+      {filteredPosts.length > MAX_DISPLAY && (
         <div className="flex justify-end text-base font-medium leading-6">
           <Link
             href="/blog"
