@@ -24,6 +24,7 @@ import {
   FileCode,
   Images,
 } from 'lucide-react';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 interface MarkdownEditorProps {
   content: string;
@@ -44,6 +45,7 @@ export default function MarkdownEditor({
   className = '',
   slug = '',
 }: MarkdownEditorProps) {
+  const { user } = useAuth();
   const [showPreview, setShowPreview] = useState(false);
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [imageMode, setImageMode] = useState<'single' | 'double' | null>(null);
@@ -157,8 +159,12 @@ export default function MarkdownEditor({
       formData.append('file', file);
       formData.append('folderName', slug || 'default');
 
+      const token = await user?.getIdToken();
       const response = await fetch('/api/images/upload', {
         method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: formData,
       });
 
@@ -227,8 +233,12 @@ export default function MarkdownEditor({
       formData.append('file', file);
       formData.append('folderName', slug || 'default');
 
+      const token = await user?.getIdToken();
       const response = await fetch('/api/images/upload', {
         method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: formData,
       });
 
@@ -271,7 +281,7 @@ export default function MarkdownEditor({
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = Array.from(e.clipboardData.items);
     const imageItem = items.find(item => item.type.startsWith('image/'));
-    
+
     if (imageItem) {
       e.preventDefault();
       const file = imageItem.getAsFile();
@@ -287,7 +297,7 @@ export default function MarkdownEditor({
   const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(file => file.type.startsWith('image/'));
-    
+
     if (imageFile) {
       e.preventDefault();
       uploadImageFile(imageFile);
