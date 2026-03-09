@@ -49,9 +49,10 @@ export async function POST(request: NextRequest) {
       await db.collection('posts').doc(slug).set(postData);
     }
 
-    // 캐시 즉시 무효화 - 저장한 글과 목록 페이지만 갱신 (루트는 제외하여 edge request 최소화)
+    // 캐시 즉시 무효화
     revalidatePath(`/blog/${slug}`);
     revalidatePath('/blog');
+    revalidatePath('/');
 
     return NextResponse.json({
       success: true,

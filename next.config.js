@@ -8,7 +8,7 @@ const path = require('path');
 // ads.txt 파일을 환경변수 기반으로 생성하는 함수
 function generateAdsText() {
   const adsenseId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID;
-  
+
   if (!adsenseId) {
     console.log('ℹ️  NEXT_PUBLIC_GOOGLE_ADSENSE_ID가 설정되지 않아 ads.txt를 생성하지 않습니다.');
     return;
@@ -16,20 +16,20 @@ function generateAdsText() {
 
   // Publisher ID에서 ca-pub- 접두사 제거
   const publisherId = adsenseId.replace('ca-pub-', '');
-  
+
   // ads.txt 내용 생성
   const adsContent = `google.com, pub-${publisherId}, DIRECT, f08c47fec0942fa0`;
-  
+
   // public 디렉토리에 ads.txt 파일 생성
   const publicDir = path.join(__dirname, 'public');
   const adsFilePath = path.join(publicDir, 'ads.txt');
-  
+
   try {
     // public 디렉토리가 없으면 생성
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir, { recursive: true });
     }
-    
+
     // ads.txt 파일 생성
     fs.writeFileSync(adsFilePath, adsContent);
     console.log('✅ ads.txt 파일이 성공적으로 생성되었습니다:', adsFilePath);
@@ -44,7 +44,7 @@ generateAdsText();
 
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is cloud.umami.is https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://apis.google.com https://www.gstatic.com https://fundingchoicesmessages.google.com https://ep2.adtrafficquality.google;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is cloud.umami.is https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://apis.google.com https://www.gstatic.com https://fundingchoicesmessages.google.com https://ep2.adtrafficquality.google https://vercel.live;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src * blob: data:;
   media-src *.s3.amazonaws.com;

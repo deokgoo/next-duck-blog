@@ -53,13 +53,7 @@ export const getAllTags = cache(async (): Promise<Record<string, number>> => {
   posts.forEach((post) => {
     if (!isPostPublishedAndReady(post)) return;
     post.tags.forEach((tag) => {
-      const formattedTag = tag.trim(); // Keep original case for display but consistent
-      const key = formattedTag.toLowerCase();
-      // We might want to store the original casing too, but for counting let's use lower
-      // For now, let's just count. If we need a map of slug -> display, we can add that later.
-      // Actually, existing code uses slug(t) which lowercases it.
-      // Let's just count occurrences of the raw tag for now, or normalize to kebab-case?
-      // Contentlayer usually does this. Let's stick to simple counting.
+      const formattedTag = tag.trim();
       tagCount[formattedTag] = (tagCount[formattedTag] || 0) + 1;
     });
   });

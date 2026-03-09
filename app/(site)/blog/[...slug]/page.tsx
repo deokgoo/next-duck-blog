@@ -99,7 +99,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export const revalidate = 31536000; // 1년 — 사실상 영구 캐시, revalidatePath()로 수동 갱신 // ISR 1시간 주기 재검증 + 수동 캐시 무효화 (revalidatePath)
+export const revalidate = 31536000; // 1년 — 사실상 영구 캐시, revalidatePath()로 수동 갱신
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;

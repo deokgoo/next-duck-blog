@@ -25,9 +25,10 @@ export async function DELETE(request: NextRequest) {
     // 논리 삭제 (status를 'deleted'로 변경)
     await docRef.update({ status: 'deleted' });
 
-    // 캐시 즉시 무효화 - 루트는 제외하여 edge request 최소화
+    // 캐시 즉시 무효화
     revalidatePath(`/blog/${slug}`);
     revalidatePath('/blog');
+    revalidatePath('/');
 
     return NextResponse.json({ message: 'Post deleted successfully' });
   } catch (error) {

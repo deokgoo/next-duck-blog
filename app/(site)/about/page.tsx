@@ -10,7 +10,9 @@ export const metadata = genPageMetadata({ title: 'About' });
 
 export default async function Page() {
   const authorData = await getAuthorBySlug('default');
-  const author = (authorData || allAuthors.find(a => a.slug === 'default') || allAuthors[0]) as Authors;
+  const author = (authorData ||
+    allAuthors.find((a) => a.slug === 'default') ||
+    allAuthors[0]) as Authors;
   const mainContent = coreContent(author);
 
   return (
