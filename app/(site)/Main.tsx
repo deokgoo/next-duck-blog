@@ -15,9 +15,10 @@ const MAX_DISPLAY = 10; // 5개 → 10개로 증가
 interface MainProps {
   posts: Post[];
   featuredTags: string[];
+  description?: string;
 }
 
-export default function Home({ posts, featuredTags }: MainProps) {
+export default function Home({ posts, featuredTags, description }: MainProps) {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const filteredPosts = filterPostsByTag(posts, selectedTag);
 
@@ -29,7 +30,7 @@ export default function Home({ posts, featuredTags }: MainProps) {
             Latest
           </h1>
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-            {siteMetadata.description}
+            {description || siteMetadata.description}
           </p>
         </div>
         {featuredTags.length > 0 && (

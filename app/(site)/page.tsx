@@ -10,12 +10,14 @@ export default async function Page() {
   const posts = allCoreContent(sortedPosts);
 
   let featuredTags: string[] = [];
+  let blogDescription: string | undefined = undefined;
   try {
     const author = await getAuthorBySlug('default');
     featuredTags = author?.featuredTags ?? [];
+    blogDescription = author?.blogDescription;
   } catch {
     featuredTags = [];
   }
 
-  return <Main posts={posts} featuredTags={featuredTags} />;
+  return <Main posts={posts} featuredTags={featuredTags} description={blogDescription} />;
 }
