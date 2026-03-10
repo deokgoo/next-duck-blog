@@ -1,26 +1,57 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Authors } from '@/lib/types';
 import ImageUploader from '@/components/editor/ImageUploader';
 import { Save, ArrowLeft, Loader2, User } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth/AuthContext';
 
-interface ProfileFormClientProps {
-  initialData: Authors;
-  allTags?: string[];
-}
-
-export default function ProfileFormClient({ initialData, allTags = [] }: ProfileFormClientProps) {
+export default function ProfileFormClient() {
   const router = useRouter();
-  const [formData, setFormData] = useState<Authors>(initialData);
+  const { user } = useAuth();
+
+  const [formData, setFormData] = useState<Authors | null>(null);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchProfileData = async () => {
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/admin/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setFormData(data.authorData);
+          setAllTags(data.allTags || []);
+        } else {
+          setMessage({ type: 'error', text: '프로필 데이터를 불러오는데 실패했습니다.' });
+        }
+      } catch (err) {
+        console.error('Error fetching profile data:', err);
+        setMessage({ type: 'error', text: '오류가 발생했습니다.' });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [user]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
   };
 
   const handleImageInsert = (field: keyof Authors) => (markdownString: string) => {
@@ -28,7 +59,7 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
     // We just want the URL
     const urlMatch = markdownString.match(/\((.*?)\)/);
     if (urlMatch && urlMatch[1]) {
-      setFormData((prev) => ({ ...prev, [field]: urlMatch[1] }));
+      setFormData((prev) => (prev ? { ...prev, [field]: urlMatch[1] } : null));
     }
   };
 
@@ -43,7 +74,7 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ slug: formData.slug || 'default', data: formData }),
+        body: JSON.stringify({ slug: formData?.slug || 'default', data: formData }),
       });
 
       if (!res.ok) throw new Error('Failed to update profile');
@@ -56,13 +87,30 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex py-12 items-center justify-center text-gray-500">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-3">프로필 정보를 불러오는 중입니다...</span>
+      </div>
+    );
+  }
+
+  if (!formData) {
+    return (
+      <div className="py-12 text-center text-red-500">
+        {message?.text || '프로필 데이터를 불러올 수 없습니다.'}
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {message && (
         <div
           className={`rounded-md p-4 ${message.type === 'success'
-              ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-              : 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+            ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+            : 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300'
             }`}
         >
           {message.text}
@@ -346,8 +394,8 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
                 <label
                   key={key}
                   className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${checked
-                      ? 'border-black bg-black/5 dark:border-white dark:bg-white/10'
-                      : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600'
+                    ? 'border-black bg-black/5 dark:border-white dark:bg-white/10'
+                    : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600'
                     }`}
                 >
                   <input
@@ -355,6 +403,7 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
                     checked={checked}
                     onChange={() => {
                       setFormData((prev) => {
+                        if (!prev) return null;
                         const current = prev.visibleSocials || [];
                         const next = checked ? current.filter((k) => k !== key) : [...current, key];
                         return { ...prev, visibleSocials: next };
@@ -387,8 +436,8 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
                 <label
                   key={tag}
                   className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${checked
-                      ? 'border-black bg-black/5 dark:border-white dark:bg-white/10'
-                      : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600'
+                    ? 'border-black bg-black/5 dark:border-white dark:bg-white/10'
+                    : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600'
                     }`}
                 >
                   <input
@@ -396,6 +445,7 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
                     checked={checked}
                     onChange={() => {
                       setFormData((prev) => {
+                        if (!prev) return null;
                         const current = prev.featuredTags || [];
                         const isSelected = current.includes(tag);
                         const next = isSelected

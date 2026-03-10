@@ -1,30 +1,20 @@
-import UltimateEditor from '@/components/editor/UltimateEditor';
-import { getPostBySlug } from '@/lib/firestore';
-import { Post } from '@/lib/types';
+import { Suspense } from 'react';
+import EditorClientWrapper from './EditorClientWrapper';
+import { Loader2 } from 'lucide-react';
 
-export default async function EditorPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const resolvedParams = await searchParams;
-  const slug = typeof resolvedParams.slug === 'string' ? resolvedParams.slug : undefined;
-  
-  let initialData: Post | null = null;
-
-  if (slug) {
-    const post = await getPostBySlug(slug);
-    if (post) {
-      initialData = post;
-    }
-  }
-
-  // Ensure plain object serialization for Server action/Client component boundary
-  const plainInitialData = initialData ? JSON.parse(JSON.stringify(initialData)) : null;
-
+export default function EditorPage() {
   return (
     <div className="min-h-screen">
-      <UltimateEditor initialData={plainInitialData} />
+      <Suspense fallback={
+        <div className="flex min-h-screen items-center justify-center p-8 bg-white dark:bg-black">
+          <div className="flex flex-col items-center gap-4 text-gray-500">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p>로딩 중...</p>
+          </div>
+        </div>
+      }>
+        <EditorClientWrapper />
+      </Suspense>
     </div>
   );
 }
