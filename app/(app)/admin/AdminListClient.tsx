@@ -7,16 +7,13 @@ import siteMetadata from '@/data/siteMetadata';
 import { Post } from '@/lib/types';
 import { Dialog, Transition } from '@headlessui/react';
 
-interface AdminListClientProps {
-  initialPosts: Post[];
-}
-
 import { useAuth } from '@/lib/auth/AuthContext';
 import NextImage from 'next/image';
 
-export default function AdminListClient({ initialPosts }: AdminListClientProps) {
+export default function AdminListClient() {
   const { user, logout } = useAuth();
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -27,6 +24,33 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchPosts = async () => {
+      try {
+        setIsLoading(true);
+        const token = await user.getIdToken();
+        const res = await fetch('/api/admin/posts', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setPosts(data.posts || []);
+        } else {
+          console.error('Failed to fetch admin posts');
+        }
+      } catch (error) {
+        console.error('Error fetching admin posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [user]);
 
   const openDeleteModal = (e: React.MouseEvent, slug: string) => {
     e.preventDefault();
@@ -63,7 +87,7 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
     try {
       // If draft, switch to published. If published/scheduled, switch to draft.
       const newStatus = post.status === 'draft' ? 'published' : 'draft';
-      
+
       const res = await fetch('/api/blog/status', {
         method: 'POST',
         headers: {
@@ -85,7 +109,7 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
 
   const confirmDelete = async () => {
     if (!deletingSlug || isHandlingDelete.current) return;
-    
+
     const slug = deletingSlug;
     console.log(`[${instanceId.current}] confirmDelete started for:`, slug);
     isHandlingDelete.current = true;
@@ -137,10 +161,9 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
               onClick={() => setActiveTab(tab)}
               className={`
                 px-6 py-2 text-sm font-semibold rounded-lg transition-all duration-200
-                ${
-                  activeTab === tab
-                    ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg shadow-black/10'
-                    : 'text-gray-500 hover:text-black dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'
+                ${activeTab === tab
+                  ? 'bg-black text-white dark:bg-white dark:text-black shadow-lg shadow-black/10'
+                  : 'text-gray-500 hover:text-black dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'
                 }
               `}
             >
@@ -150,7 +173,7 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
             </button>
           ))}
         </div>
-        
+
         <Link
           href="/admin/editor"
           className="rounded-lg bg-black px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-100 shadow-lg shadow-black/10 active:scale-95"
@@ -170,14 +193,23 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {filteredPosts.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500 italic">
+                  <div className="flex justify-center flex-row items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent"></span>
+                    포스트를 불러오는 중입니다...
+                  </div>
+                </td>
+              </tr>
+            ) : filteredPosts.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500 italic">
                   {activeTab === 'all'
                     ? '포스트가 없습니다.'
                     : activeTab === 'published'
-                    ? '발행된 포스트가 없습니다.'
-                    : '작성 중인 초안이 없습니다.'}
+                      ? '발행된 포스트가 없습니다.'
+                      : '작성 중인 초안이 없습니다.'}
                 </td>
               </tr>
             ) : (
@@ -188,62 +220,62 @@ export default function AdminListClient({ initialPosts }: AdminListClientProps) 
                 >
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
-                        <div className="font-bold text-gray-900 dark:text-gray-100 text-base">
-                            <Link href={`/blog/${post.slug}`} className="hover:underline underline-offset-4 decoration-1 decoration-gray-400">
-                              {post.title}
-                            </Link>
+                      <div className="font-bold text-gray-900 dark:text-gray-100 text-base">
+                        <Link href={`/blog/${post.slug}`} className="hover:underline underline-offset-4 decoration-1 decoration-gray-400">
+                          {post.title}
+                        </Link>
+                      </div>
+                      {getDisplayStatus(post) === 'draft' && (
+                        <button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
+                          className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-gray-300 dark:border-gray-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <span className="mr-1 h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                          비전시 (Draft)
+                        </button>
+                      )}
+                      {getDisplayStatus(post) === 'scheduled' && (
+                        <div className="relative group/status flex">
+                          <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
+                            className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-yellow-300 bg-yellow-50 dark:border-yellow-600/50 dark:bg-yellow-900/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors"
+                          >
+                            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-yellow-500"></span>
+                            예약됨
+                          </button>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden w-max group-hover/status:block z-50">
+                            <div className="relative bg-gray-900 dark:bg-gray-100 text-white dark:text-black text-[10px] font-medium leading-relaxed rounded-md py-1.5 px-2.5 shadow-xl text-center">
+                              예정: {formatDate(post.date, siteMetadata.locale)} {new Date(post.date).toLocaleTimeString(siteMetadata.locale, { hour: '2-digit', minute: '2-digit' })}
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
+                            </div>
+                          </div>
                         </div>
-                        {getDisplayStatus(post) === 'draft' && (
-                            <button 
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
-                              className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-gray-300 dark:border-gray-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            >
-                              <span className="mr-1 h-1.5 w-1.5 rounded-full bg-gray-400"></span>
-                              비전시 (Draft)
-                            </button>
-                        )}
-                        {getDisplayStatus(post) === 'scheduled' && (
-                            <div className="relative group/status flex">
-                              <button 
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
-                                className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-yellow-300 bg-yellow-50 dark:border-yellow-600/50 dark:bg-yellow-900/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors"
-                              >
-                                <span className="mr-1 h-1.5 w-1.5 rounded-full bg-yellow-500"></span>
-                                예약됨
-                              </button>
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden w-max group-hover/status:block z-50">
-                                <div className="relative bg-gray-900 dark:bg-gray-100 text-white dark:text-black text-[10px] font-medium leading-relaxed rounded-md py-1.5 px-2.5 shadow-xl text-center">
-                                  예정: {formatDate(post.date, siteMetadata.locale)} {new Date(post.date).toLocaleTimeString(siteMetadata.locale, { hour: '2-digit', minute: '2-digit' })}
-                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
-                                </div>
-                              </div>
+                      )}
+                      {getDisplayStatus(post) === 'published' && (
+                        <div className="relative group/status flex">
+                          <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
+                            className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-green-300 bg-green-50 dark:border-green-600/50 dark:bg-green-900/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
+                          >
+                            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                            전시 중
+                          </button>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden w-max group-hover/status:block z-50">
+                            <div className="relative bg-gray-900 dark:bg-gray-100 text-white dark:text-black text-[10px] font-medium leading-relaxed rounded-md py-1.5 px-2.5 shadow-xl text-center">
+                              전시: {formatDate(post.date, siteMetadata.locale)} {new Date(post.date).toLocaleTimeString(siteMetadata.locale, { hour: '2-digit', minute: '2-digit' })}
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
                             </div>
-                        )}
-                        {getDisplayStatus(post) === 'published' && (
-                            <div className="relative group/status flex">
-                              <button 
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(post); }}
-                                className="inline-flex shrink-0 whitespace-nowrap items-center rounded-full border border-green-300 bg-green-50 dark:border-green-600/50 dark:bg-green-900/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
-                              >
-                                <span className="mr-1 h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                                전시 중
-                              </button>
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden w-max group-hover/status:block z-50">
-                                <div className="relative bg-gray-900 dark:bg-gray-100 text-white dark:text-black text-[10px] font-medium leading-relaxed rounded-md py-1.5 px-2.5 shadow-xl text-center">
-                                  전시: {formatDate(post.date, siteMetadata.locale)} {new Date(post.date).toLocaleTimeString(siteMetadata.locale, { hour: '2-digit', minute: '2-digit' })}
-                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
-                                </div>
-                              </div>
-                            </div>
-                        )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="text-xs text-gray-400 mt-1.5 font-mono flex gap-2">
-                        <span>{post.slug}</span>
+                      <span>{post.slug}</span>
                     </div>
                   </td>
                   <td className="px-6 py-5 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {post.createdAt ? formatDate(post.createdAt, siteMetadata.locale) : formatDate(post.date, siteMetadata.locale)}
+                      {post.createdAt ? formatDate(post.createdAt, siteMetadata.locale) : formatDate(post.date, siteMetadata.locale)}
                     </div>
                   </td>
                   <td className="px-6 py-5">
