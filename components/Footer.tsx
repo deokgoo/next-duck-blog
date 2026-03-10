@@ -10,6 +10,12 @@ export default async function Footer() {
   const github = authorData?.github || siteMetadata.github;
   const twitter = authorData?.twitter || siteMetadata.twitter;
   const linkedin = authorData?.linkedin || siteMetadata.linkedin;
+  const facebook = authorData?.facebook || siteMetadata.facebook;
+  const youtube = authorData?.youtube || siteMetadata.youtube;
+  const mastodon = authorData?.mastodon || siteMetadata.mastodon;
+  const threads = authorData?.threads || siteMetadata.threads;
+  const instagram = authorData?.instagram || siteMetadata.instagram;
+
   const authorName = authorData?.name || siteMetadata.author;
   const title = authorData?.blogTitle || siteMetadata.title;
   const visibleSocials = authorData?.visibleSocials;
@@ -26,6 +32,11 @@ export default async function Footer() {
           {show('github') && <SocialIcon kind="github" href={github} size={6} />}
           {show('linkedin') && <SocialIcon kind="linkedin" href={linkedin} size={6} />}
           {show('twitter') && <SocialIcon kind="x" href={twitter} size={6} />}
+          {show('facebook') && <SocialIcon kind="facebook" href={facebook} size={6} />}
+          {show('youtube') && <SocialIcon kind="youtube" href={youtube} size={6} />}
+          {show('mastodon') && <SocialIcon kind="mastodon" href={mastodon} size={6} />}
+          {show('threads') && <SocialIcon kind="threads" href={threads} size={6} />}
+          {show('instagram') && <SocialIcon kind="instagram" href={instagram} size={6} />}
         </div>
         <div className="mb-2 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
           <div>{authorName}</div>

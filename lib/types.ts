@@ -37,6 +37,11 @@ export type Authors = {
   twitter?: string;
   linkedin?: string;
   github?: string;
+  facebook?: string;
+  youtube?: string;
+  mastodon?: string;
+  threads?: string;
+  instagram?: string;
   layout?: string;
   body?: { code: string };
   // Blog Metadata
@@ -71,6 +76,11 @@ export const allAuthors: Authors[] = [
     twitter: 'https://twitter.com/x',
     linkedin: 'https://www.linkedin.com',
     github: 'https://github.com/username',
+    facebook: '',
+    youtube: '',
+    mastodon: '',
+    threads: '',
+    instagram: '',
     layout: 'AuthorLayout',
     body: { code: '' },
   },

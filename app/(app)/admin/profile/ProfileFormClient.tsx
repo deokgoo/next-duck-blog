@@ -60,11 +60,10 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
     <form onSubmit={handleSubmit} className="space-y-8">
       {message && (
         <div
-          className={`rounded-md p-4 ${
-            message.type === 'success'
+          className={`rounded-md p-4 ${message.type === 'success'
               ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300'
               : 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-          }`}
+            }`}
         >
           {message.text}
         </div>
@@ -235,6 +234,91 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white sm:text-sm"
             />
           </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="facebook"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Facebook URL
+            </label>
+            <input
+              type="url"
+              id="facebook"
+              name="facebook"
+              value={formData.facebook || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white sm:text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="instagram"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Instagram URL
+            </label>
+            <input
+              type="url"
+              id="instagram"
+              name="instagram"
+              value={formData.instagram || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white sm:text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="youtube"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              YouTube URL
+            </label>
+            <input
+              type="url"
+              id="youtube"
+              name="youtube"
+              value={formData.youtube || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white sm:text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="threads"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Threads URL
+            </label>
+            <input
+              type="url"
+              id="threads"
+              name="threads"
+              value={formData.threads || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white sm:text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="mastodon"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Mastodon URL
+            </label>
+            <input
+              type="url"
+              id="mastodon"
+              name="mastodon"
+              value={formData.mastodon || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white sm:text-sm"
+            />
+          </div>
         </div>
 
         {/* Visible Socials Selection */}
@@ -251,16 +335,20 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
               { key: 'github', label: 'GitHub' },
               { key: 'twitter', label: 'Twitter / X' },
               { key: 'linkedin', label: 'LinkedIn' },
+              { key: 'facebook', label: 'Facebook' },
+              { key: 'instagram', label: 'Instagram' },
+              { key: 'youtube', label: 'YouTube' },
+              { key: 'threads', label: 'Threads' },
+              { key: 'mastodon', label: 'Mastodon' },
             ].map(({ key, label }) => {
               const checked = formData.visibleSocials?.includes(key) ?? false;
               return (
                 <label
                   key={key}
-                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
-                    checked
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${checked
                       ? 'border-black bg-black/5 dark:border-white dark:bg-white/10'
                       : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600'
-                  }`}
+                    }`}
                 >
                   <input
                     type="checkbox"
@@ -298,11 +386,10 @@ export default function ProfileFormClient({ initialData, allTags = [] }: Profile
               return (
                 <label
                   key={tag}
-                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
-                    checked
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${checked
                       ? 'border-black bg-black/5 dark:border-white dark:bg-white/10'
                       : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600'
-                  }`}
+                    }`}
                 >
                   <input
                     type="checkbox"
