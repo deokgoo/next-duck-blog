@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { verifyAuth } from '@/lib/auth/serverAuth';
 import { revalidatePath } from 'next/cache';
+import { submitUrlToIndexNow } from '@/lib/indexnow';
+import siteMetadata from '@/data/siteMetadata';
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,6 +55,15 @@ export async function POST(request: NextRequest) {
     revalidatePath(`/blog/${slug}`);
     revalidatePath('/blog');
     revalidatePath('/');
+
+    // IndexNow 알림: published 글만 fire-and-forget으로 전송
+    if (postData.status === 'published') {
+      const urls =
+        previousSlug && previousSlug !== slug
+          ? [`${siteMetadata.siteUrl}/blog/${slug}`, `${siteMetadata.siteUrl}/blog/${previousSlug}`]
+          : [`${siteMetadata.siteUrl}/blog/${slug}`];
+      submitUrlToIndexNow(urls).catch(() => {});
+    }
 
     return NextResponse.json({
       success: true,
