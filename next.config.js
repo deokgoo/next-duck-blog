@@ -124,6 +124,12 @@ module.exports = withBundleAnalyzer({
         source: '/:googlefile(google[a-z0-9]+\\.html)',
         destination: '/api/google-site-verification',
       },
+      {
+        // IndexNow API 키 검증 파일을 API로 처리
+        // 환경변수 INDEXNOW_API_KEY 설정 시 자동 동작
+        source: '/:keyfile([a-zA-Z0-9]+\\.txt)',
+        destination: '/api/indexnow-key',
+      },
     ];
   },
   async headers() {

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { verifyAuth } from '@/lib/auth/serverAuth';
 import { revalidatePath } from 'next/cache';
+import { submitUrlToIndexNow } from '@/lib/indexnow';
+import siteMetadata from '@/data/siteMetadata';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,6 +30,11 @@ export async function POST(request: NextRequest) {
     revalidatePath(`/blog/${slug}`);
     revalidatePath('/blog');
     revalidatePath('/');
+
+    // IndexNow 알림: published 상태일 때만 fire-and-forget으로 전송
+    if (status === 'published') {
+      submitUrlToIndexNow([`${siteMetadata.siteUrl}/blog/${slug}`]).catch(() => {});
+    }
 
     return NextResponse.json({ message: 'Post status updated successfully' });
   } catch (error) {

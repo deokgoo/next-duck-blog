@@ -2,7 +2,7 @@ import siteMetadata from '@/data/siteMetadata';
 import { getAllPosts, isPostPublishedAndReady } from '@/lib/firestore';
 import { MetadataRoute } from 'next';
 
-export const revalidate = 86400; // 24시간 캐시 (edge request 최소화)
+export const revalidate = 3600; // 1시간 캐시 (IndexNow 알림과 연동하여 최신 콘텐츠 반영)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl;
