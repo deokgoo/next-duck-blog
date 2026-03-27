@@ -9,10 +9,15 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { slug } = await request.json();
-
+    let { slug } = await request.json();
+ 
     if (!slug) {
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
+    }
+
+    // 슬러그 정제: /가 포함되어 있다면 마지막 부분만 사용 (Firestore doc ID 규칙 준수)
+    if (slug.includes('/')) {
+      slug = slug.split('/').pop() || slug;
     }
 
     const docRef = db.collection('posts').doc(slug);
