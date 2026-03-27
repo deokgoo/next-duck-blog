@@ -34,6 +34,7 @@ interface MDXMetadata {
   createdAt?: string; // Written Date
   layout?: string;
   images?: string[];
+  category?: string;
 }
 
 interface UltimateEditorProps {
@@ -58,6 +59,7 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
     summary: initialData?.summary || '',
     draft: initialData?.status === 'draft',
     slug: initialData?.slug || '',
+    category: initialData?.category || 'dev',
     createdAt: initialData?.createdAt || defaultDate.toISOString().split('T')[0],
     layout: initialData?.layout || 'PostLayout',
     images: initialData?.images || [],

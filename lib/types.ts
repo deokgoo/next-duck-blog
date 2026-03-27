@@ -7,6 +7,7 @@ export type Post = {
   summary: string;
   content: string;
   status?: 'published' | 'draft' | 'deleted'; // Replaces `draft: boolean`
+  category?: string; // 'dev' | 'travel' | 'hobby' | 'life'
   layout?: string;
   images?: string[];
   authors?: string[];

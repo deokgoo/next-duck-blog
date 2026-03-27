@@ -23,9 +23,11 @@ export async function POST(request: NextRequest) {
         .replace(/^-|-$/g, '');
 
     // Firestore에 저장할 데이터 구성
+    const category = metadata.category || 'dev';
     const postData = {
       slug,
       title: metadata.title,
+      category,
       date: metadata.date,
       createdAt: metadata.createdAt,
       tags: metadata.tags || [],
@@ -45,23 +47,32 @@ export async function POST(request: NextRequest) {
         transaction.delete(db.collection('posts').doc(previousSlug));
         transaction.set(db.collection('posts').doc(slug), postData);
       });
-      revalidatePath(`/blog/${previousSlug}`);
+      revalidatePath(`/blog/${category}/${previousSlug}`);
     } else {
       // 기존 동작: 덮어쓰기
       await db.collection('posts').doc(slug).set(postData);
     }
 
-    // 캐시 즉시 무효화
-    revalidatePath(`/blog/${slug}`);
-    revalidatePath('/blog');
+    // 캐시 즉시 무효화 (New Structure)
+    revalidatePath(`/blog/${category}/${slug}`);
+    revalidatePath(`/${category}`);
+    revalidatePath(`/${category}/tag`);
+    if (metadata.tags) {
+      metadata.tags.forEach((tag: string) => {
+        revalidatePath(`/${category}/tag/${tag}`);
+      });
+    }
     revalidatePath('/');
 
     // IndexNow 알림: published 글만 fire-and-forget으로 전송
     if (postData.status === 'published') {
       const urls =
         previousSlug && previousSlug !== slug
-          ? [`${siteMetadata.siteUrl}/blog/${slug}`, `${siteMetadata.siteUrl}/blog/${previousSlug}`]
-          : [`${siteMetadata.siteUrl}/blog/${slug}`];
+          ? [
+              `${siteMetadata.siteUrl}/blog/${category}/${slug}`,
+              `${siteMetadata.siteUrl}/blog/${category}/${previousSlug}`,
+            ]
+          : [`${siteMetadata.siteUrl}/blog/${category}/${slug}`];
       submitUrlToIndexNow(urls).catch(() => {});
     }
 

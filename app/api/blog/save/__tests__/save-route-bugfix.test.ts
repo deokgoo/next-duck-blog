@@ -157,7 +157,7 @@ describe('Bug Condition Exploration: Slug Change Leaves Orphan Documents', () =>
         const transactionDeleteCalled =
           mockRunTransaction.mock.calls.length > 0 &&
           lastTransaction !== null &&
-          lastTransaction.delete.mock.calls.length > 0;
+          (lastTransaction as any).delete.mock.calls.length > 0;
 
         const directDeleteCalled =
           mockDoc.mock.calls.some((call: any[]) => call[0] === oldSlug) &&

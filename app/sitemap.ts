@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogRoutes = allBlogs
     .filter((post) => isPostPublishedAndReady(post))
     .map((post) => ({
-      url: `${siteUrl}/blog/${cleanSlug(post.slug)}`,
+      url: `${siteUrl}/blog/${post.category || 'dev'}/${cleanSlug(post.slug)}`,
       lastModified: new Date(post.lastmod || post.date).toISOString(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,

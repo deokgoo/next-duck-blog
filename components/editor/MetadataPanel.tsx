@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/auth/AuthContext';
 import { Plus, X, Calendar, Hash, FileText, Settings, Save, Eye } from 'lucide-react';
 import LayoutThumbnailPicker from './LayoutThumbnailPicker';
 import BannerImageSetting from './BannerImageSetting';
@@ -15,6 +16,7 @@ export interface MDXMetadata {
   slug?: string;
   createdAt?: string; // Written Date
   images?: string[];
+  category?: string;
 }
 
 interface MetadataPanelProps {
@@ -34,6 +36,27 @@ export default function MetadataPanel({
 }: MetadataPanelProps) {
   const [newTag, setNewTag] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [existingCategories, setExistingCategories] = useState<string[]>(['dev', 'travel', 'hobby', 'life']);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchCategories = async () => {
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/admin/categories', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.categories) setExistingCategories(data.categories);
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories', err);
+      }
+    };
+    fetchCategories();
+  }, [user]);
 
   const bannerImageUrl = metadata.images?.[0] || '';
   const isPostBanner = metadata.layout === 'PostBanner';
@@ -165,6 +188,36 @@ export default function MetadataPanel({
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* 카테고리 설정 */}
+          <div>
+            <label
+              htmlFor="category"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              <FileText className="mr-1 inline h-4 w-4" />
+              카테고리
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="category"
+                type="text"
+                list="category-options"
+                value={metadata.category || 'dev'}
+                onChange={(e) => updateMetadata('category', e.target.value.toLowerCase().replace(/[^a-z0-9ㄱ-ㅎㅏ-ㅣ가-힣-]/g, ''))}
+                className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                placeholder="카테고리명 입력 (영소문자, 숫자, 한글, 하이픈)"
+              />
+              <datalist id="category-options">
+                {existingCategories.map((cat) => (
+                  <option key={cat} value={cat} />
+                ))}
+              </datalist>
+            </div>
+            <p className="mt-1 text-xs text-gray-400">
+              목록에서 선택하거나 새로운 카테고리 이름을 직접 입력해 추가할 수 있습니다. 영소문자 위주로 작성하세요.
+            </p>
           </div>
 
           {/* 날짜, 레이아웃, 전시 상태 */}

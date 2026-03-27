@@ -34,13 +34,24 @@ const layouts = {
 };
 
 export async function generateMetadata(props: {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ category: string; slug: string[] }>;
 }): Promise<Metadata | undefined> {
   const params = await props.params;
+  const category = decodeURI(params.category);
   const slug = decodeURI(params.slug.join('/'));
-  const post = await getPostBySlug(slug);
+  
+  // SEO Redirect Fallback Check
+  const posts = await getAllPosts();
+  const validSet = new Set(posts.map(p => p.category || 'dev'));
+  ['dev', 'travel', 'hobby', 'life'].forEach(c => validSet.add(c));
+  const VALID_CATEGORIES = Array.from(validSet);
 
-  if (!post || !isPostPublishedAndReady(post)) {
+  const isOldRoute = !VALID_CATEGORIES.includes(category);
+  const postSlugToFind = isOldRoute ? `${category}/${slug}` : slug;
+
+  const post = await getPostBySlug(postSlugToFind);
+
+  if (!post || !isPostPublishedAndReady(post) || isOldRoute) {
     return;
   }
   const authorList = post?.authors || ['default'];
@@ -95,24 +106,44 @@ export async function generateMetadata(props: {
 export async function generateStaticParams() {
   const posts = (await getAllPosts()).filter(isPostPublishedAndReady);
   return posts.map((post) => ({
+    category: post.category || 'dev',
     slug: post.slug.split('/'),
   }));
 }
 
 export const revalidate = 31536000; // 1년 — 사실상 영구 캐시, revalidatePath()로 수동 갱신
 
-export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+export default async function Page(props: { params: Promise<{ category: string; slug: string[] }> }) {
   const params = await props.params;
+  const category = decodeURI(params.category);
   const slug = decodeURI(params.slug.join('/'));
 
+  const posts = await getAllPosts();
+  const validSet = new Set(posts.map(p => p.category || 'dev'));
+  ['dev', 'travel', 'hobby', 'life'].forEach(c => validSet.add(c));
+  const VALID_CATEGORIES = Array.from(validSet);
+
+  const isOldRoute = !VALID_CATEGORIES.includes(category);
+  const postSlugToFind = isOldRoute ? `${category}/${slug}` : slug;
+
   // 해당 포스트를 직접 조회 (slug 기반)
-  const postItem = await getPostBySlug(slug);
+  const postItem = await getPostBySlug(postSlugToFind);
   if (!postItem || postItem.status === 'deleted') {
     return notFound();
   }
 
-  // prev/next 계산을 위해 전체 목록 조회
-  const allPosts = (await getAllPosts()).filter(isPostPublishedAndReady);
+  // SEO 308 Redirect for Old URLs
+  if (isOldRoute) {
+    const redirectCategory = postItem.category || 'dev';
+    const { redirect } = await import('next/navigation');
+    redirect(`/blog/${redirectCategory}/${postSlugToFind}`, 'replace' as any); // Replace forces Next 14+ 308 permanent redirect automatically if outside try-catch, but standard is redirect(url, 'replace') or permanentRedirect. We use simple redirect for edge safety or permanentRedirect if imported. Next.js permanentRedirect does 308.
+  }
+
+  // prev/next 계산을 위해 카테고리 내 포스트 목록 조회
+  const allPosts = (await getAllPosts())
+    .filter(isPostPublishedAndReady)
+    .filter((p) => (p.category || 'dev') === category);
+  
   const sortedCoreContents = sortPosts(allPosts);
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug);
 
@@ -120,8 +151,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const nextItem = postIndex >= 0 ? sortedCoreContents[postIndex - 1] : undefined;
 
   // Add path to prev/next for layout compatibility
-  const prev = prevItem ? { ...prevItem, path: `blog/${prevItem.slug}` } : undefined;
-  const next = nextItem ? { ...nextItem, path: `blog/${nextItem.slug}` } : undefined;
+  const prev = prevItem ? { ...prevItem, path: `blog/${category}/${prevItem.slug}` } : undefined;
+  const next = nextItem ? { ...nextItem, path: `blog/${category}/${nextItem.slug}` } : undefined;
 
   // Add readingTime to post
   const wordCount = postItem.content.split(/\s+/gu).length;
