@@ -407,6 +407,7 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
         summary: '',
         draft: false,
         slug: '',
+        category: 'dev',
         layout: 'PostLayout',
         images: [],
       });

@@ -11,16 +11,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { content, metadata, previousSlug } = await request.json();
+    const body = await request.json();
+    const { content, metadata } = body;
+    let { previousSlug } = body;
 
-    // 슬러그 생성 (제목 기반)
-    const slug =
+    // 슬러그 생성 및 정제 (Firestore Document ID 단계에서는 / 가 포함되면 안 됨)
+    let slug =
       metadata.slug ||
       metadata.title
         .toLowerCase()
         .replace(/[^a-z0-9가-힣]/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '');
+
+    // 슬러그 및 이전 슬러그 정제: /가 포함되어 있다면 마지막 부분만 사용 (Firestore doc ID 규칙 준수)
+    if (slug.includes('/')) {
+      slug = slug.split('/').pop() || slug;
+    }
+
+    if (previousSlug && previousSlug.includes('/')) {
+      previousSlug = previousSlug.split('/').pop() || previousSlug;
+    }
 
     // Firestore에 저장할 데이터 구성
     const category = metadata.category || 'dev';
@@ -53,27 +64,32 @@ export async function POST(request: NextRequest) {
       await db.collection('posts').doc(slug).set(postData);
     }
 
-    // 캐시 즉시 무효화 (New Structure)
-    revalidatePath(`/blog/${category}/${slug}`);
-    revalidatePath(`/${category}`);
-    revalidatePath(`/${category}/tag`);
-    if (metadata.tags) {
-      metadata.tags.forEach((tag: string) => {
-        revalidatePath(`/${category}/tag/${tag}`);
-      });
+    // 캐시 즉시 무효화 (New Structure) - Revalidation Fail shouldn't block Save
+    try {
+      revalidatePath(`/blog/${category}/${slug}`);
+      revalidatePath(`/${category}`);
+      if (metadata.tags) {
+        metadata.tags.forEach((tag: string) => {
+          revalidatePath(`/${category}/tag/${tag}`);
+        });
+      }
+      revalidatePath('/');
+      revalidatePath('/admin');
+    } catch (revalidateError) {
+      console.error('Revalidation failed:', revalidateError);
     }
-    revalidatePath('/');
 
     // IndexNow 알림: published 글만 fire-and-forget으로 전송
-    if (postData.status === 'published') {
-      const urls =
-        previousSlug && previousSlug !== slug
-          ? [
-              `${siteMetadata.siteUrl}/blog/${category}/${slug}`,
-              `${siteMetadata.siteUrl}/blog/${category}/${previousSlug}`,
-            ]
-          : [`${siteMetadata.siteUrl}/blog/${category}/${slug}`];
-      submitUrlToIndexNow(urls).catch(() => {});
+    try {
+      if (postData.status === 'published') {
+        const urls = [`${siteMetadata.siteUrl}/blog/${category}/${slug}`];
+        if (previousSlug && previousSlug !== slug) {
+          urls.push(`${siteMetadata.siteUrl}/blog/${category}/${previousSlug}`);
+        }
+        submitUrlToIndexNow(urls).catch(() => {});
+      }
+    } catch (indexNowError) {
+      console.error('IndexNow submission failed:', indexNowError);
     }
 
     return NextResponse.json({
@@ -81,10 +97,16 @@ export async function POST(request: NextRequest) {
       message: '블로그 포스트가 성공적으로 저장되었습니다!',
       slug,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Firestore 저장 중 오류:', error);
+    // 더 구체적인 오류 정보 출력 (디버깅용)
     return NextResponse.json(
-      { success: false, message: '저장 중 오류가 발생했습니다.' },
+      { 
+        success: false, 
+        message: '저장 중 오류가 발생했습니다.', 
+        error: error?.message,
+        pathError: error?.message?.includes('components') 
+      },
       { status: 500 }
     );
   }

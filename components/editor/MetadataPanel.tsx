@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { Plus, X, Calendar, Hash, FileText, Settings, Save, Eye } from 'lucide-react';
 import LayoutThumbnailPicker from './LayoutThumbnailPicker';
 import BannerImageSetting from './BannerImageSetting';
+import { categoriesData } from '@/data/categoriesData';
 
 export interface MDXMetadata {
   title: string;
@@ -175,7 +176,7 @@ export default function MetadataPanel({
                   id="slug"
                   type="text"
                   value={metadata.slug || ''}
-                  onChange={(e) => updateMetadata('slug', e.target.value)}
+                  onChange={(e) => updateMetadata('slug', e.target.value.replace(/\//g, '-'))}
                   className="flex-1 rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   placeholder="URL 슬러그 (선택사항)"
                 />
@@ -192,31 +193,73 @@ export default function MetadataPanel({
 
           {/* 카테고리 설정 */}
           <div>
-            <label
-              htmlFor="category"
-              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               <FileText className="mr-1 inline h-4 w-4" />
-              카테고리
+              카테고리 선택
             </label>
-            <div className="flex gap-2">
-              <input
-                id="category"
-                type="text"
-                list="category-options"
-                value={metadata.category || 'dev'}
-                onChange={(e) => updateMetadata('category', e.target.value.toLowerCase().replace(/[^a-z0-9ㄱ-ㅎㅏ-ㅣ가-힣-]/g, ''))}
-                className="w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                placeholder="카테고리명 입력 (영소문자, 숫자, 한글, 하이픈)"
-              />
-              <datalist id="category-options">
-                {existingCategories.map((cat) => (
-                  <option key={cat} value={cat} />
-                ))}
-              </datalist>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(categoriesData).map(([key, data]) => {
+                const isSelected = (metadata.category || 'dev') === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => updateMetadata('category', key)}
+                    className={`flex items-center space-x-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+                      isSelected
+                        ? 'text-white shadow-md scale-105'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-650'
+                    }`}
+                    style={isSelected ? { backgroundColor: data.color } : {}}
+                  >
+                    <span>{data.title}</span>
+                  </button>
+                );
+              })}
+
+              {/* 기타/커스텀 카테고리 표시 (만약 위 4개에 해당하지 않는 경우) */}
+              {metadata.category && !categoriesData[metadata.category as keyof typeof categoriesData] && (
+                <button
+                  type="button"
+                  className="flex items-center space-x-2 rounded-xl bg-gray-800 px-4 py-2 text-sm font-semibold text-white shadow-md dark:bg-gray-200 dark:text-black"
+                >
+                  <span>{metadata.category}</span>
+                  <X 
+                    className="ml-1 h-3 w-3 cursor-pointer hover:text-red-400" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateMetadata('category', 'dev');
+                    }}
+                  />
+                </button>
+              )}
+
+              {/* 신규 직접 입력 모드 토글 */}
+              <div className="flex items-center gap-2 border-l border-gray-200 pl-2 dark:border-gray-700">
+                <input
+                  type="text"
+                  list="category-options"
+                  className="w-32 rounded-lg border border-gray-300 px-3 py-1.5 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  placeholder="직접 입력..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const val = (e.target as HTMLInputElement).value.trim().toLowerCase();
+                      if (val) {
+                        updateMetadata('category', val);
+                        (e.target as HTMLInputElement).value = '';
+                      }
+                    }
+                  }}
+                />
+                <datalist id="category-options">
+                  {existingCategories.map((cat) => (
+                    <option key={cat} value={cat} />
+                  ))}
+                </datalist>
+              </div>
             </div>
-            <p className="mt-1 text-xs text-gray-400">
-              목록에서 선택하거나 새로운 카테고리 이름을 직접 입력해 추가할 수 있습니다. 영소문자 위주로 작성하세요.
+            <p className="mt-2 text-xs text-gray-400">
+              * 상단 칩을 클릭하여 브랜딩된 핵심 카테고리를 직관적으로 선택할 수 있습니다.
             </p>
           </div>
 
