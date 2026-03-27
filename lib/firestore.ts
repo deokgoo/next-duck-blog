@@ -60,3 +60,19 @@ export const getAllTags = cache(async (): Promise<Record<string, number>> => {
 
   return tagCount;
 });
+
+export const getTagsByCategory = cache(async (category: string): Promise<Record<string, number>> => {
+  const posts = await getAllPosts();
+  const tagCount: Record<string, number> = {};
+
+  posts.forEach((post) => {
+    if (!isPostPublishedAndReady(post)) return;
+    if ((post.category || 'dev') !== category) return;
+    post.tags.forEach((tag) => {
+      const formattedTag = tag.trim();
+      tagCount[formattedTag] = (tagCount[formattedTag] || 0) + 1;
+    });
+  });
+
+  return tagCount;
+});
