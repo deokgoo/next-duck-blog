@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import ListLayout from '@/layouts/ListLayoutWithTags';
 import { allCoreContent, sortPosts } from '@/lib/types';
-import { getAllPosts, getAllTags, isPostPublishedAndReady, getPostBySlug } from '@/lib/firestore';
+import { getAllPosts, getAllTags, isPostPublishedAndReady, getPostBySlug, getTagsByCategory } from '@/lib/firestore';
 import { genPageMetadata } from 'app/seo';
 
 import { Metadata } from 'next';
@@ -41,7 +41,7 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
   const category = decodeURI(params.category);
   const VALID_CATEGORIES = await getValidCategories();
 
-  // 1. SEO Fallback for Old URLs (e.g. /blog/my-post -> category = 'my-post')
+  // SEO Fallback for Old URLs (e.g. /blog/my-post -> category = 'my-post')
   if (!VALID_CATEGORIES.includes(category)) {
     const postItem = await getPostBySlug(category);
     if (!postItem || postItem.status === 'deleted') {
@@ -51,6 +51,26 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
     redirect(`/blog/${redirectCategory}/${category}`);
   }
 
-  // 2. Redirect /blog/[category] to /[category] (New Landing Page)
-  redirect(`/${category}`);
+  // Show all posts for this category
+  const allPosts = (await getAllPosts()).filter(isPostPublishedAndReady);
+  const categoryPosts = allPosts.filter((p) => (p.category || 'dev') === category);
+  const sortedPosts = sortPosts(categoryPosts);
+  const initialDisplayPosts = allCoreContent(sortedPosts.slice(0, POSTS_PER_PAGE));
+  const pagination = {
+    currentPage: 1,
+    totalPages: Math.ceil(categoryPosts.length / POSTS_PER_PAGE),
+  };
+  const tags = await getTagsByCategory(category);
+
+  const title = category.charAt(0).toUpperCase() + category.slice(1);
+
+  return (
+    <ListLayout
+      posts={allCoreContent(sortedPosts)}
+      initialDisplayPosts={initialDisplayPosts}
+      pagination={pagination}
+      title={`${title} Posts`}
+      tags={tags}
+    />
+  );
 }
