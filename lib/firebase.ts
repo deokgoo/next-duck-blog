@@ -14,11 +14,14 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const storage = getStorage(app);
-const db = getFirestore(app);
-const auth = getAuth(app);
+const isConfigValid = !!firebaseConfig.apiKey;
+const app = isConfigValid 
+  ? (!getApps().length ? initializeApp(firebaseConfig) : getApp())
+  : (getApps().length > 0 ? getApp() : null);
+
+const storage = app ? getStorage(app) : null as unknown as ReturnType<typeof getStorage>;
+const db = app ? getFirestore(app) : null as unknown as ReturnType<typeof getFirestore>;
+const auth = app ? getAuth(app) : null as unknown as ReturnType<typeof getAuth>;
 const googleProvider = new GoogleAuthProvider();
-// const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
 export { app, storage, db, auth, googleProvider };
