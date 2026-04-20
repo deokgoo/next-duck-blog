@@ -17,11 +17,16 @@ export function isPostPublishedAndReady(post: Post): boolean {
 }
 
 export const getAllPosts = cache(async (): Promise<Post[]> => {
+  if (!db) {
+    console.warn('Firestore DB is not initialized. Returning empty posts.');
+    return [];
+  }
   const snapshot = await db.collection('posts').orderBy('date', 'desc').get();
   return snapshot.docs.map((doc) => doc.data() as Post).filter((post) => post.status !== 'deleted');
 });
 
 export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
+  if (!db) return null;
   const snapshot = await db.collection('posts').where('slug', '==', slug).limit(1).get();
 
   if (snapshot.empty) return null;
@@ -30,18 +35,30 @@ export const getPostBySlug = cache(async (slug: string): Promise<Post | null> =>
 });
 
 export async function getAuthorBySlug(slug: string): Promise<Authors | null> {
-  const docRef = db.collection('authors').doc(slug);
-  const docSnap = await docRef.get();
-
-  if (!docSnap.exists) {
-    const { allAuthors } = await import('./types');
-    const author = allAuthors.find((p) => p.slug === slug);
-    return author || null;
+  const { allAuthors } = await import('./types');
+  if (!db) {
+    return allAuthors.find((p) => p.slug === slug) || null;
   }
-  return docSnap.data() as Authors;
+
+  try {
+    const docRef = db.collection('authors').doc(slug);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      const author = allAuthors.find((p) => p.slug === slug);
+      return author || null;
+    }
+    return docSnap.data() as Authors;
+  } catch (error) {
+    console.error('Error fetching author from Firestore:', error);
+    return allAuthors.find((p) => p.slug === slug) || null;
+  }
 }
 
 export async function updateAuthor(slug: string, data: Partial<Authors>): Promise<void> {
+  if (!db) {
+    throw new Error('Firestore DB is not initialized.');
+  }
   const docRef = db.collection('authors').doc(slug);
   await docRef.set(data, { merge: true });
 }

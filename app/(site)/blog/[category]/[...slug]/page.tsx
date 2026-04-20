@@ -189,16 +189,6 @@ export default async function Page(props: {
 
   const Layout = layouts[post.layout || defaultLayout];
 
-  // MDX 파서가 **"텍스트"** 패턴에서 따옴표를 JSX attribute로 오해하는 문제 방지
-  // 코드 블록(``` 또는 `)을 보존하면서 그 바깥의 **...** 를 <strong> 태그로 변환
-  const sanitizedContent = post.content
-    .split(/(```[\s\S]*?```|`[^`\n]*`)/g)
-    .map((segment: string, i: number) => {
-      if (i % 2 === 1) return segment; // 코드 블록은 그대로
-      return segment.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    })
-    .join('');
-
   return (
     <>
       <script
@@ -207,7 +197,7 @@ export default async function Page(props: {
       />
       <Layout content={mainContent} authorDetails={authorDetails} next={next} prev={prev}>
         <MDXRemote
-          source={sanitizedContent}
+          source={post.content}
           components={components}
           options={{
             mdxOptions: {
