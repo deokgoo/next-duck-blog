@@ -19,6 +19,7 @@ import ChromeDevToolsMCPSetupModal from './ChromeDevToolsMCPSetupModal';
 import CodeComparison from './CodeComparison';
 import Mermaid from './Mermaid';
 import KoreanNewsletterForm from './KoreanNewsletterForm';
+import YouTube from './YouTube';
 
 const PreWithMermaid = (props) => {
   const { children, className, ...rest } = props;
@@ -62,4 +63,5 @@ export const components: MDXComponents = {
   ChromeDevToolsMCPSetupModal,
   CodeComparison,
   Mermaid,
+  YouTube,
 };
