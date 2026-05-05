@@ -91,6 +91,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: title,
       card: 'summary_large_image',
       images: [socialBanner],
+      description: description,
     },
   };
 }

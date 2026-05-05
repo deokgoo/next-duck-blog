@@ -1,9 +1,9 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'My Blog',
-  author: 'Blog Author',
-  headerTitle: 'My Blog',
-  description: 'A personal blog sharing thoughts on web development, software engineering, and more.',
+  title: 'Duck Blog',
+  author: 'deokgoo',
+  headerTitle: 'Duck Blog',
+  description: '웹 개발, 프론트엔드, React, JavaScript에 관한 실무 경험과 기술 인사이트를 공유하는 개발 블로그입니다.',
   language: 'ko-KR',
   theme: 'system', // system, dark or light
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://your-blog.vercel.app',
