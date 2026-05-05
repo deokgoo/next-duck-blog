@@ -20,6 +20,7 @@ import siteMetadata from '@/data/siteMetadata';
 import { notFound } from 'next/navigation';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import remarkSmartypants from 'remark-smartypants';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeKatex from 'rehype-katex';
@@ -201,7 +202,7 @@ export default async function Page(props: {
           components={components}
           options={{
             mdxOptions: {
-              remarkPlugins: [remarkGfm, remarkMath],
+              remarkPlugins: [remarkGfm, remarkMath, remarkSmartypants],
               rehypePlugins: [
                 rehypeSlug,
                 rehypeAutolinkHeadings,

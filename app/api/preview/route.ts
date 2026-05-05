@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serialize } from 'next-mdx-remote/serialize';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import remarkSmartypants from 'remark-smartypants';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeKatex from 'rehype-katex';
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     const mdxSource = await serialize(content, {
       mdxOptions: {
-        remarkPlugins: [remarkGfm, remarkMath],
+        remarkPlugins: [remarkGfm, remarkMath, remarkSmartypants],
         rehypePlugins: [
           rehypeSlug,
           rehypeAutolinkHeadings,
