@@ -6,6 +6,7 @@ export const revalidate = false; // 수동 캐시 무효화만 사용
 import { Space_Grotesk, Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import { Analytics, AnalyticsConfig } from 'pliny/analytics';
+import { Analytics as VercelAnalytics } from '@vercel/analytics/next';
 import { SearchProvider, SearchConfig } from 'pliny/search';
 import siteMetadata from '@/data/siteMetadata';
 import { ThemeProviders } from './theme-providers';
@@ -129,6 +130,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </SearchProvider>
           </AuthProvider>
         </ThemeProviders>
+        <VercelAnalytics />
       </body>
     </html>
   );
