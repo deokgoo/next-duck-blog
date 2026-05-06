@@ -8,7 +8,6 @@ import Image from '@/components/Image';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
 import ScrollTopAndComment from '@/components/ScrollTopAndComment';
-import Head from 'next/head';
 import AdComponentDisplay from '@/components/AdComponentDisplay';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
 
@@ -39,13 +38,6 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
 
   return (
     <SectionContainer>
-      <Head>
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2038243209448310"
-          crossOrigin="anonymous"
-        ></script>
-      </Head>
       <ScrollTopAndComment />
       <article>
         <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
