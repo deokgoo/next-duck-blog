@@ -8,7 +8,6 @@ import PageTitle from '@/components/PageTitle';
 import SectionContainer from '@/components/SectionContainer';
 import siteMetadata from '@/data/siteMetadata';
 import ScrollTopAndComment from '@/components/ScrollTopAndComment';
-import AdComponentInArticle from '@/components/AdComponentInArticle';
 import AdComponentDisplay from '@/components/AdComponentDisplay';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
 
@@ -42,7 +41,6 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
             </div>
           </div>
           <div className="prose max-w-none py-4 dark:prose-invert">{children}</div>
-          <AdComponentInArticle />
           <AdComponentDisplay />
           {siteMetadata.comments && (
             <div className="pb-6 pt-6 text-center text-gray-700 dark:text-gray-300" id="comment">
