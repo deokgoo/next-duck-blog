@@ -27,7 +27,7 @@ export default function Home({ posts, featuredTags, description }: MainProps) {
   return (
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        <div className="space-y-2 pb-12 pt-10 md:space-y-5">
+        <div className="space-y-2 pb-section-sm pt-xxxl md:space-y-5">
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
             Welcome to Duck Blog
           </h1>
@@ -37,18 +37,18 @@ export default function Home({ posts, featuredTags, description }: MainProps) {
         </div>
 
         {/* Category Grid Section */}
-        <div className="py-12">
-          <h2 className="mb-8 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+        <div className="py-section-sm">
+          <h2 className="mb-xxl text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
             Explore Categories
           </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-xl sm:grid-cols-2 lg:grid-cols-4">
             {Object.entries(categoriesData).map(([key, data]) => {
               const IconComponent = (LucideIcons as any)[data.icon] || LucideIcons.FileText;
               return (
                 <Link
                   key={key}
                   href={`/${key}`}
-                  className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-8 transition-all hover:border-transparent hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900"
+                  className="group relative overflow-hidden rounded-xxxl border border-gray-100 bg-white p-xxl transition-all hover:border-transparent hover:shadow-elevated dark:border-gray-800 dark:bg-gray-900"
                 >
                   <div 
                     className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white transition-transform group-hover:scale-110"
@@ -56,7 +56,7 @@ export default function Home({ posts, featuredTags, description }: MainProps) {
                   >
                     <IconComponent size={24} />
                   </div>
-                  <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
+                  <h3 className="mb-xs text-xl font-bold text-gray-900 dark:text-white">
                     {data.title}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
@@ -72,7 +72,7 @@ export default function Home({ posts, featuredTags, description }: MainProps) {
           </div>
         </div>
 
-        <div className="pb-8 pt-12 md:space-y-5">
+        <div className="pb-xxl pt-section-sm md:space-y-5">
           <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
             Latest Posts
           </h2>
@@ -92,7 +92,7 @@ export default function Home({ posts, featuredTags, description }: MainProps) {
             const { slug, date, title, summary, tags, createdAt } = post;
             const displayDate = createdAt || date;
             return (
-              <li key={slug} className="py-6">
+              <li key={slug} className="py-xl">
                 <article>
                   <Link href={`/blog/${post.category || 'dev'}/${slug}`} className="group block">
                     <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">

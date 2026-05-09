@@ -8,6 +8,7 @@ import NextImage from 'next/image';
 const navItems = [
   { name: '대시보드', href: '/admin' },
   { name: '새 글 쓰기', href: '/admin/editor' },
+  { name: '좋아요 관리', href: '/admin/engagement' },
   { name: '블로그 아이디어', href: '/admin/blog-ideas' },
 ];
 

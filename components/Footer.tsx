@@ -24,8 +24,8 @@ export default async function Footer() {
 
   return (
     <footer>
-      <div className="mt-16 flex flex-col items-center">
-        <div className="mb-3 flex space-x-4">
+      <div className="mt-section flex flex-col items-center">
+        <div className="mb-sm flex space-x-md">
           {show('email') && (
             <SocialIcon kind="mail" href={email ? `mailto:${email}` : undefined} size={6} />
           )}
@@ -38,17 +38,12 @@ export default async function Footer() {
           {show('threads') && <SocialIcon kind="threads" href={threads} size={6} />}
           {show('instagram') && <SocialIcon kind="instagram" href={instagram} size={6} />}
         </div>
-        <div className="mb-2 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <div className="mb-xs flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
           <div>{authorName}</div>
           <div>{` • `}</div>
           <div>{`© ${new Date().getFullYear()}`}</div>
           <div>{` • `}</div>
           <Link href="/">{title}</Link>
-        </div>
-        <div className="mb-8 text-sm text-gray-500 dark:text-gray-400">
-          <Link href="https://github.com/timlrx/tailwind-nextjs-starter-blog">
-            Tailwind Nextjs Theme
-          </Link>
         </div>
       </div>
     </footer>

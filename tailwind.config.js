@@ -21,6 +21,68 @@ module.exports = {
         13: '3.25rem',
         14: '3.5rem',
       },
+      fontSize: {
+        'hero-display': ['80px', { lineHeight: '1.05', letterSpacing: '-2px' }],
+        'display-lg': ['56px', { lineHeight: '1.10', letterSpacing: '-1px' }],
+        'heading-1': ['48px', { lineHeight: '1.15', letterSpacing: '-0.5px' }],
+        'heading-2': ['36px', { lineHeight: '1.20', letterSpacing: '-0.5px' }],
+        'heading-3': ['28px', { lineHeight: '1.25', letterSpacing: '0' }],
+        'heading-4': ['22px', { lineHeight: '1.30', letterSpacing: '0' }],
+        'heading-5': ['18px', { lineHeight: '1.40', letterSpacing: '0' }],
+      },
+      spacing: {
+        'xxs': '4px',
+        'xs': '8px',
+        'sm': '12px',
+        'md': '16px',
+        'lg': '20px',
+        'xl': '24px',
+        'xxl': '32px',
+        'xxxl': '40px',
+        'section-sm': '48px',
+        'section': '64px',
+        'section-lg': '96px',
+        'hero': '120px',
+      },
+      borderRadius: {
+        'xs': '4px',
+        'sm': '6px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        'xxl': '20px',
+        'xxxl': '24px',
+      },
+      boxShadow: {
+        'subtle': 'rgba(15, 15, 15, 0.04) 0px 1px 2px 0px',
+        'card': 'rgba(15, 15, 15, 0.08) 0px 4px 12px 0px',
+        'elevated': 'rgba(15, 15, 15, 0.20) 0px 24px 48px -8px',
+        'modal': 'rgba(15, 15, 15, 0.16) 0px 16px 48px -8px',
+      },
+      maxWidth: {
+        'container': '1280px',
+      },
+      screens: {
+        'xs': '480px',
+      },
+      keyframes: {
+        'like-heart': {
+          '0%': { transform: 'scale(1)' },
+          '25%': { transform: 'scale(1.3)' },
+          '50%': { transform: 'scale(0.9)' },
+          '75%': { transform: 'scale(1.1)' },
+          '100%': { transform: 'scale(1)' },
+        },
+      },
+      animation: {
+        'like-heart': 'like-heart 0.5s ease-in-out',
+      },
+      height: {
+        'input': '44px',
+      },
+      minHeight: {
+        'input': '44px',
+      },
       fontFamily: {
         sans: ['var(--font-pretendard)', 'var(--font-inter)', ...fontFamily.sans],
         display: ['var(--font-space-grotesk)', 'var(--font-pretendard)', ...fontFamily.sans],

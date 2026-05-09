@@ -14,7 +14,7 @@ const Header = async () => {
   const siteLogo = authorData?.siteLogo || Logo;
 
   return (
-    <header className="flex items-center justify-between py-10">
+    <header className="flex items-center justify-between py-xxxl">
       <div>
         <Link href="/" aria-label={typeof headerTitle === 'string' ? headerTitle : 'Blog'}>
           <div className="flex items-center justify-between">
@@ -33,7 +33,7 @@ const Header = async () => {
           </div>
         </Link>
       </div>
-      <div className="flex items-center space-x-4 leading-5 sm:space-x-6">
+      <div className="flex items-center space-x-md leading-5 sm:space-x-xl">
         <NavLinks />
         <SearchButton />
         <ThemeSwitch />
