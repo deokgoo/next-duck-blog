@@ -103,8 +103,8 @@ export default function KoreanNewsletterForm({
 
   if (compact) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-blue-50 to-green-50 p-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+      <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-blue-50 to-green-50 p-md dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-xs">
           {displayTitle}
         </h3>
         <form onSubmit={handleSubmit} className="flex gap-2">
@@ -113,13 +113,13 @@ export default function KoreanNewsletterForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t.placeholder}
-            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="flex-1 rounded-md border border-gray-300 px-sm py-xs text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             disabled={status === 'loading'}
           />
           <button
             type="submit"
             disabled={status === 'loading' || !email}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 dark:bg-blue-700 dark:hover:bg-blue-600"
+            className="rounded-md bg-blue-600 px-md py-xs text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 dark:bg-blue-700 dark:hover:bg-blue-600"
           >
             {status === 'loading' ? '전송중...' : (language === 'ko' ? '구독' : 'Subscribe')}
           </button>
@@ -135,10 +135,10 @@ export default function KoreanNewsletterForm({
   }
 
   return (
-    <div className="not-prose my-8 rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50 via-white to-green-50 p-6 shadow-sm dark:border-gray-700 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 lg:p-8">
+    <div className="not-prose my-8 rounded-xxl border border-gray-200 bg-gradient-to-br from-blue-50 via-white to-green-50 p-xl shadow-subtle dark:border-gray-700 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 lg:p-xxl">
       {/* 헤더 */}
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+      <div className="text-center mb-xl">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-sm">
           {displayTitle}
         </h2>
         <p className="text-gray-600 dark:text-gray-300 text-lg">
@@ -148,11 +148,11 @@ export default function KoreanNewsletterForm({
 
       {/* 혜택 칩 */}
       {showBenefits && (
-        <div className="mb-6 flex flex-wrap gap-2 justify-center">
+        <div className="mb-xl flex flex-wrap gap-2 justify-center">
           {t.benefits.map((benefit, index) => (
             <span
               key={index}
-              className="inline-block px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full dark:text-blue-300 dark:bg-blue-900/30"
+              className="inline-block px-sm py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full dark:text-blue-300 dark:bg-blue-900/30"
             >
               {benefit}
             </span>
@@ -168,14 +168,14 @@ export default function KoreanNewsletterForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t.placeholder}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-800"
+            className="flex-1 rounded-lg border border-gray-300 px-md py-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-800"
             disabled={status === 'loading'}
             required
           />
           <button
             type="submit"
             disabled={status === 'loading' || !email}
-            className="rounded-lg bg-gradient-to-r from-blue-600 to-green-600 px-6 py-3 font-semibold text-white transition-all duration-200 hover:from-blue-700 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed"
+            className="rounded-lg bg-gradient-to-r from-blue-600 to-green-600 px-xl py-sm font-semibold text-white transition-all duration-200 hover:from-blue-700 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed"
           >
             {status === 'loading' ? (
               <span className="flex items-center gap-2">
