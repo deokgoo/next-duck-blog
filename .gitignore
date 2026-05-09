@@ -59,3 +59,6 @@ public/search.json
 public/google*.html
 ads.txt
 .aider*
+
+# npm lockfile (using pnpm)
+package-lock.json
