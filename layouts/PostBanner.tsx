@@ -10,6 +10,8 @@ import siteMetadata from '@/data/siteMetadata';
 import ScrollTopAndComment from '@/components/ScrollTopAndComment';
 import AdComponentDisplay from '@/components/AdComponentDisplay';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
+import PostEngagement from '@/components/engagement/PostEngagement';
+import PostHeaderEngagement from '@/components/engagement/PostHeaderEngagement';
 
 interface LayoutProps {
   content: CoreContent<Blog>;
@@ -28,7 +30,7 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
       <ScrollTopAndComment />
       <article>
         <div>
-          <div className="space-y-1 pb-10 text-center dark:border-gray-700">
+          <div className="space-y-1 pb-xxxl text-center dark:border-gray-700">
             <div className="w-full">
               <Bleed>
                 <div className="relative aspect-[2/1] w-full">
@@ -36,19 +38,25 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
                 </div>
               </Bleed>
             </div>
-            <div className="relative pt-10">
+            <div className="relative pt-xxxl">
               <PageTitle>{title}</PageTitle>
             </div>
+            <div className="pt-md">
+              <PostHeaderEngagement slug={slug} title={title} />
+            </div>
           </div>
-          <div className="prose max-w-none py-4 dark:prose-invert">{children}</div>
+          <div className="prose max-w-none py-md dark:prose-invert">{children}</div>
+          <div className="flex justify-center py-4">
+            <PostEngagement slug={slug} />
+          </div>
           <AdComponentDisplay />
           {siteMetadata.comments && (
-            <div className="pb-6 pt-6 text-center text-gray-700 dark:text-gray-300" id="comment">
+            <div className="pb-xl pt-xl text-center text-gray-700 dark:text-gray-300" id="comment">
               <Comments slug={slug} />
             </div>
           )}
           {siteMetadata.newsletter?.provider && (
-            <div className="flex items-center justify-center pt-6 pb-6">
+            <div className="flex items-center justify-center pt-xl pb-xl">
               <KoreanNewsletterForm
                 showBenefits={true}
               />
@@ -57,7 +65,7 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
           <footer>
             <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
               {prev && prev.path && (
-                <div className="pt-4 xl:pt-8">
+                <div className="pt-md xl:pt-xxl">
                   <Link
                     href={`/${prev.path}`}
                     className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
@@ -68,7 +76,7 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
                 </div>
               )}
               {next && next.path && (
-                <div className="pt-4 xl:pt-8">
+                <div className="pt-md xl:pt-xxl">
                   <Link
                     href={`/${next.path}`}
                     className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"

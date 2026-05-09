@@ -21,6 +21,12 @@ export default function AdminListClient() {
   const isHandlingDelete = useRef(false);
   const instanceId = useRef(Math.random().toString(36).substring(7));
 
+  // Engagement stats
+  const [engagementStats, setEngagementStats] = useState<Record<string, { baseLikes: number; likes: number; total: number }>>({});
+  const [editingBaseLikes, setEditingBaseLikes] = useState<string | null>(null);
+  const [baseLikesInput, setBaseLikesInput] = useState('');
+  const [savingBaseLikes, setSavingBaseLikes] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -51,6 +57,61 @@ export default function AdminListClient() {
 
     fetchPosts();
   }, [user]);
+
+  // Fetch engagement stats when posts are loaded
+  useEffect(() => {
+    if (!user || posts.length === 0) return;
+    const fetchEngagement = async () => {
+      try {
+        const token = await user.getIdToken();
+        const slugs = posts.map((p) => p.slug).join(',');
+        const res = await fetch(`/api/engagement/admin/stats?slugs=${encodeURIComponent(slugs)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setEngagementStats(data.stats || {});
+        }
+      } catch (error) {
+        console.error('Error fetching engagement stats:', error);
+      }
+    };
+    fetchEngagement();
+  }, [user, posts]);
+
+  const handleSaveBaseLikes = async (slug: string) => {
+    if (!user) return;
+    const value = parseInt(baseLikesInput, 10);
+    if (isNaN(value) || value < 0) return;
+
+    setSavingBaseLikes(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/engagement/admin/base-likes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ slug, baseLikes: value }),
+      });
+      if (res.ok) {
+        setEngagementStats((prev) => ({
+          ...prev,
+          [slug]: {
+            baseLikes: value,
+            likes: prev[slug]?.likes ?? 0,
+            total: value + (prev[slug]?.likes ?? 0),
+          },
+        }));
+        setEditingBaseLikes(null);
+      }
+    } catch (error) {
+      console.error('Error saving baseLikes:', error);
+    } finally {
+      setSavingBaseLikes(false);
+    }
+  };
 
   const openDeleteModal = (e: React.MouseEvent, slug: string) => {
     e.preventDefault();
@@ -188,6 +249,7 @@ export default function AdminListClient() {
             <tr>
               <th className="px-6 py-4 font-bold">Title</th>
               <th className="px-6 py-4 font-bold">Date</th>
+              <th className="px-6 py-4 font-bold">Likes</th>
               <th className="px-6 py-4 font-bold">Tags</th>
               <th className="px-6 py-4 font-bold text-right">Actions</th>
             </tr>
@@ -195,7 +257,7 @@ export default function AdminListClient() {
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {isLoading ? (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500 italic">
+                <td colSpan={5} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500 italic">
                   <div className="flex justify-center flex-row items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent"></span>
                     포스트를 불러오는 중입니다...
@@ -204,7 +266,7 @@ export default function AdminListClient() {
               </tr>
             ) : filteredPosts.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500 italic">
+                <td colSpan={5} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500 italic">
                   {activeTab === 'all'
                     ? '포스트가 없습니다.'
                     : activeTab === 'published'
@@ -303,6 +365,54 @@ export default function AdminListClient() {
                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {post.createdAt ? formatDate(post.createdAt, siteMetadata.locale) : formatDate(post.date, siteMetadata.locale)}
                     </div>
+                  </td>
+                  <td className="px-6 py-5 whitespace-nowrap">
+                    {editingBaseLikes === post.slug ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          min="0"
+                          value={baseLikesInput}
+                          onChange={(e) => setBaseLikesInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveBaseLikes(post.slug);
+                            if (e.key === 'Escape') setEditingBaseLikes(null);
+                          }}
+                          className="w-16 rounded border border-gray-300 px-1.5 py-0.5 text-xs dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+                          autoFocus
+                          disabled={savingBaseLikes}
+                        />
+                        <button
+                          onClick={() => handleSaveBaseLikes(post.slug)}
+                          disabled={savingBaseLikes}
+                          className="text-[10px] font-bold text-green-600 hover:text-green-700 dark:text-green-400"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={() => setEditingBaseLikes(null)}
+                          className="text-[10px] font-bold text-gray-400 hover:text-gray-600"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingBaseLikes(post.slug);
+                          setBaseLikesInput(String(engagementStats[post.slug]?.baseLikes ?? 0));
+                        }}
+                        className="group/likes flex flex-col items-start gap-0.5 hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1.5 py-0.5 -mx-1.5 transition-colors"
+                        title="클릭하여 기본 좋아요 수 편집"
+                      >
+                        <span className="text-sm font-bold text-pink-500">
+                          ♥ {engagementStats[post.slug]?.total ?? 0}
+                        </span>
+                        <span className="text-[10px] text-gray-400 group-hover/likes:text-gray-600 dark:group-hover/likes:text-gray-300">
+                          base: {engagementStats[post.slug]?.baseLikes ?? 0} + real: {engagementStats[post.slug]?.likes ?? 0}
+                        </span>
+                      </button>
+                    )}
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-wrap gap-1.5">
