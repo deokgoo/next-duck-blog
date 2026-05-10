@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { CoreContent } from 'pliny/utils/contentlayer';
 import type { Post as Blog, Authors } from '@/lib/types';
-import Comments from '@/components/Comments';
+import CommentWidget from '@/components/comments/CommentWidget';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
 import SectionContainer from '@/components/SectionContainer';
@@ -128,11 +128,9 @@ export default function PostModern({ content, authorDetails, next, prev, childre
         </div>
       </article>
 
-      {siteMetadata.comments && (
-        <div className="pb-6 pt-6 text-center text-gray-700 dark:text-gray-300" id="comment">
-          <Comments slug={slug} />
-        </div>
-      )}
+      <div className="pb-6 pt-6 text-gray-700 dark:text-gray-300" id="comment">
+        <CommentWidget slug={slug} />
+      </div>
 
       {siteMetadata.newsletter?.provider && (
         <div className="flex items-center justify-center pb-6 pt-6">

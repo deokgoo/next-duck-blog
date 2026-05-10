@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { CoreContent, Post as Blog, Authors } from '@/lib/types';
-import Comments from '@/components/Comments';
+import CommentWidget from '@/components/comments/CommentWidget';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
 import SectionContainer from '@/components/SectionContainer';
@@ -106,18 +106,16 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
             </dl>
             <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
               <div className="prose max-w-none pb-xxl pt-xxxl dark:prose-invert">{children}</div>
-              <div className="flex justify-center py-4">
+              <div className="flex justify-center py-8">
                 <PostEngagement slug={slug} />
               </div>
               <AdComponentDisplay />
-              {siteMetadata.comments && (
-                <div
-                  className="pb-xl pt-xl text-center text-gray-700 dark:text-gray-300"
-                  id="comment"
-                >
-                  <Comments slug={slug} />
-                </div>
-              )}
+              <div
+                className="pb-xl pt-xl text-gray-700 dark:text-gray-300"
+                id="comment"
+              >
+                <CommentWidget slug={slug} />
+              </div>
               {siteMetadata.newsletter?.provider && (
                 <div className="flex items-center justify-center pb-xl pt-xl">
                   <KoreanNewsletterForm showBenefits={true} />

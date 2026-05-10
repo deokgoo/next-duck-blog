@@ -44,13 +44,13 @@ generateAdsText();
 
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is cloud.umami.is https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://apis.google.com https://www.gstatic.com https://fundingchoicesmessages.google.com https://ep2.adtrafficquality.google https://vercel.live;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' analytics.umami.is cloud.umami.is https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://apis.google.com https://www.gstatic.com https://fundingchoicesmessages.google.com https://ep2.adtrafficquality.google https://vercel.live;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src * blob: data:;
   media-src *.s3.amazonaws.com;
   connect-src * https://*.googleapis.com https://*.google.com https://*.firebaseio.com https://*.firebase.com;
   font-src 'self' https://fonts.gstatic.com;
-  frame-src giscus.app https://www.google.com https://www.youtube.com https://youtube.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://apis.google.com https://*.firebaseapp.com https://ep2.adtrafficquality.google https://vercel.live;
+  frame-src https://www.google.com https://www.youtube.com https://youtube.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://apis.google.com https://*.firebaseapp.com https://ep2.adtrafficquality.google https://vercel.live;
 `;
 
 const securityHeaders = [
