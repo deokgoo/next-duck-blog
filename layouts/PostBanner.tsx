@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import Image from '@/components/Image';
 import Bleed from 'pliny/ui/Bleed';
 import { CoreContent, Post as Blog } from '@/lib/types';
-import Comments from '@/components/Comments';
+import CommentWidget from '@/components/comments/CommentWidget';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
 import SectionContainer from '@/components/SectionContainer';
@@ -46,15 +46,13 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
             </div>
           </div>
           <div className="prose max-w-none py-md dark:prose-invert">{children}</div>
-          <div className="flex justify-center py-4">
+          <div className="flex justify-center py-8">
             <PostEngagement slug={slug} />
           </div>
           <AdComponentDisplay />
-          {siteMetadata.comments && (
-            <div className="pb-xl pt-xl text-center text-gray-700 dark:text-gray-300" id="comment">
-              <Comments slug={slug} />
-            </div>
-          )}
+          <div className="pb-xl pt-xl text-gray-700 dark:text-gray-300" id="comment">
+            <CommentWidget slug={slug} />
+          </div>
           {siteMetadata.newsletter?.provider && (
             <div className="flex items-center justify-center pt-xl pb-xl">
               <KoreanNewsletterForm
