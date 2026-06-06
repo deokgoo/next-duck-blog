@@ -11,6 +11,7 @@ const navItems = [
   { name: '좋아요 관리', href: '/admin/engagement' },
   { name: '댓글 관리', href: '/admin/comments' },
   { name: '블로그 아이디어', href: '/admin/blog-ideas' },
+  { name: '캐시 관리', href: '/admin/cache' },
 ];
 
 export default function AdminNav() {
