@@ -135,20 +135,23 @@ describe('filterPostsByTag — Property 5: 정렬 순서 불변성', () => {
    * the result of filterPostsByTag must also maintain date descending order.
    */
 
-  // Arbitrary that generates posts with random dates via fc.date()
+  // Arbitrary that generates posts with random dates using integer timestamps
   const postWithDateArb = fc
     .record({
       slug: fc
         .string({ minLength: 1, maxLength: 20 })
         .map((s) => `post-${s.replace(/[^a-z0-9]/gi, 'x')}`),
       tags: fc.array(fc.string({ minLength: 1, maxLength: 30 }), { minLength: 0, maxLength: 5 }),
-      date: fc.date({ min: new Date('2000-01-01'), max: new Date('2030-12-31') }),
+      timestamp: fc.integer({
+        min: new Date('2000-01-01').getTime(),
+        max: new Date('2030-12-31').getTime(),
+      }),
     })
     .map(
-      ({ slug, tags, date }): Post => ({
+      ({ slug, tags, timestamp }): Post => ({
         slug,
         title: slug,
-        date: date.toISOString(),
+        date: new Date(timestamp).toISOString(),
         summary: '',
         content: '',
         tags,

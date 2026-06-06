@@ -112,7 +112,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export const revalidate = 31536000; // 1년 — 사실상 영구 캐시, revalidatePath()로 수동 갱신
+export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디맨드 갱신 전용
 
 export default async function Page(props: {
   params: Promise<{ category: string; slug: string[] }>;

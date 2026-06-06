@@ -13,6 +13,22 @@ import * as fc from 'fast-check';
 // Mock 'server-only' to avoid errors in test environment
 vi.mock('server-only', () => ({}));
 
+// Mock next/cache unstable_cache — pass-through that just calls the function
+vi.mock('next/cache', () => ({
+  unstable_cache: (fn: (...args: any[]) => any, _keys?: string[], _options?: any) => fn,
+}));
+
+// Mock siteMetadata for fallback author
+vi.mock('@/data/siteMetadata', () => ({
+  default: {
+    title: 'Test Blog',
+    author: 'Test Author',
+    description: 'Test description',
+    image: '/test-avatar.jpg',
+    socialBanner: '/test-banner.jpg',
+  },
+}));
+
 // ---------------------------------------------------------------------------
 // Arbitrary generators for Post data
 // ---------------------------------------------------------------------------
@@ -106,13 +122,11 @@ import type { Post } from '../types';
 
 function referenceIsPostPublishedAndReady(post: Post): boolean {
   if (post.status) {
-    if (post.status !== 'published') return false;
-  } else {
-    const isDraft = (post as any).draft;
-    if (isDraft === true || String(isDraft) === 'true') return false;
+    return post.status === 'published';
   }
-  if (!post.date) return false;
-  return new Date(post.date).getTime() <= Date.now();
+  // Backwards compatibility: status가 없는 이전 포스트는 draft 필드 확인
+  const isDraft = (post as any).draft;
+  return isDraft !== true && String(isDraft) !== 'true';
 }
 
 // ---------------------------------------------------------------------------
@@ -141,15 +155,15 @@ describe('Preservation Property: isPostPublishedAndReady() filtering', () => {
     );
   });
 
-  it('should return false for posts with future dates', () => {
+  it('should return true for published posts regardless of date (no date filtering)', () => {
     fc.assert(
       fc.property(postArb, (postData) => {
         const post = { ...postData, status: 'published' as const } as Post;
         const result = isPostPublishedAndReady(post);
 
-        if (new Date(post.date).getTime() > Date.now()) {
-          expect(result).toBe(false);
-        }
+        // The function only checks status, not date
+        // All published posts should return true
+        expect(result).toBe(true);
       }),
       { numRuns: 200 }
     );

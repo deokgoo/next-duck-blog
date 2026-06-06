@@ -4,7 +4,7 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components';
 import AuthorLayout from '@/layouts/AuthorLayout';
 import { genPageMetadata } from 'app/seo';
 
-export const revalidate = 86400; // 24시간 캐시 (정적 페이지)
+export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디맨드 갱신 전용
 
 export const metadata = genPageMetadata({ title: 'About' });
 

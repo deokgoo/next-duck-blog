@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { verifyAuth } from '@/lib/auth/serverAuth';
-import { revalidatePath } from 'next/cache';
+import { revalidateOnPostCreate, revalidateOnPostUpdate } from '@/lib/revalidation';
 import { submitUrlToIndexNow } from '@/lib/indexnow';
 import siteMetadata from '@/data/siteMetadata';
 
@@ -58,25 +58,28 @@ export async function POST(request: NextRequest) {
         transaction.delete(db.collection('posts').doc(previousSlug));
         transaction.set(db.collection('posts').doc(slug), postData);
       });
-      revalidatePath(`/blog/${category}/${previousSlug}`);
     } else {
       // 기존 동작: 덮어쓰기
       await db.collection('posts').doc(slug).set(postData);
     }
 
-    // 캐시 즉시 무효화 (New Structure) - Revalidation Fail shouldn't block Save
-    try {
-      revalidatePath(`/blog/${category}/${slug}`);
-      revalidatePath(`/${category}`);
-      if (metadata.tags) {
-        metadata.tags.forEach((tag: string) => {
-          revalidatePath(`/${category}/tag/${tag}`);
-        });
-      }
-      revalidatePath('/');
-      revalidatePath('/admin');
-    } catch (revalidateError) {
-      console.error('Revalidation failed:', revalidateError);
+    // 캐시 무효화 — centralized revalidation handler
+    if (previousSlug) {
+      // previousSlug가 제공되면 update로 판단
+      revalidateOnPostUpdate({
+        slug,
+        category,
+        tags: metadata.tags || [],
+        previousSlug,
+        previousCategory: metadata.previousCategory || category,
+      });
+    } else {
+      // previousSlug가 없으면 새 포스트 create
+      revalidateOnPostCreate({
+        slug,
+        category,
+        tags: metadata.tags || [],
+      });
     }
 
     // IndexNow 알림: published 글만 fire-and-forget으로 전송

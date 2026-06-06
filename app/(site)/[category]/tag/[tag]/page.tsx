@@ -6,7 +6,7 @@ import { categoriesData, CategoryKey } from '@/data/categoriesData';
 import { genPageMetadata } from 'app/seo';
 import { Metadata } from 'next';
 
-export const revalidate = 31536000;
+export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디맨드 갱신 전용
 
 export async function generateMetadata(props: {
   params: Promise<{ category: string; tag: string }>;
@@ -24,19 +24,9 @@ export async function generateMetadata(props: {
   });
 }
 
-export async function generateStaticParams() {
-  const categories = Object.keys(categoriesData);
-  const paths: { category: string; tag: string }[] = [];
-
-  for (const category of categories) {
-    const tags = await getTagsByCategory(category);
-    for (const tag of Object.keys(tags)) {
-      paths.push({ category, tag });
-    }
-  }
-
-  return paths;
-}
+// generateStaticParams 제거: 빌드 시 모든 카테고리×태그 조합을 사전 생성하지 않음.
+// 첫 요청 시 동적 렌더 후 Full Route Cache에 저장되며 (dynamicParams = true 기본값),
+// 이후 동일 경로는 캐시에서 즉시 반환됨. 캐시 갱신은 revalidatePath()로 온디맨드 처리.
 
 export default async function CategoryTagPage(props: {
   params: Promise<{ category: string; tag: string }>;

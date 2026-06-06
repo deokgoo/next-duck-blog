@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { verifyAuth } from '@/lib/auth/serverAuth';
-import { revalidatePath } from 'next/cache';
+import { revalidateOnPostDelete } from '@/lib/revalidation';
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -27,13 +27,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
+    // Extract category and tags from the post document before deletion
+    const postData = doc.data();
+    const category = postData?.category || '';
+    const tags: string[] = postData?.tags || [];
+
     // 논리 삭제 (status를 'deleted'로 변경)
     await docRef.update({ status: 'deleted' });
 
-    // 캐시 즉시 무효화
-    revalidatePath(`/blog/${slug}`);
-    revalidatePath('/blog');
-    revalidatePath('/');
+    // 캐시 즉시 무효화 (centralized revalidation handler)
+    revalidateOnPostDelete({ slug, category, tags });
 
     return NextResponse.json({ message: 'Post deleted successfully' });
   } catch (error) {
