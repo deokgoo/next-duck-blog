@@ -1,7 +1,30 @@
 // @vitest-environment jsdom
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
+
+// IntersectionObserver polyfill for jsdom (must be set before component import)
+beforeAll(() => {
+  global.IntersectionObserver = class IntersectionObserver {
+    private callback: IntersectionObserverCallback
+    constructor(callback: IntersectionObserverCallback) {
+      this.callback = callback
+    }
+    observe(target: Element) {
+      // Simulate immediate intersection
+      this.callback(
+        [{ isIntersecting: true, target, intersectionRatio: 1 } as IntersectionObserverEntry],
+        this
+      )
+    }
+    unobserve() {}
+    disconnect() {}
+    get root() { return null }
+    get rootMargin() { return '' }
+    get thresholds() { return [] }
+    takeRecords() { return [] }
+  } as unknown as typeof IntersectionObserver
+})
 import CommentWidget from '../CommentWidget'
 import CommentForm from '../CommentForm'
 import CommentItem from '../CommentItem'
@@ -32,18 +55,20 @@ describe('CommentWidget', () => {
     })
   })
 
-  it('shows loading state initially', async () => {
+  it('shows loading skeleton state while fetching', async () => {
     let resolvePromise: (value: Response) => void
     const fetchPromise = new Promise<Response>((resolve) => {
       resolvePromise = resolve
     })
     global.fetch = vi.fn().mockReturnValue(fetchPromise)
 
-    await act(async () => {
-      render(<CommentWidget slug="test-post" />)
+    const { container } = await act(async () => {
+      return render(<CommentWidget slug="test-post" />)
     })
 
-    expect(screen.getByText('댓글을 불러오는 중...')).toBeInTheDocument()
+    // CommentWidget shows skeleton pulse divs while loading
+    const skeletons = container.querySelectorAll('.animate-pulse')
+    expect(skeletons.length).toBeGreaterThan(0)
 
     // Resolve to clean up
     await act(async () => {

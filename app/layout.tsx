@@ -12,14 +12,6 @@ import { ThemeProviders } from './theme-providers';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import { Metadata } from 'next';
 import { getAuthorBySlug } from '@/lib/firestore';
-import { unstable_cache } from 'next/cache';
-
-// Author 데이터를 24시간 캐싱하여 Firestore 호출 최소화
-const getCachedAuthor = unstable_cache(
-  async () => getAuthorBySlug('default'),
-  ['author-default'],
-  { revalidate: 86400 } // 24시간
-);
 
 const space_grotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -48,7 +40,7 @@ const firaCode = localFont({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const authorData = await getCachedAuthor();
+  const authorData = await getAuthorBySlug('default');
 
   const title = authorData?.blogTitle || siteMetadata.title;
   const description = authorData?.blogDescription || siteMetadata.description;
@@ -97,7 +89,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const authorData = await getCachedAuthor();
+  const authorData = await getAuthorBySlug('default');
   const favicon = authorData?.favicon || '/static/favicons/favicon-32x32.png';
 
   return (

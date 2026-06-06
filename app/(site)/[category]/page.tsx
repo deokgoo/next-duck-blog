@@ -8,7 +8,7 @@ import siteMetadata from '@/data/siteMetadata';
 import { Metadata } from 'next';
 import * as LucideIcons from 'lucide-react';
 
-export const revalidate = 31536000;
+export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디맨드 갱신 전용
 
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }): Promise<Metadata | undefined> {
   const category = (await params).category as CategoryKey;

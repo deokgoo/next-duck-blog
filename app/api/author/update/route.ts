@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { updateAuthor } from '@/lib/firestore';
 import { adminAuth } from '@/lib/firebaseAdmin';
+import { revalidateOnAuthorUpdate } from '@/lib/revalidation';
 
 export async function POST(request: Request) {
   try {
@@ -30,6 +31,8 @@ export async function POST(request: Request) {
     }
 
     await updateAuthor(slug, data);
+
+    revalidateOnAuthorUpdate(slug);
 
     return NextResponse.json({ success: true, slug });
   } catch (error) {

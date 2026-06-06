@@ -6,8 +6,8 @@ import { genPageMetadata } from 'app/seo';
 
 import { Metadata } from 'next';
 
-export const revalidate = 31536000;
-const POSTS_PER_PAGE = 5;
+export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디맨드 갱신 전용
+
 
 // Dynamic categories helper
 const getValidCategories = async () => {
@@ -71,11 +71,6 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
   const allPosts = (await getAllPosts()).filter(isPostPublishedAndReady);
   const categoryPosts = allPosts.filter((p) => (p.category || 'dev') === category);
   const sortedPosts = sortPosts(categoryPosts);
-  const initialDisplayPosts = allCoreContent(sortedPosts.slice(0, POSTS_PER_PAGE));
-  const pagination = {
-    currentPage: 1,
-    totalPages: Math.ceil(categoryPosts.length / POSTS_PER_PAGE),
-  };
   const tags = await getTagsByCategory(category);
 
   const title = category.charAt(0).toUpperCase() + category.slice(1);
@@ -83,8 +78,6 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
   return (
     <ListLayout
       posts={allCoreContent(sortedPosts)}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
       title={`${title} Posts`}
       tags={tags}
     />

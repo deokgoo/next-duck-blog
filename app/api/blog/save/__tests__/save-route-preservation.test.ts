@@ -36,8 +36,10 @@ vi.mock('@/lib/auth/serverAuth', () => ({
 }));
 
 const mockRevalidatePath = vi.fn();
+const mockRevalidateTag = vi.fn();
 vi.mock('next/cache', () => ({
   revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
+  revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
 // --- Helpers ---
@@ -98,6 +100,7 @@ describe('Preservation Property: Non-Slug-Change Save Behavior', () => {
     mockDelete.mockClear();
     mockDoc.mockClear();
     mockRevalidatePath.mockClear();
+    mockRevalidateTag.mockClear();
   });
 
   it('Property 2a: New post creation (no previousSlug) → document set at slug, revalidatePath called correctly', async () => {
@@ -117,6 +120,7 @@ describe('Preservation Property: Non-Slug-Change Save Behavior', () => {
         mockDelete.mockClear();
         mockDoc.mockClear();
         mockRevalidatePath.mockClear();
+        mockRevalidateTag.mockClear();
 
         const expectedSlug = generateSlug(metadata.title);
 
@@ -153,10 +157,9 @@ describe('Preservation Property: Non-Slug-Change Save Behavior', () => {
         // No delete should be called (new post, no old document to remove)
         expect(mockDelete).not.toHaveBeenCalled();
 
-        // revalidatePath should be called for slug path, /blog, and /
+        // revalidatePath should be called for slug path (with category), /blog, and /
         const revalidatedPaths = mockRevalidatePath.mock.calls.map((c: any[]) => c[0]);
-        expect(revalidatedPaths).toContain(`/blog/${expectedSlug}`);
-        expect(revalidatedPaths).toContain('/blog');
+        expect(revalidatedPaths).toContain(`/blog/dev/${expectedSlug}`);
         expect(revalidatedPaths).toContain('/');
       }),
       { numRuns: 30, verbose: true }
@@ -180,6 +183,7 @@ describe('Preservation Property: Non-Slug-Change Save Behavior', () => {
         mockDelete.mockClear();
         mockDoc.mockClear();
         mockRevalidatePath.mockClear();
+        mockRevalidateTag.mockClear();
 
         const slug = generateSlug(metadata.title);
 
@@ -217,10 +221,9 @@ describe('Preservation Property: Non-Slug-Change Save Behavior', () => {
         // No delete should be called (slug didn't change)
         expect(mockDelete).not.toHaveBeenCalled();
 
-        // revalidatePath should be called for slug path, /blog, and /
+        // revalidatePath should be called for slug path (with category), and /
         const revalidatedPaths = mockRevalidatePath.mock.calls.map((c: any[]) => c[0]);
-        expect(revalidatedPaths).toContain(`/blog/${slug}`);
-        expect(revalidatedPaths).toContain('/blog');
+        expect(revalidatedPaths).toContain(`/blog/dev/${slug}`);
         expect(revalidatedPaths).toContain('/');
       }),
       { numRuns: 30, verbose: true }

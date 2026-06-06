@@ -49,8 +49,10 @@ vi.mock('@/lib/auth/serverAuth', () => ({
 }));
 
 const mockRevalidatePath = vi.fn();
+const mockRevalidateTag = vi.fn();
 vi.mock('next/cache', () => ({
   revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
+  revalidateTag: (...args: any[]) => mockRevalidateTag(...args),
 }));
 
 // --- Helpers ---
@@ -102,6 +104,7 @@ describe('Bug Condition Exploration: Slug Change Leaves Orphan Documents', () =>
     mockDoc.mockClear();
     mockRunTransaction.mockClear();
     mockRevalidatePath.mockClear();
+    mockRevalidateTag.mockClear();
     lastTransaction = null;
   });
 
@@ -127,6 +130,7 @@ describe('Bug Condition Exploration: Slug Change Leaves Orphan Documents', () =>
         mockDoc.mockClear();
         mockRunTransaction.mockClear();
         mockRevalidatePath.mockClear();
+        mockRevalidateTag.mockClear();
         lastTransaction = null;
 
         const oldSlug = generateSlug(originalTitle);
@@ -165,12 +169,12 @@ describe('Bug Condition Exploration: Slug Change Leaves Orphan Documents', () =>
 
         expect(transactionDeleteCalled || directDeleteCalled).toBe(true);
 
-        // 2. revalidatePath should be called for the old slug path
+        // 2. revalidatePath should be called for the old slug path (with category)
         const revalidatedPaths = mockRevalidatePath.mock.calls.map((c: any[]) => c[0]);
-        expect(revalidatedPaths).toContain(`/blog/${oldSlug}`);
+        expect(revalidatedPaths).toContain(`/blog/dev/${oldSlug}`);
 
-        // 3. revalidatePath should also be called for the new slug path
-        expect(revalidatedPaths).toContain(`/blog/${newSlug}`);
+        // 3. revalidatePath should also be called for the new slug path (with category)
+        expect(revalidatedPaths).toContain(`/blog/dev/${newSlug}`);
       }),
       { numRuns: 20, verbose: true }
     );

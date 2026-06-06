@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 'use client';
 
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { slug } from 'github-slugger';
 import { formatDate } from 'pliny/utils/formatDate';
@@ -9,64 +10,18 @@ import type { Post as Blog } from '@/lib/types';
 import Link from '@/components/Link';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
-interface PaginationProps {
-  totalPages: number;
-  currentPage: number;
-}
+
+const POSTS_PER_PAGE = 10;
 
 interface ListLayoutProps {
   posts: CoreContent<Blog>[];
   title: string;
-  initialDisplayPosts?: CoreContent<Blog>[];
-  pagination?: PaginationProps;
   tags?: Record<string, number>;
-}
-
-function Pagination({ totalPages, currentPage }: PaginationProps) {
-  const pathname = usePathname();
-  const basePath = pathname.split('/')[1];
-  const prevPage = currentPage - 1 > 0;
-  const nextPage = currentPage + 1 <= totalPages;
-
-  return (
-    <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-      <nav className="flex justify-between">
-        {!prevPage && (
-          <button className="cursor-auto disabled:opacity-50" disabled={!prevPage}>
-            Previous
-          </button>
-        )}
-        {prevPage && (
-          <Link
-            href={currentPage - 1 === 1 ? `/${basePath}/` : `/${basePath}/page/${currentPage - 1}`}
-            rel="prev"
-          >
-            Previous
-          </Link>
-        )}
-        <span>
-          {currentPage} of {totalPages}
-        </span>
-        {!nextPage && (
-          <button className="cursor-auto disabled:opacity-50" disabled={!nextPage}>
-            Next
-          </button>
-        )}
-        {nextPage && (
-          <Link href={`/${basePath}/page/${currentPage + 1}`} rel="next">
-            Next
-          </Link>
-        )}
-      </nav>
-    </div>
-  );
 }
 
 export default function ListLayoutWithTags({
   posts,
   title,
-  initialDisplayPosts = [],
-  pagination,
   tags = {},
 }: ListLayoutProps) {
   const pathname = usePathname();
@@ -74,7 +29,33 @@ export default function ListLayoutWithTags({
   const tagKeys = Object.keys(tagCounts);
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a]);
 
-  const displayPosts = initialDisplayPosts.length > 0 ? initialDisplayPosts : posts;
+  // Infinite scroll state
+  const [displayCount, setDisplayCount] = useState(POSTS_PER_PAGE);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const hasMore = displayCount < posts.length;
+
+  const loadMore = useCallback(() => {
+    setDisplayCount((prev) => Math.min(prev + POSTS_PER_PAGE, posts.length));
+  }, [posts.length]);
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
+
+  const displayPosts = posts.slice(0, displayCount);
 
   return (
     <>
@@ -101,11 +82,10 @@ export default function ListLayoutWithTags({
                 {sortedTags.map((t) => {
                   const tagSlug = slug(t);
                   const isSelected = pathname.includes(`/tag/${tagSlug}`);
-                  // If we are in a category root or tag page, keep the category in the path
                   const baseCategoryPath = pathname.split('/tag/')[0];
                   const segments = baseCategoryPath.split('/').filter(Boolean);
                   const isCategoryPath = segments.length === 1 && segments[0] !== 'blog';
-                  
+
                   const tagHref = isCategoryPath
                     ? `/${segments[0]}/tag/${tagSlug}`
                     : `/search?tags=${tagSlug}`;
@@ -131,7 +111,7 @@ export default function ListLayoutWithTags({
               </ul>
             </div>
           </div>
-          <div>
+          <div className="w-full">
             <ul>
               {displayPosts.map((post) => {
                 const { slug, date, title, summary, tags, createdAt, category } = post;
@@ -170,8 +150,10 @@ export default function ListLayoutWithTags({
                 );
               })}
             </ul>
-            {pagination && pagination.totalPages > 1 && (
-              <Pagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} />
+            {hasMore && (
+              <div ref={loadMoreRef} className="flex justify-center py-8">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Loading...</span>
+              </div>
             )}
           </div>
         </div>
