@@ -16,21 +16,24 @@
 
 ## 1. 페이지별 캐싱 계층 매트릭스
 
-| Route | Data Cache | Full Route Cache | CDN | `revalidate` | 데이터 함수 |
-|-------|:----------:|:----------------:|:---:|:------------:|------------|
-| `/` (홈) | ✓ | ✓ | ✓ | `false` | `getAllPosts`, `getAuthorBySlug('default')` |
-| `/blog` | ✓ | ✓ | ✓ | `false` | `getAllPosts`, `getAllTags` |
-| `/blog/[category]` | ✓ | ✓ | ✓ | `false` | `getAllPosts`, `getTagsByCategory`, `getPostBySlug` |
-| `/blog/[category]/[...slug]` | ✓ | ✓ | ✓ | `false` | `getAllPosts`, `getPostBySlug`, `getAuthorBySlug` |
-| `/blog/page/[page]` | ✓ | ✓ | ✓ | `false` | `getAllPosts`, `getAllTags` |
-| `/[category]` | ✓ | ✓ | ✓ | `false` | `getAllPosts`, `getTagsByCategory` |
-| `/[category]/tag/[tag]` | ✓ | ✓ | ✓ | `false` | `getAllPosts`, `getTagsByCategory` (generateStaticParams 없음 — 첫 요청 시 동적 렌더 후 캐싱) |
-| `/about` | ✓ | ✓ | ✓ | `false` | `getAuthorBySlug('default')` |
-| `/search` | — | — | — | N/A | Client component (`'use client'`), API 호출 |
-| `/admin/*` | — | — | — | `force-dynamic` | 매 요청 시 fresh render |
-| `/projects` | — | ✓ | ✓ | 미선언 | 빌드 시 정적 생성, 무기한 유지 |
-| `/privacy` | — | ✓ | ✓ | 미선언 | 빌드 시 정적 생성, 무기한 유지 |
-| Root Layout (`app/layout.tsx`) | ✓ | — | — | `false` | `getAuthorBySlug('default')` |
+| Route | Data Cache | Full Route Cache | CDN | `revalidate` | `generateStaticParams` | 데이터 함수 |
+|-------|:----------:|:----------------:|:---:|:------------:|:---------------------:|------------|
+| `/` (홈) | ✓ | ✓ Static | ✓ | `false` | ❌ (단일 경로) | `getAllPosts`, `getAuthorBySlug('default')` |
+| `/blog` | ✓ | ✓ Static | ✓ | `false` | ❌ | `getAllPosts`, `getAllTags` |
+| `/blog/[category]` | ✓ | ✓ Static | ✓ | `false` | ✅ DB 카테고리 추출 | `getAllPosts`, `getTagsByCategory`, `getPostBySlug` |
+| `/blog/[category]/[...slug]` | ✓ | ✓ Static | ✓ | `false` | ✅ 발행된 모든 포스트 | `getAllPosts`×3¹, `getPostBySlug`, `getAuthorBySlug` |
+| `/[category]` | ✓ | ✓ Static | ✓ | `false` | ✅ `categoriesData` 키 | `getAllPosts`, `getTagsByCategory` |
+| `/[category]/tag/[tag]` | ✓ | ✓ Lazy Static² | ✓ | `false` | ❌ (의도적 제거) | `getAllPosts`, `getTagsByCategory` |
+| `/about` | ✓ | ✓ Static | ✓ | `false` | ❌ | `getAuthorBySlug('default')` |
+| `/search` | — | ✓ Shell only | ✓ | N/A | — | Client component (`'use client'`), `/api/blog/search` 호출 |
+| `/login` | — | ✓ Shell only | ✓ | N/A | — | Client component (`'use client'`), Firebase Auth |
+| `/admin/*` | — | ✓ Shell only | ✓ | N/A | — | Client component (`'use client'`), Firebase Auth (클라이언트 인증) |
+| `/projects` | — | ✓ Static | ✓ | 미선언 | — | 빌드 시 정적 생성 |
+| `/privacy-policies` | — | ✓ Static | ✓ | 미선언 | — | 빌드 시 정적 생성 |
+| Root Layout (`app/layout.tsx`) | ✓ | — | — | — | — | — |
+
+> **¹ `getAllPosts()` 중복 호출 주의:** `/blog/[category]/[...slug]`는 `generateStaticParams`, `generateMetadata`, `Page` 본문에서 각각 `getAllPosts()`를 호출합니다. Firestore SDK는 Next.js의 `fetch` 기반 Request Memoization 대상이 아니므로, 빌드 타임에 포스트 수 × 3번 Firestore를 호출합니다.  
+> **² Lazy Static:** 첫 요청 시 SSR 후 Full Route Cache에 저장. `dynamicParams = true` (기본값) 덕분에 `generateStaticParams` 없이도 동작합니다.
 
 ### 참고사항
 

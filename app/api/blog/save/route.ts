@@ -35,12 +35,11 @@ export async function POST(request: NextRequest) {
 
     // Firestore에 저장할 데이터 구성
     const category = metadata.category || 'dev';
-    const postData = {
+    const postData: Record<string, any> = {
       slug,
       title: metadata.title,
       category,
       date: metadata.date,
-      createdAt: metadata.createdAt,
       tags: metadata.tags || [],
       summary: metadata.summary || '',
       body: { code: '', raw: content },
@@ -50,6 +49,11 @@ export async function POST(request: NextRequest) {
       images: metadata.images || [],
       lastmod: new Date().toISOString(),
     };
+
+    // undefined 필드는 제외 (Firestore는 undefined 허용 안 함)
+    if (metadata.createdAt !== undefined) {
+      postData.createdAt = metadata.createdAt;
+    }
 
     // Firestore에 문서 저장
     if (previousSlug && previousSlug !== slug) {
