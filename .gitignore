@@ -62,3 +62,6 @@ ads.txt
 
 # npm lockfile (using pnpm)
 package-lock.json
+
+# TypeScript incremental build cache
+*.tsbuildinfo
