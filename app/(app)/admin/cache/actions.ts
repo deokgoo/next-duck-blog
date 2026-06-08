@@ -13,16 +13,16 @@ export async function revalidateAll(): Promise<RevalidateResult> {
   const details: string[] = [];
   try {
     // Data Cache
-    revalidateTag('posts-all');
-    revalidateTag('tags-all');
-    revalidateTag('author-default');
+    revalidateTag('posts-all', 'max');
+    revalidateTag('tags-all', 'max');
+    revalidateTag('author-default', 'max');
     details.push('태그: posts-all, tags-all, author-default');
 
     // 카테고리별 태그
     const posts = await getAllPosts();
     const categories = Array.from(new Set(posts.map((p) => p.category || 'dev')));
     categories.forEach((cat) => {
-      revalidateTag(`tags-${cat}`);
+      revalidateTag(`tags-${cat}`, 'max');
     });
     details.push(`카테고리 태그: ${categories.map((c) => `tags-${c}`).join(', ')}`);
 
@@ -39,7 +39,7 @@ export async function revalidateAll(): Promise<RevalidateResult> {
 export async function revalidatePosts(): Promise<RevalidateResult> {
   const details: string[] = [];
   try {
-    revalidateTag('posts-all');
+    revalidateTag('posts-all', 'max');
     details.push('태그: posts-all');
 
     revalidatePath('/');
@@ -55,12 +55,12 @@ export async function revalidatePosts(): Promise<RevalidateResult> {
 export async function revalidateTags(): Promise<RevalidateResult> {
   const details: string[] = [];
   try {
-    revalidateTag('tags-all');
+    revalidateTag('tags-all', 'max');
     details.push('태그: tags-all');
 
     const posts = await getAllPosts();
     const categories = Array.from(new Set(posts.map((p) => p.category || 'dev')));
-    categories.forEach((cat) => revalidateTag(`tags-${cat}`));
+    categories.forEach((cat) => revalidateTag(`tags-${cat}`, 'max'));
     details.push(`카테고리 태그: ${categories.map((c) => `tags-${c}`).join(', ')}`);
 
     return { ok: true, message: '태그 캐시가 초기화됐습니다.', details };
@@ -72,7 +72,7 @@ export async function revalidateTags(): Promise<RevalidateResult> {
 export async function revalidateAuthor(): Promise<RevalidateResult> {
   const details: string[] = [];
   try {
-    revalidateTag('author-default');
+    revalidateTag('author-default', 'max');
     details.push('태그: author-default');
 
     revalidatePath('/about');
