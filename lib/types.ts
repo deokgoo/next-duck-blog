@@ -1,3 +1,13 @@
+export type LocaleTranslation = {
+  title: string;
+  summary: string;
+};
+
+export type PostTranslations = {
+  en?: LocaleTranslation;
+  jp?: LocaleTranslation;
+};
+
 export type Post = {
   slug: string;
   title: string;
@@ -13,6 +23,16 @@ export type Post = {
   authors?: string[];
   lastmod?: string;
   readingTime?: { minutes: number };
+  // i18n: locale별 번역 메타데이터 (title, summary)
+  translations?: PostTranslations | null;
+};
+
+// locale별로 title/summary가 오버라이드된 포스트 뷰
+// content는 항상 ko 원문 유지
+export type LocalizedPost = Post & {
+  _locale: 'ko' | 'en' | 'jp';
+  _originalTitle: string; // ko 원본 title
+  _originalSummary: string; // ko 원본 summary
 };
 
 // Compatibility type for pliny/utils/contentlayer

@@ -1,4 +1,5 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { PostTranslations } from '@/lib/types';
 
 export interface RevalidatePostOptions {
   slug: string;
@@ -6,6 +7,7 @@ export interface RevalidatePostOptions {
   tags?: string[];
   previousSlug?: string;
   previousCategory?: string;
+  translations?: PostTranslations | null;
 }
 
 export function revalidateOnPostCreate(options: RevalidatePostOptions): void {
@@ -21,6 +23,14 @@ export function revalidateOnPostCreate(options: RevalidatePostOptions): void {
     revalidatePath(`/blog/${options.category}`);
     revalidatePath(`/${options.category}`);
     revalidatePath(`/blog/${options.category}/${options.slug}`);
+
+    // locale revalidation (en/jp)
+    if (options.translations?.en) {
+      revalidatePath(`/en/blog/${options.category}/${options.slug}`);
+    }
+    if (options.translations?.jp) {
+      revalidatePath(`/jp/blog/${options.category}/${options.slug}`);
+    }
 
     // Tag pages
     options.tags?.forEach((tag) => {
@@ -57,6 +67,14 @@ export function revalidateOnPostUpdate(options: RevalidatePostOptions): void {
     if (options.previousSlug && options.previousSlug !== options.slug) {
       revalidateTag(`post-${options.previousSlug}`, 'max');
       revalidatePath(`/blog/${options.category}/${options.previousSlug}`);
+    }
+
+    // locale revalidation (en/jp)
+    if (options.translations?.en) {
+      revalidatePath(`/en/blog/${options.category}/${options.slug}`);
+    }
+    if (options.translations?.jp) {
+      revalidatePath(`/jp/blog/${options.category}/${options.slug}`);
     }
 
     // Tag pages

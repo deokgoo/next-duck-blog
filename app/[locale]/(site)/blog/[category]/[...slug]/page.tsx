@@ -25,6 +25,7 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeKatex from 'rehype-katex';
 import rehypePrismPlus from 'rehype-prism-plus';
+import { resolvePostForLocale } from '@/lib/i18n';
 
 const defaultLayout = 'PostLayout';
 const layouts = {
@@ -34,28 +35,32 @@ const layouts = {
   PostModern,
 };
 
-export async function generateMetadata(props: {
-  params: Promise<{ category: string; slug: string[] }>;
-}): Promise<Metadata | undefined> {
+type Props = {
+  params: Promise<{
+    locale: 'en' | 'jp';
+    category: string;
+    slug: string[];
+  }>;
+};
+
+export async function generateMetadata(props: Props): Promise<Metadata | undefined> {
   const params = await props.params;
+  const locale = params.locale;
   const category = decodeURI(params.category);
   const slug = decodeURI(params.slug.join('/'));
 
-  // SEO Redirect Fallback Check
-  const posts = await getAllPosts();
-  const validSet = new Set(posts.map((p) => p.category || 'dev'));
-  ['dev', 'travel', 'hobby', 'life'].forEach((c) => validSet.add(c));
-  const VALID_CATEGORIES = Array.from(validSet);
+  const post = await getPostBySlug(slug);
 
-  const isOldRoute = !VALID_CATEGORIES.includes(category);
-  const postSlugToFind = isOldRoute ? `${category}/${slug}` : slug;
-
-  const post = await getPostBySlug(postSlugToFind);
-
-  if (!post || !isPostPublishedAndReady(post) || isOldRoute) {
+  if (!post || !isPostPublishedAndReady(post)) {
     return;
   }
-  const authorList = post?.authors || ['default'];
+
+  const localizedPost = resolvePostForLocale(post, locale);
+  if (!localizedPost) {
+    return;
+  }
+
+  const authorList = post.authors || ['default'];
   const authorDetails = await Promise.all(
     authorList.map(async (authorSlug) => {
       const authorResults = await getAuthorBySlug(authorSlug);
@@ -64,94 +69,97 @@ export async function generateMetadata(props: {
       );
     })
   );
-  if (!post) {
-    return;
-  }
 
   const publishedAt = new Date(post.date).toISOString();
   const modifiedAt = new Date(post.lastmod || post.date).toISOString();
   const authors = authorDetails.map((author) => author.name);
+
   let imageList = [siteMetadata.socialBanner];
   if (post.images) {
     imageList = typeof post.images === 'string' ? [post.images] : post.images;
   }
-  const ogImages = imageList.map((img) => {
-    return {
-      url: img.includes('http') ? img : siteMetadata.siteUrl + img,
-    };
-  });
-  const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
+  const ogImages = imageList.map((img) => ({
+    url: img.includes('http') ? img : siteMetadata.siteUrl + img,
+  }));
+
+  const koUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
+
+  // hreflang alternates — conditionally include en/jp based on translations presence
+  // (task 3.1 will fully implement hreflang; here we set up the basic structure)
   const hasEn = !!post.translations?.en;
   const hasJp = !!post.translations?.jp;
 
   return {
-    title: post.title,
-    description: post.summary,
+    title: localizedPost.title,
+    description: localizedPost.summary,
     alternates: {
-      canonical: postUrl,
+      canonical: koUrl,
       languages: {
-        'ko': postUrl,
-        ...(hasEn && { 'en': `${siteMetadata.siteUrl}/en/blog/${category}/${slug}` }),
-        ...(hasJp && { 'ja': `${siteMetadata.siteUrl}/jp/blog/${category}/${slug}` }),
-        'x-default': postUrl,
+        ko: koUrl,
+        ...(hasEn && { en: `${siteMetadata.siteUrl}/en/blog/${category}/${slug}` }),
+        ...(hasJp && { ja: `${siteMetadata.siteUrl}/jp/blog/${category}/${slug}` }),
+        'x-default': koUrl,
       },
     },
     openGraph: {
-      title: post.title,
-      description: post.summary,
+      title: localizedPost.title,
+      description: localizedPost.summary,
       siteName: siteMetadata.title,
-      locale: 'ko_KR',
+      locale: locale === 'en' ? 'en_US' : 'ja_JP',
       type: 'article',
       publishedTime: publishedAt,
       modifiedTime: modifiedAt,
-      url: postUrl,
+      url: `${siteMetadata.siteUrl}/${locale}/blog/${category}/${slug}`,
       images: ogImages,
       authors: authors.length > 0 ? authors : [siteMetadata.author],
     },
     twitter: {
       card: 'summary_large_image',
-      title: post.title,
-      description: post.summary,
+      title: localizedPost.title,
+      description: localizedPost.summary,
       images: imageList,
     },
   };
 }
-export async function generateStaticParams() {
+
+export async function generateStaticParams(): Promise<
+  { locale: string; category: string; slug: string[] }[]
+> {
   const posts = (await getAllPosts()).filter(isPostPublishedAndReady);
-  return posts.map((post) => ({
-    category: post.category || 'dev',
-    slug: post.slug.split('/'),
-  }));
+
+  const params: { locale: string; category: string; slug: string[] }[] = [];
+
+  for (const post of posts) {
+    const category = post.category || 'dev';
+    const slugParts = post.slug.split('/');
+
+    if (post.translations?.en) {
+      params.push({ locale: 'en', category, slug: slugParts });
+    }
+    if (post.translations?.jp) {
+      params.push({ locale: 'jp', category, slug: slugParts });
+    }
+  }
+
+  return params;
 }
 
-export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디맨드 갱신 전용
+export const revalidate = false;
 
-export default async function Page(props: {
-  params: Promise<{ category: string; slug: string[] }>;
-}) {
+export default async function Page(props: Props) {
   const params = await props.params;
+  const locale = params.locale;
   const category = decodeURI(params.category);
   const slug = decodeURI(params.slug.join('/'));
 
-  const posts = await getAllPosts();
-  const validSet = new Set(posts.map((p) => p.category || 'dev'));
-  ['dev', 'travel', 'hobby', 'life'].forEach((c) => validSet.add(c));
-  const VALID_CATEGORIES = Array.from(validSet);
-
-  const isOldRoute = !VALID_CATEGORIES.includes(category);
-  const postSlugToFind = isOldRoute ? `${category}/${slug}` : slug;
-
-  // 해당 포스트를 직접 조회 (slug 기반)
-  const postItem = await getPostBySlug(postSlugToFind);
+  const postItem = await getPostBySlug(slug);
   if (!postItem || postItem.status === 'deleted') {
     return notFound();
   }
 
-  // SEO 308 Redirect for Old URLs
-  if (isOldRoute) {
-    const redirectCategory = postItem.category || 'dev';
-    const { redirect } = await import('next/navigation');
-    redirect(`/blog/${redirectCategory}/${postSlugToFind}`, 'replace' as any); // Replace forces Next 14+ 308 permanent redirect automatically if outside try-catch, but standard is redirect(url, 'replace') or permanentRedirect. We use simple redirect for edge safety or permanentRedirect if imported. Next.js permanentRedirect does 308.
+  const localizedPost = resolvePostForLocale(postItem, locale);
+  if (!localizedPost) {
+    return notFound();
   }
 
   // prev/next 계산을 위해 카테고리 내 포스트 목록 조회
@@ -165,20 +173,18 @@ export default async function Page(props: {
   const prevItem = postIndex >= 0 ? sortedCoreContents[postIndex + 1] : undefined;
   const nextItem = postIndex >= 0 ? sortedCoreContents[postIndex - 1] : undefined;
 
-  // Add path to prev/next for layout compatibility
   const prev = prevItem ? { ...prevItem, path: `blog/${category}/${prevItem.slug}` } : undefined;
   const next = nextItem ? { ...nextItem, path: `blog/${category}/${nextItem.slug}` } : undefined;
 
-  // Add readingTime to post
+  // Add readingTime (based on ko content)
   const wordCount = postItem.content.split(/\s+/gu).length;
   const readingTime = { minutes: Math.ceil(wordCount / 200) };
-  const post = { ...postItem, readingTime };
+  const post = { ...localizedPost, readingTime };
 
-  const authorList = post?.authors || ['default'];
+  const authorList = post.authors || ['default'];
   const authorDetails = await Promise.all(
     authorList.map(async (authorSlug) => {
       const authorResults = await getAuthorBySlug(authorSlug);
-      // fallback if Firestore returns null and mock isn't found
       return coreContent(
         (authorResults || allAuthors.find((a) => a.slug === authorSlug) || allAuthors[0]) as Authors
       );
@@ -186,7 +192,7 @@ export default async function Page(props: {
   );
   const mainContent = coreContent(post);
 
-  const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
+  const koUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
 
   let imageList = [siteMetadata.socialBanner];
   if (post.images) {
@@ -196,7 +202,7 @@ export default async function Page(props: {
     ? imageList[0]
     : `${siteMetadata.siteUrl}${imageList[0]}`;
 
-  // Structured Data (JSON-LD)
+  // Structured Data (JSON-LD) — use locale title/summary, ko canonical URL
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -204,10 +210,10 @@ export default async function Page(props: {
     datePublished: new Date(post.date).toISOString(),
     dateModified: new Date(post.lastmod || post.date).toISOString(),
     description: post.summary,
-    url: postUrl,
+    url: koUrl,
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': postUrl,
+      '@id': koUrl,
     },
     image: ogImageUrl,
     publisher: {

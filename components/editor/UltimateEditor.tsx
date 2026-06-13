@@ -13,6 +13,7 @@ import {
   Eye,
 } from 'lucide-react';
 import MetadataPanel from './MetadataPanel';
+import TranslationTabPanel from './TranslationTabPanel';
 import MarkdownEditor from './MarkdownEditor';
 import TemplateSelector from './TemplateSelector';
 import RealPreviewModal from './RealPreviewModal';
@@ -21,7 +22,7 @@ import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 
-import { Post } from '@/lib/types';
+import { Post, PostTranslations } from '@/lib/types';
 import { Template } from '@/lib/db/templates';
 import { saveDraft, getDraft, removeDraft, SavedDraft } from '@/lib/utils/localStorage';
 interface MDXMetadata {
@@ -35,6 +36,7 @@ interface MDXMetadata {
   layout?: string;
   images?: string[];
   category?: string;
+  translations?: PostTranslations;
 }
 
 interface UltimateEditorProps {
@@ -63,6 +65,7 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
     createdAt: initialData?.createdAt || defaultDate.toISOString().split('T')[0],
     layout: initialData?.layout || 'PostLayout',
     images: initialData?.images || [],
+    translations: initialData?.translations || undefined,
   });
 
   // 마크다운 콘텐츠 상태
@@ -632,6 +635,16 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
           {/* 메타데이터 패널 - 상단 */}
           <div className="w-full">
             <MetadataPanel metadata={metadata} onMetadataChange={handleMetadataChange} />
+          </div>
+
+          {/* 번역 탭 패널 */}
+          <div className="w-full">
+            <TranslationTabPanel
+              translations={metadata.translations}
+              onChange={(translations) =>
+                setMetadata((prev) => ({ ...prev, translations }))
+              }
+            />
           </div>
 
           {/* 마크다운 에디터 - 하단 */}
