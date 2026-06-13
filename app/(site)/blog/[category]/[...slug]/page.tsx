@@ -81,12 +81,20 @@ export async function generateMetadata(props: {
     };
   });
   const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
+  const hasEn = !!post.translations?.en;
+  const hasJp = !!post.translations?.jp;
 
   return {
     title: post.title,
     description: post.summary,
     alternates: {
       canonical: postUrl,
+      languages: {
+        'ko': postUrl,
+        ...(hasEn && { 'en': `${siteMetadata.siteUrl}/en/blog/${category}/${slug}` }),
+        ...(hasJp && { 'ja': `${siteMetadata.siteUrl}/jp/blog/${category}/${slug}` }),
+        'x-default': postUrl,
+      },
     },
     openGraph: {
       title: post.title,

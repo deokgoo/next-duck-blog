@@ -55,6 +55,9 @@ export async function POST(request: NextRequest) {
       postData.createdAt = metadata.createdAt;
     }
 
+    // i18n: translations 필드 저장 (없으면 null로 명시)
+    postData.translations = metadata.translations || null;
+
     // Firestore에 문서 저장
     if (previousSlug && previousSlug !== slug) {
       // slug가 변경된 경우: 이전 문서 삭제 + 새 문서 생성을 원자적으로 수행
@@ -76,6 +79,7 @@ export async function POST(request: NextRequest) {
         tags: metadata.tags || [],
         previousSlug,
         previousCategory: metadata.previousCategory || category,
+        translations: postData.translations,
       });
     } else {
       // previousSlug가 없으면 새 포스트 create
@@ -83,6 +87,7 @@ export async function POST(request: NextRequest) {
         slug,
         category,
         tags: metadata.tags || [],
+        translations: postData.translations,
       });
     }
 
@@ -92,6 +97,13 @@ export async function POST(request: NextRequest) {
         const urls = [`${siteMetadata.siteUrl}/blog/${category}/${slug}`];
         if (previousSlug && previousSlug !== slug) {
           urls.push(`${siteMetadata.siteUrl}/blog/${category}/${previousSlug}`);
+        }
+        // locale URLs (IndexNow)
+        if (postData.translations?.en) {
+          urls.push(`${siteMetadata.siteUrl}/en/blog/${category}/${slug}`);
+        }
+        if (postData.translations?.jp) {
+          urls.push(`${siteMetadata.siteUrl}/jp/blog/${category}/${slug}`);
         }
         submitUrlToIndexNow(urls).catch(() => {});
       }
