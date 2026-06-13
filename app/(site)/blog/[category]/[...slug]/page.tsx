@@ -80,19 +80,23 @@ export async function generateMetadata(props: {
       url: img.includes('http') ? img : siteMetadata.siteUrl + img,
     };
   });
+  const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
 
   return {
     title: post.title,
     description: post.summary,
+    alternates: {
+      canonical: postUrl,
+    },
     openGraph: {
       title: post.title,
       description: post.summary,
       siteName: siteMetadata.title,
-      locale: 'en_US',
+      locale: 'ko_KR',
       type: 'article',
       publishedTime: publishedAt,
       modifiedTime: modifiedAt,
-      url: './',
+      url: postUrl,
       images: ogImages,
       authors: authors.length > 0 ? authors : [siteMetadata.author],
     },
@@ -174,14 +178,34 @@ export default async function Page(props: {
   );
   const mainContent = coreContent(post);
 
-  // Structured Data (JSON-LD) - basic fallback if not in post
+  const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
+
+  let imageList = [siteMetadata.socialBanner];
+  if (post.images) {
+    imageList = typeof post.images === 'string' ? [post.images] : post.images;
+  }
+  const ogImageUrl = imageList[0].includes('http')
+    ? imageList[0]
+    : `${siteMetadata.siteUrl}${imageList[0]}`;
+
+  // Structured Data (JSON-LD)
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
-    datePublished: post.date,
-    dateModified: post.lastmod || post.date,
+    datePublished: new Date(post.date).toISOString(),
+    dateModified: new Date(post.lastmod || post.date).toISOString(),
     description: post.summary,
+    url: postUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl,
+    },
+    image: ogImageUrl,
+    publisher: {
+      '@type': 'Person',
+      name: siteMetadata.author,
+    },
     author: authorDetails.map((author) => ({
       '@type': 'Person',
       name: author.name,
