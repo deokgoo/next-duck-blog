@@ -23,8 +23,8 @@ export function resolvePostForLocale(
     ...post,
     title: translation.title,
     summary: translation.summary,
-    // content는 항상 ko 원문 유지 (spread 이후 명시적으로 재할당하지 않아도 되지만 명확성을 위해 유지)
-    content: post.content,
+    // locale에 번역된 content가 있으면 사용, 없으면 ko 원문 유지
+    content: translation.content || post.content,
     _locale: locale,
     _originalTitle: post.title,
     _originalSummary: post.summary,
