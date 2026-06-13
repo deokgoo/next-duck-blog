@@ -1,6 +1,7 @@
 export type LocaleTranslation = {
   title: string;
   summary: string;
+  content?: string;
 };
 
 export type PostTranslations = {
