@@ -195,12 +195,12 @@ export default async function Page(props: Props) {
   const koUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
 
   let imageList = [siteMetadata.socialBanner];
-  if (post.images) {
+  if (post.images && post.images.length > 0) {
     imageList = typeof post.images === 'string' ? [post.images] : post.images;
   }
-  const ogImageUrl = imageList[0].includes('http')
+  const ogImageUrl = imageList[0]?.includes('http')
     ? imageList[0]
-    : `${siteMetadata.siteUrl}${imageList[0]}`;
+    : `${siteMetadata.siteUrl}${imageList[0] ?? siteMetadata.socialBanner}`;
 
   // Structured Data (JSON-LD) — use locale title/summary, ko canonical URL
   const jsonLd = {
