@@ -118,7 +118,7 @@ export async function LocaleCategoryLandingPage({
               {sortedTags.map((tag) => (
                 <Link
                   key={tag}
-                  href={`/${locale}/${category}/tag/${tag}`}
+                  href={`/search?q=${encodeURIComponent(tag)}`}
                   className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600 shadow-sm transition-all hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   #{tag} <span className="opacity-50">({tagCounts[tag]})</span>
