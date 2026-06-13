@@ -4,58 +4,22 @@ import { getAllPosts, isPostPublishedAndReady } from '@/lib/firestore';
 import { categoriesData, CategoryKey } from '@/data/categoriesData';
 import { formatDate } from 'pliny/utils/formatDate';
 import siteMetadata from '@/data/siteMetadata';
-import { Metadata } from 'next';
 import * as LucideIcons from 'lucide-react';
 
-export const revalidate = false;
+type SupportedLocale = 'en' | 'jp';
 
-const SUPPORTED_LOCALES = ['en', 'jp'] as const;
-type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
-
-const LOCALE_LABEL: Record<SupportedLocale, string> = {
-  en: 'English',
-  jp: '日本語',
-};
-
-export async function generateMetadata(props: {
-  params: Promise<{ locale: string; category: string }>;
-}): Promise<Metadata | undefined> {
-  const params = await props.params;
-  const locale = params.locale as SupportedLocale;
-  const category = params.category as CategoryKey;
-  const data = categoriesData[category];
-
-  if (!data || !SUPPORTED_LOCALES.includes(locale)) return;
-
-  return {
-    title: `${data.title} (${LOCALE_LABEL[locale]}) | ${siteMetadata.title}`,
-    description: data.description,
-  };
-}
-
-export async function generateStaticParams() {
-  const params: { locale: string; category: string }[] = [];
-  for (const locale of SUPPORTED_LOCALES) {
-    for (const category of Object.keys(categoriesData)) {
-      params.push({ locale, category });
-    }
-  }
-  return params;
-}
-
-export default async function LocaleCategoryLandingPage(props: {
-  params: Promise<{ locale: string; category: string }>;
+export async function LocaleCategoryLandingPage({
+  locale,
+  category,
+}: {
+  locale: SupportedLocale;
+  category: string;
 }) {
-  const params = await props.params;
-  const locale = params.locale as SupportedLocale;
-  const category = params.category as CategoryKey;
-  const data = categoriesData[category];
-
-  if (!data || !SUPPORTED_LOCALES.includes(locale)) return notFound();
+  const data = categoriesData[category as CategoryKey];
+  if (!data) return notFound();
 
   const allPosts = (await getAllPosts()).filter(isPostPublishedAndReady);
 
-  // locale 번역이 있는 포스트만 필터링 + 번역된 title/summary로 오버라이드
   const localePosts = allPosts
     .filter((p) => (p.category || 'dev') === category)
     .filter((p) => !!p.translations?.[locale])
@@ -65,7 +29,6 @@ export default async function LocaleCategoryLandingPage(props: {
       summary: p.translations![locale]!.summary,
     }));
 
-  // 태그별 카운트
   const tagCounts: Record<string, number> = {};
   localePosts.forEach((p) => {
     p.tags?.forEach((tag) => {
@@ -90,18 +53,12 @@ export default async function LocaleCategoryLandingPage(props: {
             <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
               {data.title}
             </h1>
-            <p className="text-sm text-gray-400 dark:text-gray-500">
-              {LOCALE_LABEL[locale]} · {localePosts.length} posts
-            </p>
-            <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-              {data.description}
-            </p>
+            <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">{data.description}</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-12 pt-10 lg:grid-cols-3">
-        {/* 포스트 목록 */}
         <div className="lg:col-span-2">
           <h2 className="mb-6 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
             Latest in {data.title}
@@ -152,7 +109,6 @@ export default async function LocaleCategoryLandingPage(props: {
           )}
         </div>
 
-        {/* 태그 사이드바 */}
         <div className="lg:col-span-1">
           <div className="sticky top-24 rounded-3xl border border-gray-100 bg-gray-50/50 p-6 dark:border-gray-800 dark:bg-gray-900/50">
             <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
