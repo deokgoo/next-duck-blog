@@ -10,7 +10,7 @@ import {
   isPostPublishedAndReady,
 } from '@/lib/firestore';
 import { sortPosts, coreContent, allAuthors } from '@/lib/types';
-import type { Authors, Post as Blog } from '@/lib/types';
+import type { Authors } from '@/lib/types';
 import PostSimple from '@/layouts/PostSimple';
 import PostLayout from '@/layouts/PostLayout';
 import PostBanner from '@/layouts/PostBanner';

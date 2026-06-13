@@ -63,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
     },
     alternates: {
-      canonical: './',
+      canonical: siteMetadata.siteUrl,
       types: {
         'application/rss+xml': `${siteMetadata.siteUrl}/feed.xml`,
       },

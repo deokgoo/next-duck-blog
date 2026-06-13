@@ -19,7 +19,7 @@ export async function generateMetadata(props: {
   if (!data) return;
 
   return genPageMetadata({
-    title: `${tag} in ${data.title}`,
+    title: `${data.title}의 ${tag}`,
     description: `${data.title} 카테고리의 ${tag} 관련 포스트 목록입니다.`,
   });
 }
