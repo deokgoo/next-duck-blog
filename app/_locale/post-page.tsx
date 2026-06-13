@@ -27,6 +27,8 @@ import rehypeKatex from 'rehype-katex';
 import rehypePrismPlus from 'rehype-prism-plus';
 import { resolvePostForLocale } from '@/lib/i18n';
 
+type SupportedLocale = 'en' | 'jp';
+
 const defaultLayout = 'PostLayout';
 const layouts = {
   PostSimple,
@@ -35,47 +37,43 @@ const layouts = {
   PostModern,
 };
 
-type Props = {
-  params: Promise<{
-    locale: 'en' | 'jp';
-    category: string;
-    slug: string[];
-  }>;
-};
+export async function generateLocalePostParams(locale: SupportedLocale) {
+  const posts = (await getAllPosts()).filter(isPostPublishedAndReady);
+  return posts
+    .filter((p) => !!p.translations?.[locale])
+    .map((post) => ({
+      category: post.category || 'dev',
+      slug: post.slug.split('/'),
+    }));
+}
 
-export async function generateMetadata(props: Props): Promise<Metadata | undefined> {
-  const params = await props.params;
-  const locale = params.locale;
-  const category = decodeURI(params.category);
-  const slug = decodeURI(params.slug.join('/'));
-
+export async function generateLocalePostMetadata(
+  locale: SupportedLocale,
+  category: string,
+  slug: string
+): Promise<Metadata | undefined> {
   const post = await getPostBySlug(slug);
-
-  if (!post || !isPostPublishedAndReady(post)) {
-    return;
-  }
+  if (!post || !isPostPublishedAndReady(post)) return;
 
   const localizedPost = resolvePostForLocale(post, locale);
-  if (!localizedPost) {
-    return;
-  }
+  if (!localizedPost) return;
 
   const authorList = post.authors || ['default'];
   const authorDetails = await Promise.all(
     authorList.map(async (authorSlug) => {
-      const authorResults = await getAuthorBySlug(authorSlug);
+      const result = await getAuthorBySlug(authorSlug);
       return coreContent(
-        (authorResults || allAuthors.find((p) => p.slug === authorSlug) || allAuthors[0]) as Authors
+        (result || allAuthors.find((p) => p.slug === authorSlug) || allAuthors[0]) as Authors
       );
     })
   );
 
   const publishedAt = new Date(post.date).toISOString();
   const modifiedAt = new Date(post.lastmod || post.date).toISOString();
-  const authors = authorDetails.map((author) => author.name);
+  const authors = authorDetails.map((a) => a.name);
 
   let imageList = [siteMetadata.socialBanner];
-  if (post.images) {
+  if (post.images && post.images.length > 0) {
     imageList = typeof post.images === 'string' ? [post.images] : post.images;
   }
   const ogImages = imageList.map((img) => ({
@@ -83,9 +81,6 @@ export async function generateMetadata(props: Props): Promise<Metadata | undefin
   }));
 
   const koUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
-
-  // hreflang alternates — conditionally include en/jp based on translations presence
-  // (task 3.1 will fully implement hreflang; here we set up the basic structure)
   const hasEn = !!post.translations?.en;
   const hasJp = !!post.translations?.jp;
 
@@ -122,47 +117,23 @@ export async function generateMetadata(props: Props): Promise<Metadata | undefin
   };
 }
 
-export async function generateStaticParams(): Promise<
-  { locale: string; category: string; slug: string[] }[]
-> {
-  const posts = (await getAllPosts()).filter(isPostPublishedAndReady);
-
-  const params: { locale: string; category: string; slug: string[] }[] = [];
-
-  for (const post of posts) {
-    const category = post.category || 'dev';
-    const slugParts = post.slug.split('/');
-
-    if (post.translations?.en) {
-      params.push({ locale: 'en', category, slug: slugParts });
-    }
-    if (post.translations?.jp) {
-      params.push({ locale: 'jp', category, slug: slugParts });
-    }
-  }
-
-  return params;
-}
-
-export const revalidate = false;
-
-export default async function Page(props: Props) {
-  const params = await props.params;
-  const locale = params.locale;
-  const category = decodeURI(params.category);
-  const slug = decodeURI(params.slug.join('/'));
+export async function LocalePostPage({
+  locale,
+  category,
+  slugParts,
+}: {
+  locale: SupportedLocale;
+  category: string;
+  slugParts: string[];
+}) {
+  const slug = decodeURI(slugParts.join('/'));
 
   const postItem = await getPostBySlug(slug);
-  if (!postItem || postItem.status === 'deleted') {
-    return notFound();
-  }
+  if (!postItem || postItem.status === 'deleted') return notFound();
 
   const localizedPost = resolvePostForLocale(postItem, locale);
-  if (!localizedPost) {
-    return notFound();
-  }
+  if (!localizedPost) return notFound();
 
-  // prev/next 계산을 위해 카테고리 내 포스트 목록 조회
   const allPosts = (await getAllPosts())
     .filter(isPostPublishedAndReady)
     .filter((p) => (p.category || 'dev') === category);
@@ -176,7 +147,6 @@ export default async function Page(props: Props) {
   const prev = prevItem ? { ...prevItem, path: `blog/${category}/${prevItem.slug}` } : undefined;
   const next = nextItem ? { ...nextItem, path: `blog/${category}/${nextItem.slug}` } : undefined;
 
-  // Add readingTime (based on ko content)
   const wordCount = postItem.content.split(/\s+/gu).length;
   const readingTime = { minutes: Math.ceil(wordCount / 200) };
   const post = { ...localizedPost, readingTime };
@@ -184,9 +154,9 @@ export default async function Page(props: Props) {
   const authorList = post.authors || ['default'];
   const authorDetails = await Promise.all(
     authorList.map(async (authorSlug) => {
-      const authorResults = await getAuthorBySlug(authorSlug);
+      const result = await getAuthorBySlug(authorSlug);
       return coreContent(
-        (authorResults || allAuthors.find((a) => a.slug === authorSlug) || allAuthors[0]) as Authors
+        (result || allAuthors.find((a) => a.slug === authorSlug) || allAuthors[0]) as Authors
       );
     })
   );
@@ -202,7 +172,6 @@ export default async function Page(props: Props) {
     ? imageList[0]
     : `${siteMetadata.siteUrl}${imageList[0] ?? siteMetadata.socialBanner}`;
 
-  // Structured Data (JSON-LD) — use locale title/summary, ko canonical URL
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -211,19 +180,10 @@ export default async function Page(props: Props) {
     dateModified: new Date(post.lastmod || post.date).toISOString(),
     description: post.summary,
     url: koUrl,
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': koUrl,
-    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': koUrl },
     image: ogImageUrl,
-    publisher: {
-      '@type': 'Person',
-      name: siteMetadata.author,
-    },
-    author: authorDetails.map((author) => ({
-      '@type': 'Person',
-      name: author.name,
-    })),
+    publisher: { '@type': 'Person', name: siteMetadata.author },
+    author: authorDetails.map((a) => ({ '@type': 'Person', name: a.name })),
   };
 
   const Layout = layouts[post.layout || defaultLayout];
