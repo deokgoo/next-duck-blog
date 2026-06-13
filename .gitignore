@@ -55,6 +55,10 @@ yarn-error.log*
 blog-ideas.json
 public/search.json
 
+# Firestore 로컬 스냅샷 (posts-snapshot.mjs pull 결과물)
+.snapshots/
+
+
 # Google Search Console verification (개인별로 발급, 직접 추가)
 public/google*.html
 ads.txt
