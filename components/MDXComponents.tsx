@@ -43,6 +43,7 @@ const PreWithMermaid = (props) => {
 
 export const components: MDXComponents = {
   Image,
+  img: Image,
   DoubleImage,
   TOCInline,
   a: CustomLink,
