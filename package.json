@@ -9,7 +9,14 @@
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build",
     "lint": "next lint --fix --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:pull": "node scripts/posts-snapshot.mjs pull",
+    "db:push": "node scripts/posts-snapshot.mjs push",
+    "db:push:dry": "node scripts/posts-snapshot.mjs push --dry-run",
+    "db:diff": "node scripts/posts-snapshot.mjs diff",
+    "draft:extract": "node scripts/extract-drafts.mjs",
+    "draft:apply": "node scripts/apply-drafts.mjs",
+    "draft:apply:dry": "node scripts/apply-drafts.mjs --dry-run"
   },
   "dependencies": {
     "@headlessui/react": "1.7.19",
