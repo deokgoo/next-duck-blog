@@ -13,6 +13,7 @@ import { sortPosts, coreContent, allAuthors } from '@/lib/types';
 import type { Authors } from '@/lib/types';
 import PostSimple from '@/layouts/PostSimple';
 import PostLayout from '@/layouts/PostLayout';
+import { resolveOgImage } from '@/lib/resolveOgImage';
 import PostBanner from '@/layouts/PostBanner';
 import PostModern from '@/layouts/PostModern';
 import { Metadata } from 'next';
@@ -72,10 +73,13 @@ export async function generateMetadata(props: {
   const modifiedAt = new Date(post.lastmod || post.date).toISOString();
   const authors = authorDetails.map((author) => author.name);
   let imageList = [siteMetadata.socialBanner];
-  if (post.images) {
-    imageList = typeof post.images === 'string' ? [post.images] : post.images;
+  const resolved = resolveOgImage(post);
+  if (resolved) {
+    imageList = [resolved];
+  } else if (post.images && post.images.length > 0) {
+    imageList = post.images;
   }
-  const ogImages = imageList.map((img) => {
+  const ogImages = imageList.map((img: string) => {
     return {
       url: img.includes('http') ? img : siteMetadata.siteUrl + img,
     };
@@ -189,8 +193,11 @@ export default async function Page(props: {
   const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
 
   let imageList = [siteMetadata.socialBanner];
-  if (post.images && post.images.length > 0) {
-    imageList = typeof post.images === 'string' ? [post.images] : post.images;
+  const resolved2 = resolveOgImage(post);
+  if (resolved2) {
+    imageList = [resolved2];
+  } else if (post.images && post.images.length > 0) {
+    imageList = post.images;
   }
   const ogImageUrl = imageList[0]?.includes('http')
     ? imageList[0]

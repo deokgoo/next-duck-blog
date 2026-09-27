@@ -110,15 +110,31 @@ export const getAllTags = cache(
         const posts = await getAllPosts();
         const tagCount: Record<string, number> = {};
 
+        // 대소문자 정규화: 'Next.js', 'NEXT.JS', 'nextjs' → 같은 태그로 집계
+        const canonicalMap = new Map<string, string>();
         posts.forEach((post) => {
           if (!isPostPublishedAndReady(post)) return;
           post.tags.forEach((tag) => {
-            const formattedTag = tag.trim();
-            tagCount[formattedTag] = (tagCount[formattedTag] || 0) + 1;
+            const raw = tag.trim();
+            if (!raw) return;
+            const key = raw.toLowerCase();
+            if (!canonicalMap.has(key)) {
+              // 첫 등장한 형태를 canonical 형태로 보존 (가장 자연스러운 표기)
+              canonicalMap.set(key, raw);
+            }
+            tagCount[raw] = (tagCount[raw] || 0) + 1;
           });
         });
-
-        return tagCount;
+        // 같은 key에 합산
+        const normalized: Record<string, number> = {};
+        canonicalMap.forEach((displayTag, key) => {
+          let count = 0;
+          Object.entries(tagCount).forEach(([t, c]) => {
+            if (t.toLowerCase() === key) count += c;
+          });
+          normalized[displayTag] = count;
+        });
+        return normalized;
       } catch (error) {
         console.error('Error fetching all tags:', error);
         return {};
