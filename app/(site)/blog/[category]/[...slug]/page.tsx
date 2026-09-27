@@ -13,6 +13,7 @@ import { sortPosts, coreContent, allAuthors } from '@/lib/types';
 import type { Authors } from '@/lib/types';
 import PostSimple from '@/layouts/PostSimple';
 import PostLayout from '@/layouts/PostLayout';
+import { resolveOgImage } from '@/lib/resolveOgImage';
 import PostBanner from '@/layouts/PostBanner';
 import PostModern from '@/layouts/PostModern';
 import { Metadata } from 'next';
@@ -71,15 +72,12 @@ export async function generateMetadata(props: {
   const publishedAt = new Date(post.date).toISOString();
   const modifiedAt = new Date(post.lastmod || post.date).toISOString();
   const authors = authorDetails.map((author) => author.name);
-  let imageList = [siteMetadata.socialBanner];
-  if (post.images) {
-    imageList = typeof post.images === 'string' ? [post.images] : post.images;
-  }
-  const ogImages = imageList.map((img) => {
-    return {
-      url: img.includes('http') ? img : siteMetadata.siteUrl + img,
-    };
-  });
+  const resolved = resolveOgImage(post) ?? siteMetadata.socialBanner;
+  const ogImages = [
+    {
+      url: resolved.includes('http') ? resolved : siteMetadata.siteUrl + resolved,
+    },
+  ];
   const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
   const hasEn = !!post.translations?.en;
   const hasJp = !!post.translations?.jp;
@@ -112,7 +110,7 @@ export async function generateMetadata(props: {
       card: 'summary_large_image',
       title: post.title,
       description: post.summary,
-      images: imageList,
+      images: [resolved.includes('http') ? resolved : siteMetadata.siteUrl + resolved],
     },
   };
 }
@@ -188,13 +186,10 @@ export default async function Page(props: {
 
   const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
 
-  let imageList = [siteMetadata.socialBanner];
-  if (post.images && post.images.length > 0) {
-    imageList = typeof post.images === 'string' ? [post.images] : post.images;
-  }
-  const ogImageUrl = imageList[0]?.includes('http')
-    ? imageList[0]
-    : `${siteMetadata.siteUrl}${imageList[0] ?? siteMetadata.socialBanner}`;
+  const ogImageUrl = (() => {
+    const resolved = resolveOgImage(post) ?? siteMetadata.socialBanner;
+    return resolved.includes('http') ? resolved : `${siteMetadata.siteUrl}${resolved}`;
+  })();
 
   // Structured Data (JSON-LD)
   const jsonLd = {
