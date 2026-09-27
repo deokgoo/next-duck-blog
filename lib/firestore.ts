@@ -108,13 +108,25 @@ export const getAllTags = cache(
     async (): Promise<Record<string, number>> => {
       try {
         const posts = await getAllPosts();
-        const tagCount: Record<string, number> = {};
+
+        // 대소문자 정규화: 첫 등장한 표기를 canonical로 사용하는 단순 O(n) 집계
+        const canonicalMap = new Map<string, string>(); // lowercase key → display tag
+        const tagCount: Record<string, number> = {}; // display tag → count
 
         posts.forEach((post) => {
           if (!isPostPublishedAndReady(post)) return;
-          post.tags.forEach((tag) => {
-            const formattedTag = tag.trim();
-            tagCount[formattedTag] = (tagCount[formattedTag] || 0) + 1;
+          const tags = Array.isArray(post.tags) ? post.tags : [];
+          tags.forEach((tag) => {
+            if (typeof tag !== 'string') return;
+            const raw = tag.trim();
+            if (!raw) return;
+            const key = raw.toLowerCase();
+            if (!canonicalMap.has(key)) {
+              canonicalMap.set(key, raw);
+            }
+            // canonicalMap의 display tag 기준으로 단일 키에 통합
+            const display = canonicalMap.get(key)!;
+            tagCount[display] = (tagCount[display] || 0) + 1;
           });
         });
 

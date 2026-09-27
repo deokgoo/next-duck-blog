@@ -20,7 +20,7 @@ export type Post = {
   status?: 'published' | 'draft' | 'deleted'; // Replaces `draft: boolean`
   category?: string; // 'dev' | 'travel' | 'hobby' | 'life'
   layout?: string;
-  images?: string[];
+  images?: string | string[];
   authors?: string[];
   lastmod?: string;
   readingTime?: { minutes: number };
