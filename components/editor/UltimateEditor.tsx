@@ -64,7 +64,11 @@ export default function UltimateEditor({ initialData, className = '' }: Ultimate
     category: initialData?.category || 'dev',
     createdAt: initialData?.createdAt || defaultDate.toISOString().split('T')[0],
     layout: initialData?.layout || 'PostLayout',
-    images: initialData?.images || [],
+    images: initialData?.images
+      ? Array.isArray(initialData.images)
+        ? initialData.images
+        : [initialData.images]
+      : [],
     translations: initialData?.translations || undefined,
   });
 

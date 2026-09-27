@@ -11,12 +11,36 @@ describe('resolveOgImage', () => {
     expect(resolveOgImage(post)).toBe('https://example.com/thumbnail.jpg');
   });
 
+  it('post.images 가 단일 string 이면 그 자체를 썸네일로 사용한다', () => {
+    const post = {
+      images: 'https://example.com/thumbnail.png',
+      content: '<p>본문</p>',
+    };
+    expect(resolveOgImage(post)).toBe('https://example.com/thumbnail.png');
+  });
+
   it('post.images 가 string 배열 하나일 때도 동작한다', () => {
     const post = {
       images: ['https://example.com/thumbnail.jpg'],
       content: '<p>본문</p>',
     };
     expect(resolveOgImage(post)).toBe('https://example.com/thumbnail.jpg');
+  });
+
+  it('images 의 빈 string 은 건너뛰고 다음 유효 값을 사용한다', () => {
+    const post = {
+      images: ['', null, 'https://img.example.com/valid.png'] as unknown as string[],
+      content: '<p>본문</p>',
+    };
+    expect(resolveOgImage(post)).toBe('https://img.example.com/valid.png');
+  });
+
+  it('images 에 비이미지 프로토콜이 있으면 skip 한다', () => {
+    const post = {
+      images: ['javascript:alert(1)', 'data:text/html;base64,AA'] as unknown as string[],
+      content: '<p>본문</p>',
+    };
+    expect(resolveOgImage(post)).toBeNull();
   });
 
   // 2) 본문 첫 이미지
@@ -60,8 +84,32 @@ describe('resolveOgImage', () => {
     expect(resolveOgImage(post)).toBe('/og/relative.png');
   });
 
+  it('마크다운 ![](url) 도 이미지로 인식한다', () => {
+    const post = {
+      images: undefined,
+      content: '도입문\n![제목](/og/markdown.png)\n나머지',
+    };
+    expect(resolveOgImage(post)).toBe('/og/markdown.png');
+  });
+
+  it('코드 블록 안의 <img> 는 찾지 않는다', () => {
+    const post = {
+      images: undefined,
+      content: '```\n<img src="https://fake.example.com/fromcode.png" />\n```\n\n<img src="/real-og.jpg" />',
+    };
+    expect(resolveOgImage(post)).toBe('/real-og.jpg');
+  });
+
+  it('인라인 코드 안의 <img> 는 찾지 않는다', () => {
+    const post = {
+      images: undefined,
+      content: '사용법: `<img src="/inline.jpg" />` 그리고 실제: <img src="/real.jpg" />',
+    };
+    expect(resolveOgImage(post)).toBe('/real.jpg');
+  });
+
   // 3) 둘 다 없으면 null
-  it('images 와 content 에 이미지都没有하면 null 을 반환한다', () => {
+  it('images 와 content 에 이미지가 없으면 null 을 반환한다', () => {
     const post = {
       images: undefined,
       content: '<p>이미지 없는 본문</p>',
@@ -88,24 +136,15 @@ describe('resolveOgImage', () => {
   });
 
   // edge cases
-  it('공백 문자가 있는 <img> 도 찾는다', () => {
+  it('공백 문자가 있는 <img> 도 찾는다 (trim 적용)', () => {
     const post = {
       images: undefined,
       content: '<p>   </p> <img   src   =   "  /spaced.jpg  "  />',
     };
-    expect(resolveOgImage(post)).toBe("  /spaced.jpg  ");
+    expect(resolveOgImage(post)).toBe('/spaced.jpg');
   });
 
-  it('Markdown 형식 ![alt](path) 는 <img> 이 아니라 찾지 않는다', () => {
-    const post = {
-      images: undefined,
-      content: '![제목 이미지](/og/markdown-style.png)',
-    };
-    // HTML-only 파서: markdown 이미지 태그는 미지원
-    expect(resolveOgImage(post)).toBeNull();
-  });
-
-  it('iframe/video 는 찾지 않는다 (img only)', () => {
+  it('iframe/video 는 찾지 않는다 (img/markdown only)', () => {
     const post = {
       images: undefined,
       content: '<iframe src="https://youtube.com/embed/xyz"></iframe><video src="/v.mp4"></video>',

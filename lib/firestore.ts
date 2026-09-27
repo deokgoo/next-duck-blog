@@ -108,33 +108,29 @@ export const getAllTags = cache(
     async (): Promise<Record<string, number>> => {
       try {
         const posts = await getAllPosts();
-        const tagCount: Record<string, number> = {};
 
-        // 대소문자 정규화: 'Next.js', 'NEXT.JS', 'nextjs' → 같은 태그로 집계
-        const canonicalMap = new Map<string, string>();
+        // 대소문자 정규화: 첫 등장한 표기를 canonical로 사용하는 단순 O(n) 집계
+        const canonicalMap = new Map<string, string>(); // lowercase key → display tag
+        const tagCount: Record<string, number> = {}; // display tag → count
+
         posts.forEach((post) => {
           if (!isPostPublishedAndReady(post)) return;
-          post.tags.forEach((tag) => {
+          const tags = Array.isArray(post.tags) ? post.tags : [];
+          tags.forEach((tag) => {
+            if (typeof tag !== 'string') return;
             const raw = tag.trim();
             if (!raw) return;
             const key = raw.toLowerCase();
             if (!canonicalMap.has(key)) {
-              // 첫 등장한 형태를 canonical 형태로 보존 (가장 자연스러운 표기)
               canonicalMap.set(key, raw);
             }
-            tagCount[raw] = (tagCount[raw] || 0) + 1;
+            // canonicalMap의 display tag 기준으로 단일 키에 통합
+            const display = canonicalMap.get(key)!;
+            tagCount[display] = (tagCount[display] || 0) + 1;
           });
         });
-        // 같은 key에 합산
-        const normalized: Record<string, number> = {};
-        canonicalMap.forEach((displayTag, key) => {
-          let count = 0;
-          Object.entries(tagCount).forEach(([t, c]) => {
-            if (t.toLowerCase() === key) count += c;
-          });
-          normalized[displayTag] = count;
-        });
-        return normalized;
+
+        return tagCount;
       } catch (error) {
         console.error('Error fetching all tags:', error);
         return {};
