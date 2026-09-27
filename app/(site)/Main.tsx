@@ -37,37 +37,39 @@ export default function Home({ posts, featuredTags, description }: MainProps) {
           </p>
         </div>
 
-        {/* Category Filter Buttons */}
-        <div className="flex flex-wrap items-center gap-2 py-section-sm">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-              !selectedCategory
-                ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-950/20 dark:text-primary-400'
-                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600'
-            }`}
-          >
-            All
-          </button>
-          {Object.entries(categoriesData).map(([key, data]) => {
-            const IconComponent = (LucideIcons as any)[data.icon] || LucideIcons.FileText;
-            return (
-              <button
-                key={key}
-                onClick={() =>
-                  setSelectedCategory(selectedCategory === key ? null : key)
-                }
-                className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                  selectedCategory === key
-                    ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-950/20 dark:text-primary-400'
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600'
-                }`}
-              >
-                <IconComponent size={14} />
-                {data.title}
-              </button>
-            );
-          })}
+        {/* Category Filter - horizontal scroll (swipeable on mobile) */}
+        <div className="-mx-4 overflow-x-auto px-4 pb-2 pt-section-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex flex-nowrap items-center gap-2">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                !selectedCategory
+                  ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-950/20 dark:text-primary-400'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600'
+              }`}
+            >
+              All
+            </button>
+            {Object.entries(categoriesData).map(([key, data]) => {
+              const IconComponent = (LucideIcons as any)[data.icon] || LucideIcons.FileText;
+              return (
+                <button
+                  key={key}
+                  onClick={() =>
+                    setSelectedCategory(selectedCategory === key ? null : key)
+                  }
+                  className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                    selectedCategory === key
+                      ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-950/20 dark:text-primary-400'
+                      : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <IconComponent size={14} />
+                  {data.title}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="pb-xxl pt-section-sm md:space-y-5">
