@@ -6,7 +6,7 @@ import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
 import { formatDate } from 'pliny/utils/formatDate';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
-import { filterPostsByTag } from '@/lib/utils/filterPosts';
+import { filterPostsByTag, filterPostsByCategory } from '@/lib/utils/filterPosts';
 import TagFilterBar from '@/components/TagFilterBar';
 import { Post } from '@/lib/types';
 import { categoriesData } from '@/data/categoriesData';
@@ -22,7 +22,8 @@ interface MainProps {
 
 export default function Home({ posts, featuredTags, description }: MainProps) {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const filteredPosts = filterPostsByTag(posts, selectedTag);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const filteredPosts = filterPostsByCategory(filterPostsByTag(posts, selectedTag), selectedCategory);
 
   return (
     <>
@@ -36,40 +37,37 @@ export default function Home({ posts, featuredTags, description }: MainProps) {
           </p>
         </div>
 
-        {/* Category Grid Section */}
-        <div className="py-section-sm">
-          <h2 className="mb-xxl text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-            Explore Categories
-          </h2>
-          <div className="grid grid-cols-1 gap-xl sm:grid-cols-2 lg:grid-cols-4">
-            {Object.entries(categoriesData).map(([key, data]) => {
-              const IconComponent = (LucideIcons as any)[data.icon] || LucideIcons.FileText;
-              return (
-                <Link
-                  key={key}
-                  href={`/${key}`}
-                  className="group relative overflow-hidden rounded-xxxl border border-gray-100 bg-white p-xxl transition-all hover:border-transparent hover:shadow-elevated dark:border-gray-800 dark:bg-gray-900"
-                >
-                  <div 
-                    className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: data.color }}
-                  >
-                    <IconComponent size={24} />
-                  </div>
-                  <h3 className="mb-xs text-xl font-bold text-gray-900 dark:text-white">
-                    {data.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                    {data.description}
-                  </p>
-                  <div 
-                    className="absolute bottom-0 right-0 h-1.5 w-0 transition-all group-hover:w-full"
-                    style={{ backgroundColor: data.color }}
-                  />
-                </Link>
-              );
-            })}
-          </div>
+        {/* Category Filter Buttons */}
+        <div className="flex flex-wrap items-center gap-2 py-section-sm">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+              !selectedCategory
+                ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-950/20 dark:text-primary-400'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600'
+            }`}
+          >
+            All
+          </button>
+          {Object.entries(categoriesData).map(([key, data]) => {
+            const IconComponent = (LucideIcons as any)[data.icon] || LucideIcons.FileText;
+            return (
+              <button
+                key={key}
+                onClick={() =>
+                  setSelectedCategory(selectedCategory === key ? null : key)
+                }
+                className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                  selectedCategory === key
+                    ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-950/20 dark:text-primary-400'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600'
+                }`}
+              >
+                <IconComponent size={14} />
+                {data.title}
+              </button>
+            );
+          })}
         </div>
 
         <div className="pb-xxl pt-section-sm md:space-y-5">
