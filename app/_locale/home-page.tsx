@@ -73,7 +73,7 @@ export async function LocaleHomePage({ locale }: { locale: SupportedLocale }) {
             return (
               <Link
                 key={key}
-                href={`/${locale}/${key}`}
+                href={`/${locale}/blog/${key}`}
                 className="group relative overflow-hidden rounded-xxxl border border-gray-100 bg-white p-xxl transition-all hover:border-transparent hover:shadow-elevated dark:border-gray-800 dark:bg-gray-900"
               >
                 <div

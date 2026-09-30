@@ -69,7 +69,6 @@ export default function ListLayoutWithTags({
               <ul>
                 {sortedTags.map((t) => {
                   const tagHref = `/search?q=${encodeURIComponent(t)}`;
-
                   return (
                     <li key={t} className="my-3">
                       <Link
