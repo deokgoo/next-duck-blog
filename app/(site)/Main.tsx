@@ -43,8 +43,12 @@ export default function Main({ posts, locale, description }: MainProps) {
   const recentList = visiblePosts.slice(1, 4);
   const totalPosts = visiblePosts.length;
 
+  // 한글은 루트 라우트, en/jp는 /en, /jp 프리픽스.
+  // (빈 문자열을 '/' 앞에 붙이면 '//blog/...'가 되어 프로토콜 상대 URL로 해석됨)
+  const localePrefix = locale === 'ko' ? '' : `/${locale}`;
+
   const postHref = (p: LocalizedPost) =>
-    `/${locale === 'ko' ? '' : locale}/blog/${p.category || 'dev'}/${p.slug}`;
+    `${localePrefix}/blog/${p.category || 'dev'}/${p.slug}`;
 
   const tagColor = (i: number) =>
     ['text-accent', 'text-accent-3', 'text-accent-2'][i % 3];
@@ -65,7 +69,7 @@ export default function Main({ posts, locale, description }: MainProps) {
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
             <Link
-              href={`/${locale === 'ko' ? '' : locale}/blog/dev`}
+              href={`${localePrefix}/blog/dev`}
               className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-ink/90 dark:bg-white dark:text-black dark:hover:bg-white/90"
             >
               {s.ctaRead}
@@ -94,7 +98,7 @@ export default function Main({ posts, locale, description }: MainProps) {
             return (
               <Link
                 key={key}
-                href={`/${locale === 'ko' ? '' : locale}/blog/${key}`}
+                href={`${localePrefix}/blog/${key}`}
                 className="group rounded-lg bg-white p-5 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
               >
                 <div
@@ -118,7 +122,7 @@ export default function Main({ posts, locale, description }: MainProps) {
         <div className="mb-6 flex items-baseline justify-between">
           <h2 className="text-xl font-semibold tracking-[-0.02em]">{s.recent}</h2>
           <Link
-            href={`/${locale === 'ko' ? '' : locale}/blog/dev`}
+            href={`${localePrefix}/blog/dev`}
             className="font-mono text-xs text-ink-4 transition-colors hover:text-ink dark:hover:text-white"
           >
             {s.recentMeta}
