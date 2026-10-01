@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
+import { useDropdown } from './DropdownContext';
 
 const Globe = () => (
   <svg
@@ -30,6 +31,7 @@ const LanguageSwitch = () => {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { btnRef } = useDropdown('language', mounted);
 
   useEffect(() => setMounted(true), []);
 
@@ -66,7 +68,7 @@ const LanguageSwitch = () => {
     <div className="mr-5">
       <Menu as="div" className="relative inline-block text-left">
         <div>
-          <Menu.Button aria-label="Language Switcher">
+          <Menu.Button ref={btnRef} aria-label="Language Switcher">
             <Globe />
           </Menu.Button>
         </div>
