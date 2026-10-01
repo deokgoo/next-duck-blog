@@ -58,6 +58,11 @@ module.exports = {
         'card': 'rgba(15, 15, 15, 0.08) 0px 4px 12px 0px',
         'elevated': 'rgba(15, 15, 15, 0.20) 0px 24px 48px -8px',
         'modal': 'rgba(15, 15, 15, 0.16) 0px 16px 48px -8px',
+        // Vercel Minimal: shadow-as-border
+        'v-border': '0px 0px 0px 1px rgba(0,0,0,0.08)',
+        'v-card': '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 4px 16px rgba(0,0,0,0.04)',
+        'v-border-dark': '0px 0px 0px 1px rgba(255,255,255,0.14)',
+        'v-card-dark': '0px 0px 0px 1px rgba(255,255,255,0.14), 0px 4px 16px rgba(0,0,0,0.3)',
       },
       maxWidth: {
         'container': '1280px',
@@ -91,6 +96,22 @@ module.exports = {
       colors: {
         primary: colors.emerald, // 핑크 → 네온 그린
         gray: colors.gray,
+        // Vercel Minimal 디자인 토큰 (메인 페이지 리디자인)
+        ink: {
+          DEFAULT: '#171717',
+          2: '#666666',
+          3: '#888888',
+          4: '#aaaaaa',
+        },
+        line: {
+          DEFAULT: 'rgba(0,0,0,0.08)',
+          2: 'rgba(0,0,0,0.14)',
+        },
+        accent: {
+          DEFAULT: '#0a72ef',
+          2: '#ff5b4f',
+          3: '#de1d8d',
+        },
       },
       typography: ({ theme }) => ({
         DEFAULT: {

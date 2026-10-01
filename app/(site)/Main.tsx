@@ -1,162 +1,238 @@
-'use client';
-
-import { useState } from 'react';
 import Link from '@/components/Link';
-import Tag from '@/components/Tag';
-import siteMetadata from '@/data/siteMetadata';
-import { formatDate } from 'pliny/utils/formatDate';
-import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
-import { filterPostsByTag, filterPostsByCategory } from '@/lib/utils/filterPosts';
-import TagFilterBar from '@/components/TagFilterBar';
-import { Post } from '@/lib/types';
 import { categoriesData } from '@/data/categoriesData';
+import projectsData from '@/data/projectsData';
+import siteMetadata from '@/data/siteMetadata';
+import { getHomeStrings } from '@/lib/i18n/home-locale';
+import type { Locale } from '@/lib/i18n/messages';
+import type { Post, LocalizedPost } from '@/lib/types';
+import { formatDate } from 'pliny/utils/formatDate';
 import * as LucideIcons from 'lucide-react';
 
-const MAX_DISPLAY = 10; // 5개 → 10개로 증가
-
-interface MainProps {
+type MainProps = {
   posts: Post[];
-  featuredTags: string[];
+  locale: Locale;
+  featuredTags?: string[];
   description?: string;
-}
+};
 
-export default function Home({ posts, featuredTags, description }: MainProps) {
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const filteredPosts = filterPostsByCategory(filterPostsByTag(posts, selectedTag), selectedCategory);
+/**
+ * 메인 페이지 (Vercel Minimal 리디자인)
+ * - ko: 전체 게시글
+ * - en/jp: 번역이 있는 글만 (기존 LocaleHomePage 로직 유지)
+ * 데이터/캐싱 레이어는 건드리지 않고 UI만 교체한다.
+ */
+export default function Main({ posts, locale, description }: MainProps) {
+  const s = getHomeStrings(locale);
+
+  // 로케일별 글 필터링 (en/jp는 번역 존재만)
+  const visiblePosts: LocalizedPost[] =
+    locale === 'ko'
+      ? posts.map((p) => ({ ...p, _locale: 'ko', _originalTitle: p.title, _originalSummary: p.summary }))
+      : posts
+          .filter((p) => !!p.translations?.[locale])
+          .map((p) => ({
+            ...p,
+            title: p.translations![locale]!.title,
+            summary: p.translations![locale]!.summary,
+            _locale: locale,
+            _originalTitle: p.title,
+            _originalSummary: p.summary,
+          }));
+
+  const featured = visiblePosts[0];
+  const recentList = visiblePosts.slice(1, 4);
+  const totalPosts = visiblePosts.length;
+
+  const postHref = (p: LocalizedPost) =>
+    `/${locale === 'ko' ? '' : locale}/blog/${p.category || 'dev'}/${p.slug}`;
+
+  const tagColor = (i: number) =>
+    ['text-accent', 'text-accent-3', 'text-accent-2'][i % 3];
 
   return (
-    <>
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        {/* Hero only */}
-        <div className="space-y-2 pb-xl pt-xxxl md:space-y-5">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            Welcome to Duck Blog
-          </h1>
-          <p className="max-w-2xl text-lg leading-7 text-gray-500 dark:text-gray-400">
-            {description || siteMetadata.description}
+    <div className="bg-white text-ink dark:bg-black dark:text-gray-100">
+      {/* Hero */}
+      <section className="px-8 py-20 text-center md:py-28">
+        <div className="mx-auto max-w-3xl">
+          <p className="mb-5 text-xs font-medium uppercase tracking-[0.15em] text-ink-3">
+            {s.overline}
           </p>
-        </div>
-
-        {/* Latest Posts section */}
-        <div className="pb-xxl">
-          <h2 className="pb-4 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-            Latest Posts
-          </h2>
-
-          {/* Category Filter - swipeable on mobile */}
-          <div className="-mx-4 overflow-x-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex flex-nowrap items-center gap-2">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                  !selectedCategory
-                    ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-950/20 dark:text-primary-400'
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600'
-                }`}
-              >
-                All
-              </button>
-              {Object.entries(categoriesData).map(([key, data]) => {
-                const IconComponent = (LucideIcons as any)[data.icon] || LucideIcons.FileText;
-                return (
-                  <button
-                    key={key}
-                    onClick={() =>
-                      setSelectedCategory(selectedCategory === key ? null : key)
-                    }
-                    className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                      selectedCategory === key
-                        ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-950/20 dark:text-primary-400'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <IconComponent size={14} />
-                    {data.title}
-                  </button>
-                );
-              })}
-            </div>
+          <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.03em] sm:text-5xl md:text-6xl">
+            {s.heroTitle} <span className="text-accent">{s.heroTitleAccent}</span>
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-base text-ink-2 md:text-lg">
+            {description || s.heroSubtitle}
+          </p>
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <Link
+              href={`/${locale === 'ko' ? '' : locale}/blog/dev`}
+              className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-ink/90 dark:bg-white dark:text-black dark:hover:bg-white/90"
+            >
+              {s.ctaRead}
+            </Link>
+            <Link
+              href={`/${locale === 'ko' ? '' : locale}/projects`}
+              className="rounded-md bg-white px-4 py-2 text-sm font-medium text-ink shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:text-gray-100 dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
+            >
+              {s.ctaProjects}
+            </Link>
           </div>
+        </div>
+      </section>
 
-          {/* Tag Filter */}
-          {featuredTags.length > 0 && (
-            <div className="pb-4">
-              <TagFilterBar
-                tags={featuredTags}
-                selectedTag={selectedTag}
-                onSelectTag={setSelectedTag}
-              />
-            </div>
-          )}
-
-          {/* Post List */}
-          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-          {!filteredPosts.length && 'No posts found.'}
-          {filteredPosts.slice(0, MAX_DISPLAY).map((post) => {
-            const { slug, date, title, summary, tags, createdAt } = post;
-            const displayDate = createdAt || date;
+      {/* Categories */}
+      <section className="mx-auto max-w-5xl px-8 py-14">
+        <div className="mb-6 flex items-baseline justify-between">
+          <h2 className="text-xl font-semibold tracking-[-0.02em]">{s.categories}</h2>
+          <span className="font-mono text-xs text-ink-4">
+            {Object.keys(categoriesData).length} · {totalPosts} {s.posts}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {Object.entries(categoriesData).map(([key, data]) => {
+            const Icon = (LucideIcons as any)[data.icon] || LucideIcons.FileText;
             return (
-              <li key={slug} className="py-xl">
-                <article>
-                  <Link href={`/blog/${post.category || 'dev'}/${slug}`} className="group block">
-                    <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
-                      <dl>
-                        <dt className="sr-only">Published on</dt>
-                        <dd className="text-sm font-medium leading-6 text-gray-500 dark:text-gray-400">
-                          <time dateTime={displayDate}>
-                            {formatDate(displayDate, siteMetadata.locale)}
-                          </time>
-                        </dd>
-                      </dl>
-                      <div className="space-y-2 xl:col-span-3">
-                        <div>
-                          <h2 className="text-xl font-bold leading-7 tracking-tight text-gray-900 transition-colors group-hover:text-primary-500 dark:text-gray-100 dark:group-hover:text-primary-400">
-                            {title}
-                          </h2>
-                          <div className="mt-1 flex items-center gap-2 text-xs">
-                            {tags.slice(0, 3).map((tag) => (
-                              <span
-                                key={tag}
-                                className="font-medium text-primary-500 dark:text-primary-400"
-                              >
-                                #{tag.split(' ').join('-')}
-                              </span>
-                            ))}
-                            {tags.length > 3 && (
-                              <span className="text-primary-400 dark:text-primary-500">...</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="prose line-clamp-2 max-w-none text-sm text-gray-500 dark:text-gray-400">
-                          {summary}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </article>
-              </li>
+              <Link
+                key={key}
+                href={`/${locale === 'ko' ? '' : locale}/blog/${key}`}
+                className="group rounded-lg bg-white p-5 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
+              >
+                <div
+                  className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg text-white"
+                  style={{ backgroundColor: data.color }}
+                >
+                  <Icon size={18} />
+                </div>
+                <h3 className="text-[15px] font-semibold tracking-[-0.01em]">{data.title}</h3>
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-ink-2">
+                  {data.description}
+                </p>
+              </Link>
             );
           })}
-        </ul>
         </div>
-      </div>
-      {filteredPosts.length > MAX_DISPLAY && (
-        <div className="flex justify-end text-base font-medium leading-6">
+      </section>
+
+      {/* Recent posts */}
+      <section className="mx-auto max-w-5xl px-8 py-14">
+        <div className="mb-6 flex items-baseline justify-between">
+          <h2 className="text-xl font-semibold tracking-[-0.02em]">{s.recent}</h2>
           <Link
-            href="/blog/dev"
-            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-            aria-label="All posts"
+            href={`/${locale === 'ko' ? '' : locale}/blog/dev`}
+            className="font-mono text-xs text-ink-4 transition-colors hover:text-ink"
           >
-            All Posts →
+            {s.recentMeta}
           </Link>
         </div>
+
+        {visiblePosts.length === 0 ? (
+          <p className="py-10 text-center text-sm text-ink-3">{s.noPosts}</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+            {/* Featured */}
+            {featured && (
+              <Link
+                href={postHref(featured)}
+                className="rounded-xl bg-white p-7 shadow-v-card transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-card-dark lg:col-span-3"
+              >
+                <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-accent">
+                  {categoriesData[featured.category || 'dev']?.title || 'Development'}
+                </span>
+                <h3 className="mt-3 text-2xl font-semibold leading-snug tracking-[-0.02em]">
+                  {featured.title}
+                </h3>
+                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-ink-2">
+                  {featured.summary}
+                </p>
+                <div className="mt-5 font-mono text-xs text-ink-4">
+                  {formatDate(featured.createdAt || featured.date, siteMetadata.locale)}
+                  {featured.readingTime ? ` · ${featured.readingTime.minutes} min` : ''}
+                </div>
+              </Link>
+            )}
+
+            {/* List */}
+            <div className="flex flex-col gap-3 lg:col-span-2">
+              {recentList.map((p, i) => (
+                <Link
+                  key={p.slug}
+                  href={postHref(p)}
+                  className="rounded-lg bg-white p-5 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
+                >
+                  <span
+                    className={`text-[10.5px] font-medium uppercase tracking-[0.1em] ${tagColor(i)}`}
+                  >
+                    {categoriesData[p.category || 'dev']?.title || 'Development'}
+                  </span>
+                  <h4 className="mt-2 line-clamp-2 text-[15px] font-medium leading-snug tracking-[-0.01em]">
+                    {p.title}
+                  </h4>
+                  <div className="mt-3 font-mono text-[11px] text-ink-4">
+                    {formatDate(p.createdAt || p.date, siteMetadata.locale)}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Projects */}
+      {projectsData.length > 0 && (
+        <section className="mx-auto max-w-5xl px-8 py-14">
+          <div className="mb-6 flex items-baseline justify-between">
+            <h2 className="text-xl font-semibold tracking-[-0.02em]">{s.projects}</h2>
+            <a
+              href={siteMetadata.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-xs text-ink-4 transition-colors hover:text-ink"
+            >
+              {s.projectsMeta}
+            </a>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {projectsData.map((proj) => (
+              <a
+                key={proj.title}
+                href={proj.href || siteMetadata.github}
+                target={proj.href ? '_blank' : undefined}
+                rel="noopener noreferrer"
+                className="group rounded-xl bg-white p-6 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
+              >
+                <div className="mb-3 text-xl">{proj.icon || '🦆'}</div>
+                <h3 className="text-base font-semibold tracking-[-0.01em]">{proj.title}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-ink-2">{proj.description}</p>
+                {proj.stack && proj.stack.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {proj.stack.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[10.5px] text-ink-2 dark:bg-white/10"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        </section>
       )}
-      {siteMetadata.newsletter?.provider && (
-        <div className="flex items-center justify-center pt-4">
-          <KoreanNewsletterForm compact={true} showBenefits={false} />
+
+      {/* About */}
+      <section className="mx-auto max-w-5xl px-8 py-14">
+        <div className="flex flex-col items-start gap-5 rounded-xl bg-white p-7 shadow-v-card dark:bg-transparent dark:shadow-v-card-dark sm:flex-row sm:items-center">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-ink text-2xl text-white dark:bg-white dark:text-black">
+            🦆
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold tracking-[-0.02em]">{siteMetadata.author}</h3>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-2">{s.aboutBody}</p>
+          </div>
         </div>
-      )}
-    </>
+      </section>
+    </div>
   );
 }
