@@ -42,7 +42,9 @@ const LanguageSwitch = () => {
   }
 
   const current =
-    locales.find((l) => l.path && pathname.startsWith(l.path)) || locales[0];
+    locales.find(
+      (l) => l.path && (pathname === l.path || pathname.startsWith(`${l.path}/`))
+    ) || locales[0];
 
   const switchTo = (code: string) => {
     if (code === current.code) return;
@@ -52,7 +54,11 @@ const LanguageSwitch = () => {
     const stripped = current.path
       ? pathname.replace(new RegExp(`^${current.path}`), '')
       : pathname;
-    const next = target.path ? `${target.path}${stripped || '/'}` : stripped || '/';
+    // 홈/블로그 라우트는 모든 로케일에 존재 → 경로 유지.
+    // 그 외(/about, /projects, /search 등)는 타 로케일에 미존재(404) → 홈으로 폴백.
+    const isSafePath = stripped === '/' || stripped.startsWith('/blog');
+    const rel = isSafePath ? (stripped === '/' ? '' : stripped) : '';
+    const next = target.path ? `${target.path}${rel}` : rel || '/';
     router.push(next);
   };
 
@@ -79,6 +85,7 @@ const LanguageSwitch = () => {
                 <Menu.Item key={l.code}>
                   <button
                     onClick={() => switchTo(l.code)}
+                    aria-current={l.code === current.code ? 'true' : undefined}
                     className={`group flex w-full items-center rounded-md px-2 py-2 text-sm ${
                       l.code === current.code
                         ? 'font-semibold text-gray-900 dark:text-gray-100'

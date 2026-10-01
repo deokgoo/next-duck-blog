@@ -100,8 +100,8 @@ module.exports = {
         ink: {
           DEFAULT: '#171717',
           2: '#666666',
-          3: '#888888',
-          4: '#aaaaaa',
+          3: '#767676',
+          4: '#767676',
         },
         line: {
           DEFAULT: 'rgba(0,0,0,0.08)',
@@ -109,7 +109,7 @@ module.exports = {
         },
         accent: {
           DEFAULT: '#0a72ef',
-          2: '#ff5b4f',
+          2: '#d93025',
           3: '#de1d8d',
         },
       },

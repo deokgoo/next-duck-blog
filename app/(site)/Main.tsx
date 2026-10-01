@@ -60,7 +60,7 @@ export default function Main({ posts, locale, description }: MainProps) {
           <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.03em] sm:text-5xl md:text-6xl">
             {s.heroTitle} <span className="text-accent">{s.heroTitleAccent}</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base text-ink-2 md:text-lg">
+          <p className="mx-auto mt-5 max-w-xl text-base text-ink-2 dark:text-gray-400 md:text-lg">
             {description || s.heroSubtitle}
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
@@ -71,7 +71,7 @@ export default function Main({ posts, locale, description }: MainProps) {
               {s.ctaRead}
             </Link>
             <Link
-              href={`/${locale === 'ko' ? '' : locale}/projects`}
+              href="/projects"
               className="rounded-md bg-white px-4 py-2 text-sm font-medium text-ink shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:text-gray-100 dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
             >
               {s.ctaProjects}
@@ -104,7 +104,7 @@ export default function Main({ posts, locale, description }: MainProps) {
                   <Icon size={18} />
                 </div>
                 <h3 className="text-[15px] font-semibold tracking-[-0.01em]">{data.title}</h3>
-                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-ink-2">
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-ink-2 dark:text-gray-400">
                   {data.description}
                 </p>
               </Link>
@@ -119,7 +119,7 @@ export default function Main({ posts, locale, description }: MainProps) {
           <h2 className="text-xl font-semibold tracking-[-0.02em]">{s.recent}</h2>
           <Link
             href={`/${locale === 'ko' ? '' : locale}/blog/dev`}
-            className="font-mono text-xs text-ink-4 transition-colors hover:text-ink"
+            className="font-mono text-xs text-ink-4 transition-colors hover:text-ink dark:hover:text-white"
           >
             {s.recentMeta}
           </Link>
@@ -141,11 +141,11 @@ export default function Main({ posts, locale, description }: MainProps) {
                 <h3 className="mt-3 text-2xl font-semibold leading-snug tracking-[-0.02em]">
                   {featured.title}
                 </h3>
-                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-ink-2">
+                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-ink-2 dark:text-gray-400">
                   {featured.summary}
                 </p>
                 <div className="mt-5 font-mono text-xs text-ink-4">
-                  {formatDate(featured.createdAt || featured.date, siteMetadata.locale)}
+                  {formatDate(featured.createdAt || featured.date, locale)}
                   {featured.readingTime ? ` · ${featured.readingTime.minutes} min` : ''}
                 </div>
               </Link>
@@ -164,11 +164,11 @@ export default function Main({ posts, locale, description }: MainProps) {
                   >
                     {categoriesData[p.category || 'dev']?.title || 'Development'}
                   </span>
-                  <h4 className="mt-2 line-clamp-2 text-[15px] font-medium leading-snug tracking-[-0.01em]">
+                  <h3 className="mt-2 line-clamp-2 text-[15px] font-medium leading-snug tracking-[-0.01em]">
                     {p.title}
-                  </h4>
+                  </h3>
                   <div className="mt-3 font-mono text-[11px] text-ink-4">
-                    {formatDate(p.createdAt || p.date, siteMetadata.locale)}
+                    {formatDate(p.createdAt || p.date, locale)}
                   </div>
                 </Link>
               ))}
@@ -186,7 +186,7 @@ export default function Main({ posts, locale, description }: MainProps) {
               href={siteMetadata.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-xs text-ink-4 transition-colors hover:text-ink"
+              className="font-mono text-xs text-ink-4 transition-colors hover:text-ink dark:hover:text-white"
             >
               {s.projectsMeta}
             </a>
@@ -202,13 +202,13 @@ export default function Main({ posts, locale, description }: MainProps) {
               >
                 <div className="mb-3 text-xl">{proj.icon || '🦆'}</div>
                 <h3 className="text-base font-semibold tracking-[-0.01em]">{proj.title}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-ink-2">{proj.description}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-ink-2 dark:text-gray-400">{proj.description}</p>
                 {proj.stack && proj.stack.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {proj.stack.map((t) => (
                       <span
                         key={t}
-                        className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[10.5px] text-ink-2 dark:bg-white/10"
+                        className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[10.5px] text-ink-2 dark:bg-white/10 dark:text-gray-400"
                       >
                         {t}
                       </span>
@@ -229,7 +229,7 @@ export default function Main({ posts, locale, description }: MainProps) {
           </div>
           <div>
             <h3 className="text-lg font-semibold tracking-[-0.02em]">{siteMetadata.author}</h3>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-2">{s.aboutBody}</p>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-2 dark:text-gray-400">{s.aboutBody}</p>
           </div>
         </div>
       </section>

@@ -10,6 +10,17 @@ export interface RevalidatePostOptions {
   translations?: PostTranslations | null;
 }
 
+/**
+ * 홈 페이지 라우트 무효화.
+ * ko('/') + en/jp 홈이 모두 revalidate=false(영구 캐시)라
+ * 온디맨드 갱신 시 3개 라우트를 함께 무효화해야 한다.
+ */
+export function revalidateHomeRoutes(): void {
+  revalidatePath('/');
+  revalidatePath('/en');
+  revalidatePath('/jp');
+}
+
 export function revalidateOnPostCreate(options: RevalidatePostOptions): void {
   try {
     // Data Cache invalidation
@@ -18,7 +29,7 @@ export function revalidateOnPostCreate(options: RevalidatePostOptions): void {
     revalidateTag(`tags-${options.category}`, 'max');
 
     // Full Route Cache invalidation
-    revalidatePath('/');
+    revalidateHomeRoutes();
     revalidatePath('/blog');
     revalidatePath(`/blog/${options.category}`);
     revalidatePath(`/${options.category}`);
@@ -51,7 +62,7 @@ export function revalidateOnPostUpdate(options: RevalidatePostOptions): void {
 
     // Full Route Cache invalidation
     revalidatePath(`/blog/${options.category}/${options.slug}`);
-    revalidatePath('/');
+    revalidateHomeRoutes();
     revalidatePath('/blog');
     revalidatePath(`/blog/${options.category}`);
     revalidatePath(`/${options.category}`);
@@ -96,7 +107,7 @@ export function revalidateOnPostDelete(options: RevalidatePostOptions): void {
 
     // Full Route Cache invalidation
     revalidatePath(`/blog/${options.category}/${options.slug}`);
-    revalidatePath('/');
+    revalidateHomeRoutes();
     revalidatePath('/blog');
     revalidatePath(`/blog/${options.category}`);
     revalidatePath(`/${options.category}`);
@@ -114,7 +125,7 @@ export function revalidateOnAuthorUpdate(slug: string): void {
   try {
     revalidateTag(`author-${slug}`, 'max');
     revalidatePath('/about');
-    revalidatePath('/');
+    revalidateHomeRoutes();
   } catch (error) {
     console.error('[Revalidation] Author update failed:', error);
   }
