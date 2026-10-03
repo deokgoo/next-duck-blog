@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Menu, RadioGroup, Transition } from '@headlessui/react';
+import { useDropdown } from './DropdownContext';
 
 const Sun = () => (
   <svg
@@ -48,6 +49,7 @@ const Monitor = () => (
 const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { btnRef } = useDropdown('theme', mounted);
 
   // When mounted on client, now we can show the UI
   useEffect(() => setMounted(true), []);

@@ -1,4 +1,4 @@
-import { LocaleHomePage } from '@/app/_locale/home-page';
+import { HomePage } from '@/app/(site)/page';
 import siteMetadata from '@/data/siteMetadata';
 import { genPageMetadata } from 'app/seo';
 
@@ -10,5 +10,5 @@ export const metadata = genPageMetadata({
 });
 
 export default function EnHomePage() {
-  return <LocaleHomePage locale="en" />;
+  return <HomePage locale="en" />;
 }

@@ -3,10 +3,12 @@ import Logo from '@/data/logo.png';
 import Link from './Link';
 import MobileNav from './MobileNav';
 import ThemeSwitch from './ThemeSwitch';
+import LanguageSwitch from './LanguageSwitch';
 import SearchButton from './SearchButton';
 import NavLinks from './NavLinks';
 import Image from 'next/image';
 import { getAuthorBySlug } from '@/lib/firestore';
+import { DropdownProvider } from './DropdownContext';
 
 const Header = async () => {
   const authorData = await getAuthorBySlug('default');
@@ -34,10 +36,13 @@ const Header = async () => {
         </Link>
       </div>
       <div className="flex items-center space-x-md leading-5 sm:space-x-xl">
-        <NavLinks />
-        <SearchButton />
-        <ThemeSwitch />
-        <MobileNav />
+        <DropdownProvider>
+          <NavLinks />
+          <SearchButton />
+          <LanguageSwitch />
+          <ThemeSwitch />
+          <MobileNav />
+        </DropdownProvider>
       </div>
     </header>
   );

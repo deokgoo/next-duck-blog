@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { verifyAuth } from '@/lib/auth/serverAuth';
 import { revalidatePath } from 'next/cache';
+import { revalidateHomeRoutes } from '@/lib/revalidation';
 import { submitUrlToIndexNow } from '@/lib/indexnow';
 import siteMetadata from '@/data/siteMetadata';
 
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
     // 캐시 즉시 무효화 (publish/unpublish 모두 즉시 반영)
     revalidatePath(`/blog/${slug}`);
     revalidatePath('/blog');
-    revalidatePath('/');
+    revalidateHomeRoutes();
 
     // IndexNow 알림: published 상태일 때만 fire-and-forget으로 전송
     if (status === 'published') {
