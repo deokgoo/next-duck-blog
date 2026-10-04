@@ -29,7 +29,7 @@ export interface HomeStrings {
 
 export const homeStrings: Record<Locale, HomeStrings> = {
   ko: {
-    overline: '개발자 · 작가 · 서울',
+    overline: '엔지니어 · 작가 · 미래의 사업가',
     heroTitle: '엔지니어의',
     heroTitleAccent: '서브루틴 (Subroutine)',
     heroSubtitle:
@@ -52,7 +52,7 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     posts: 'posts',
   },
   en: {
-    overline: 'Developer · Writer · Seoul',
+    overline: 'Engineer · Writer · Future Entrepreneur',
     heroTitle: 'Notes on building',
     heroTitleAccent: 'software & living well',
     heroSubtitle:
@@ -75,7 +75,7 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     posts: 'posts',
   },
   jp: {
-    overline: '開発者 · 作家 · ソウル',
+    overline: 'エンジニア · 作家 · 未来の起業家',
     heroTitle: 'ソフトウェアを',
     heroTitleAccent: '作り、暮らす記録',
     heroSubtitle:
