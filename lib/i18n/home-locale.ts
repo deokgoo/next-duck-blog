@@ -28,8 +28,8 @@ export interface HomeStrings {
 export const homeStrings: Record<Locale, HomeStrings> = {
   ko: {
     overline: '개발자 · 작가 · 서울',
-    heroTitle: '소프트웨어를 만들고',
-    heroTitleAccent: '살아내는 기록',
+    heroTitle: '엔지니어의',
+    heroTitleAccent: '서브루틴 (Subroutine)',
     heroSubtitle:
       '엔지니어의 블로그 — 기술 심화, 여행, 그리고 가끔의 라이프 에세이.',
     ctaRead: '블로그 읽기',
