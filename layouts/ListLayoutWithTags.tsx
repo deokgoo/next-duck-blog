@@ -17,6 +17,10 @@ interface ListLayoutProps {
   tags?: Record<string, number>;
 }
 
+// 홈(Main.tsx)과 동일한 accent 순환 — 토큰 재사용
+const tagColor = (i: number) =>
+  ['text-accent', 'text-accent-3', 'text-accent-2'][i % 3];
+
 export default function ListLayoutWithTags({
   posts,
   title,
@@ -55,82 +59,99 @@ export default function ListLayoutWithTags({
   const displayPosts = posts.slice(0, displayCount);
 
   return (
-    <>
-      <div>
-        <div className="pb-6 pt-6">
-          <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:hidden sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            {title}
-          </h1>
-        </div>
-        <div className="flex sm:space-x-24">
-          <div className="hidden h-full max-h-screen min-w-[280px] max-w-[280px] flex-wrap overflow-auto rounded bg-gray-50 pt-5 shadow-md dark:bg-white/5 dark:shadow-none sm:flex">
-            <div className="px-6 py-4">
-              <h3 className="font-bold uppercase text-primary-500">All Posts</h3>
-              <ul>
-                {sortedTags.map((t) => {
-                  const tagHref = `/search?q=${encodeURIComponent(t)}`;
-                  return (
-                    <li key={t} className="my-3">
-                      <Link
-                          href={tagHref}
-                          className="px-3 py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
-                          aria-label={`View posts tagged ${t}`}
-                        >
-                          {`${t} (${tagCounts[t]})`}
-                        </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+    <div className="bg-white text-ink dark:bg-black dark:text-gray-100">
+      <div className="mx-auto max-w-5xl px-8 py-14">
+        {/* Header */}
+        <div className="mb-8">
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.15em] text-ink-3">
+            Blog
+          </p>
+          <div className="flex items-baseline justify-between gap-4">
+            <h1 className="text-3xl font-semibold leading-tight tracking-[-0.03em] sm:text-4xl md:text-5xl">
+              {title}
+            </h1>
+            <span className="shrink-0 font-mono text-xs text-ink-4">
+              {posts.length} posts
+            </span>
           </div>
-          <div className="w-full">
-            <ul>
-              {displayPosts.map((post) => {
-                const { slug, date, title, summary, tags, createdAt, category } = post;
-                const displayDate = createdAt || date;
-                const path = `blog/${category || 'dev'}/${slug}`;
-                return (
-                  <li key={slug} className="py-5">
-                    <article className="flex flex-col space-y-2 xl:space-y-0">
-                      <dl>
-                        <dt className="sr-only">Published on</dt>
-                        <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                          <time dateTime={displayDate}>
-                            {formatDate(displayDate, siteMetadata.locale)}
-                          </time>
-                        </dd>
-                      </dl>
-                      <div className="space-y-3">
-                        <div>
-                          <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link href={`/${path}`} className="text-gray-900 dark:text-gray-100">
-                              {title}
-                            </Link>
-                          </h2>
-                          <div className="flex flex-wrap">
-                            {tags?.map((tag) => (
-                              <Tag key={tag} text={tag} />
-                            ))}
-                          </div>
-                        </div>
-                        <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-                          {summary}
-                        </div>
+        </div>
+
+        {/* Tags — horizontal wrapping chips (mobile/PC 동일) */}
+        {sortedTags.length > 0 && (
+          <div className="mb-10 flex flex-wrap gap-2">
+            {sortedTags.map((t) => {
+              const tagHref = `/search?q=${encodeURIComponent(t)}`;
+              return (
+                <Link
+                  key={t}
+                  href={tagHref}
+                  className="rounded-full bg-black/[0.04] px-3 py-1 text-xs font-medium text-ink-2 transition-colors hover:bg-black/[0.08] hover:text-ink dark:bg-white/10 dark:text-gray-400 dark:hover:bg-white/15 dark:hover:text-gray-200"
+                  aria-label={`View posts tagged ${t}`}
+                >
+                  {t} <span className="text-ink-4 dark:text-gray-500">({tagCounts[t]})</span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Posts — v-border cards */}
+        {displayPosts.length === 0 ? (
+          <p className="py-16 text-center text-sm text-ink-3">아직 게시된 글이 없습니다.</p>
+        ) : (
+          <ul className="flex flex-col gap-4">
+            {displayPosts.map((post, i) => {
+              const { slug, date, title, summary, tags, createdAt, category } = post;
+              const displayDate = createdAt || date;
+              const path = `blog/${category || 'dev'}/${slug}`;
+              return (
+                <li key={slug}>
+                  <Link
+                    href={`/${path}`}
+                    className="group block rounded-xl bg-white p-6 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark sm:p-7"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <span
+                        className={`text-[11px] font-medium uppercase tracking-[0.1em] ${tagColor(i)}`}
+                      >
+                        {category || 'dev'}
+                      </span>
+                      <time
+                        dateTime={displayDate}
+                        className="shrink-0 font-mono text-xs text-ink-4"
+                      >
+                        {formatDate(displayDate, siteMetadata.locale)}
+                      </time>
+                    </div>
+                    <h2 className="mt-3 text-xl font-semibold leading-snug tracking-[-0.02em] transition-colors group-hover:text-accent sm:text-2xl">
+                      {title}
+                    </h2>
+                    {summary && (
+                      <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-ink-2 dark:text-gray-400">
+                        {summary}
+                      </p>
+                    )}
+                    {tags && tags.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-1.5">
+                        {tags.map((tag) => (
+                          <Tag key={tag} text={tag} />
+                        ))}
                       </div>
-                    </article>
-                  </li>
-                );
-              })}
-            </ul>
-            {hasMore && (
-              <div ref={loadMoreRef} className="flex justify-center py-8">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Loading...</span>
-              </div>
-            )}
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {/* Infinite scroll sentinel */}
+        {hasMore && (
+          <div ref={loadMoreRef} className="flex justify-center py-10">
+            <span className="font-mono text-xs text-ink-4">Loading…</span>
           </div>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }

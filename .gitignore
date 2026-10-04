@@ -73,3 +73,6 @@ package-lock.json
 
 # hermes agent scratch
 .hermes/
+
+# planning-with-files scratch
+.planning/

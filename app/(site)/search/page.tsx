@@ -11,9 +11,9 @@ interface SearchResult extends Omit<Post, 'content'> {}
 
 function PostCard({ post }: { post: SearchResult }) {
   return (
-    <article className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-primary-400 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-primary-500">
+    <article className="group rounded-xl bg-white p-6 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-2 font-mono text-xs text-ink-4">
           <Calendar className="h-3 w-3" />
           <time dateTime={post.date}>
             {new Date(post.date).toLocaleDateString('ko-KR', {
@@ -23,19 +23,21 @@ function PostCard({ post }: { post: SearchResult }) {
             })}
           </time>
         </div>
-        <h2 className="text-lg font-bold leading-snug text-gray-900 dark:text-gray-100">
+        <h2 className="text-lg font-semibold leading-snug tracking-[-0.02em] text-ink dark:text-gray-100">
           <Link
             href={`/blog/${post.category || 'dev'}/${post.slug}`}
-            className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"
+            className="transition-colors hover:text-accent"
           >
             {post.title}
           </Link>
         </h2>
         {post.summary && (
-          <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">{post.summary}</p>
+          <p className="line-clamp-2 text-sm leading-relaxed text-ink-2 dark:text-gray-400">
+            {post.summary}
+          </p>
         )}
         {post.tags && post.tags.length > 0 && (
-          <div className="mt-1 flex flex-wrap gap-1">
+          <div className="mt-1 flex flex-wrap gap-1.5">
             {post.tags.map((tag) => (
               <Tag key={tag} text={tag} />
             ))}
@@ -88,29 +90,34 @@ function SearchContent() {
   }, [keyword, doSearch, router]);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
+    <div className="mx-auto max-w-3xl px-8 py-14">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 sm:text-4xl">검색</h1>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">
+        <p className="mb-3 text-xs font-medium uppercase tracking-[0.15em] text-ink-3">
+          Search
+        </p>
+        <h1 className="text-3xl font-semibold leading-tight tracking-[-0.03em] sm:text-4xl">
+          검색
+        </h1>
+        <p className="mt-2 text-sm text-ink-2 dark:text-gray-400">
           제목, 요약, 태그에서 키워드로 글을 찾아보세요.
         </p>
       </div>
 
       {/* 검색 입력 */}
       <div className="relative mb-8">
-        <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+        <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-4" />
         <input
           type="text"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="키워드 검색..."
           autoFocus
-          className="w-full rounded-xl border border-gray-300 bg-gray-50 py-3 pl-11 pr-10 text-base outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-primary-500"
+          className="w-full rounded-xl bg-black/[0.04] py-3 pl-11 pr-10 text-base text-ink outline-none transition-all placeholder:text-ink-4 focus:bg-black/[0.06] focus:ring-2 focus:ring-accent/30 dark:bg-white/10 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:bg-white/15"
         />
         {keyword && (
           <button
             onClick={() => setKeyword('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-4 hover:text-ink"
             aria-label="검색어 지우기"
           >
             <X className="h-4 w-4" />
@@ -121,11 +128,15 @@ function SearchContent() {
       {/* 결과 */}
       <div className="mb-4">
         {initialized && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="font-mono text-xs text-ink-3">
             {keyword ? (
-              <><span className="font-semibold text-gray-700 dark:text-gray-300">{total}개</span>의 글을 찾았습니다</>
+              <>
+                <span className="font-semibold text-ink">{total}개</span>의 글을 찾았습니다
+              </>
             ) : (
-              <>전체 <span className="font-semibold text-gray-700 dark:text-gray-300">{total}개</span>의 글</>
+              <>
+                전체 <span className="font-semibold text-ink">{total}개</span>의 글
+              </>
             )}
           </p>
         )}
@@ -134,16 +145,19 @@ function SearchContent() {
       {loading && (
         <div className="flex flex-col gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800" />
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-xl bg-black/[0.04] dark:bg-white/10"
+            />
           ))}
         </div>
       )}
 
       {!loading && initialized && results.length === 0 && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 py-20 text-center dark:border-gray-600">
-          <Search className="mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
-          <p className="font-medium text-gray-500 dark:text-gray-400">검색 결과가 없습니다</p>
-          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">다른 키워드를 시도해보세요</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line-2 py-20 text-center">
+          <Search className="mb-3 h-10 w-10 text-ink-4" />
+          <p className="font-medium text-ink-2 dark:text-gray-400">검색 결과가 없습니다</p>
+          <p className="mt-1 text-sm text-ink-4">다른 키워드를 시도해보세요</p>
         </div>
       )}
 
@@ -160,17 +174,22 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={
-      <div className="mx-auto max-w-3xl px-4 py-10">
-        <div className="mb-8 h-10 w-32 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
-        <div className="mb-8 h-12 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700" />
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700" />
-          ))}
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-3xl px-8 py-14">
+          <div className="mb-8 h-10 w-32 animate-pulse rounded-lg bg-black/[0.04] dark:bg-white/10" />
+          <div className="mb-8 h-12 animate-pulse rounded-xl bg-black/[0.04] dark:bg-white/10" />
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-32 animate-pulse rounded-xl bg-black/[0.04] dark:bg-white/10"
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SearchContent />
     </Suspense>
   );

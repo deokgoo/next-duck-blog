@@ -1,4 +1,5 @@
 import Link from 'next/link';
+
 interface Props {
   text: string;
 }
@@ -7,9 +8,9 @@ const Tag = ({ text }: Props) => {
   return (
     <Link
       href={`/search?q=${encodeURIComponent(text)}`}
-      className="mr-sm text-sm font-medium uppercase text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+      className="rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 dark:bg-accent/15 dark:text-accent"
     >
-      {text.split(' ').join('-')}
+      {text}
     </Link>
   );
 };
