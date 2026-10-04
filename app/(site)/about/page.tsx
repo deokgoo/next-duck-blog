@@ -1,24 +1,78 @@
-import { Authors, coreContent, allAuthors } from '@/lib/types';
-import { getAuthorBySlug } from '@/lib/firestore';
-import { MDXLayoutRenderer } from 'pliny/mdx-components';
+import 'css/prism.css';
+import 'katex/dist/katex.css';
+
+import { components } from '@/components/MDXComponents';
+import { MDXRemote } from 'next-mdx-remote/rsc';
 import AuthorLayout from '@/layouts/AuthorLayout';
 import { genPageMetadata } from 'app/seo';
+import { Authors, allAuthors } from '@/lib/types';
+import siteMetadata from '@/data/siteMetadata';
+import { readFile } from 'fs/promises';
+import path from 'path';
+import matter from 'gray-matter';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import remarkSmartypants from 'remark-smartypants';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeKatex from 'rehype-katex';
+import rehypePrismPlus from 'rehype-prism-plus';
 
-export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디맨드 갱신 전용
+export const revalidate = false;
 
 export const metadata = genPageMetadata({ title: 'About' });
 
 export default async function Page() {
-  const authorData = await getAuthorBySlug('default');
-  const author = (authorData ||
-    allAuthors.find((a) => a.slug === 'default') ||
-    allAuthors[0]) as Authors;
-  const mainContent = coreContent(author);
+  // Read local MDX file
+  let author: Authors;
+  let content = '';
+
+  try {
+    const filePath = path.join(process.cwd(), 'data/authors/default.mdx');
+    const raw = await readFile(filePath, 'utf-8');
+    const { data, content: mdxContent } = matter(raw);
+    content = mdxContent;
+    author = {
+      slug: 'default',
+      name: data.name || siteMetadata.author,
+      avatar: data.avatar || siteMetadata.image,
+      occupation: data.occupation,
+      company: data.company,
+      email: data.email,
+      twitter: data.twitter,
+      linkedin: data.linkedin,
+      github: data.github,
+      visibleSocials: data.visibleSocials,
+      layout: 'AuthorLayout',
+      body: { code: '' },
+    };
+  } catch {
+    // Fallback to Firestore / static
+    const fallback = allAuthors.find((a) => a.slug === 'default') || allAuthors[0];
+    author = fallback;
+    content = '';
+  }
 
   return (
     <>
-      <AuthorLayout content={mainContent}>
-        {author.body?.code && <MDXLayoutRenderer code={author.body.code} />}
+      <AuthorLayout content={author as any}>
+        {content && (
+          <MDXRemote
+            source={content}
+            components={components}
+            options={{
+              mdxOptions: {
+                remarkPlugins: [remarkGfm, remarkMath, remarkSmartypants],
+                rehypePlugins: [
+                  rehypeSlug,
+                  rehypeAutolinkHeadings,
+                  rehypeKatex,
+                  [rehypePrismPlus, { ignoreMissing: true }],
+                ],
+              },
+            }}
+          />
+        )}
       </AuthorLayout>
     </>
   );
