@@ -103,8 +103,8 @@ export default function KoreanNewsletterForm({
 
   if (compact) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-blue-50 to-green-50 p-md dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-xs">
+      <div className={`rounded-lg bg-white shadow-v-border dark:bg-transparent dark:shadow-v-border-dark ${className}`}>
+        <h3 className="mb-3 text-base font-semibold tracking-[-0.01em] text-ink dark:text-white">
           {displayTitle}
         </h3>
         <form onSubmit={handleSubmit} className="flex gap-2">
@@ -113,46 +113,46 @@ export default function KoreanNewsletterForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t.placeholder}
-            className="flex-1 rounded-md border border-gray-300 px-sm py-xs text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="flex-1 rounded-md bg-white px-3 py-2 text-sm text-ink shadow-v-border placeholder:text-ink-3 focus:shadow-v-card focus:outline-none dark:bg-transparent dark:text-white dark:shadow-v-border-dark dark:placeholder:text-gray-500 dark:focus:shadow-v-card-dark"
             disabled={status === 'loading'}
           />
           <button
             type="submit"
             disabled={status === 'loading' || !email}
-            className="rounded-md bg-blue-600 px-md py-xs text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 dark:bg-blue-700 dark:hover:bg-blue-600"
+            className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-ink/90 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/90"
           >
-            {status === 'loading' ? '전송중...' : (language === 'ko' ? '구독' : 'Subscribe')}
+            {status === 'loading' ? (language === 'ko' ? '전송중...' : 'Sending...') : (language === 'ko' ? '구독' : 'Subscribe')}
           </button>
         </form>
         {status === 'success' && (
-          <p className="mt-2 text-sm text-green-600 dark:text-green-400">{message}</p>
+          <p className="mt-2 text-sm text-ink-2 dark:text-gray-400">{message}</p>
         )}
         {status === 'error' && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{message}</p>
+          <p className="mt-2 text-sm text-accent-2">{message}</p>
         )}
       </div>
     )
   }
 
   return (
-    <div className="not-prose my-8 rounded-xxl border border-gray-200 bg-gradient-to-br from-blue-50 via-white to-green-50 p-xl shadow-subtle dark:border-gray-700 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 lg:p-xxl">
+    <div className={`not-prose my-8 rounded-xl bg-white p-8 shadow-v-card dark:bg-transparent dark:shadow-v-card-dark lg:p-10 ${className}`}>
       {/* 헤더 */}
-      <div className="text-center mb-xl">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-sm">
+      <div className="mb-8 text-center">
+        <h2 className="mb-2 text-2xl font-semibold tracking-[-0.02em] text-ink dark:text-white">
           {displayTitle}
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 text-lg">
+        <p className="text-ink-2 dark:text-gray-400">
           {displaySubtitle}
         </p>
       </div>
 
       {/* 혜택 칩 */}
       {showBenefits && (
-        <div className="mb-xl flex flex-wrap gap-2 justify-center">
+        <div className="mb-8 flex flex-wrap justify-center gap-2">
           {t.benefits.map((benefit, index) => (
             <span
               key={index}
-              className="inline-block px-sm py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full dark:text-blue-300 dark:bg-blue-900/30"
+              className="rounded-full bg-black/[0.04] px-3 py-1 text-xs text-ink-2 dark:bg-white/10 dark:text-gray-400"
             >
               {benefit}
             </span>
@@ -162,24 +162,24 @@ export default function KoreanNewsletterForm({
 
       {/* 구독 폼 */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t.placeholder}
-            className="flex-1 rounded-lg border border-gray-300 px-md py-sm text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-800"
+            className="flex-1 rounded-lg bg-white px-4 py-3 text-ink shadow-v-border placeholder:text-ink-3 focus:shadow-v-card focus:outline-none dark:bg-transparent dark:text-white dark:shadow-v-border-dark dark:placeholder:text-gray-500 dark:focus:shadow-v-card-dark"
             disabled={status === 'loading'}
             required
           />
           <button
             type="submit"
             disabled={status === 'loading' || !email}
-            className="rounded-lg bg-gradient-to-r from-blue-600 to-green-600 px-xl py-sm font-semibold text-white transition-all duration-200 hover:from-blue-700 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed"
+            className="rounded-lg bg-ink px-6 py-3 font-medium text-white transition-colors hover:bg-ink/90 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/90"
           >
             {status === 'loading' ? (
               <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
                   <circle
                     className="opacity-25"
                     cx="12"
@@ -206,19 +206,19 @@ export default function KoreanNewsletterForm({
 
       {/* 상태 메시지 */}
       {status === 'success' && (
-        <div className="mt-4 rounded-lg bg-green-50 border border-green-200 p-4 dark:bg-green-900/20 dark:border-green-800">
-          <p className="text-green-800 dark:text-green-200 font-medium">{message}</p>
+        <div className="mt-4 rounded-lg bg-ink/[0.03] p-4 shadow-v-border dark:bg-white/5 dark:shadow-v-border-dark">
+          <p className="text-sm font-medium text-ink-2 dark:text-gray-400">{message}</p>
         </div>
       )}
 
       {status === 'error' && (
-        <div className="mt-4 rounded-lg bg-red-50 border border-red-200 p-4 dark:bg-red-900/20 dark:border-red-800">
-          <p className="text-red-800 dark:text-red-200 font-medium">{message}</p>
+        <div className="mt-4 rounded-lg bg-accent-2/[0.05] p-4 shadow-v-border dark:shadow-v-border-dark">
+          <p className="text-sm font-medium text-accent-2">{message}</p>
         </div>
       )}
 
       {/* 개인정보 안내 */}
-      <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">
+      <p className="mt-4 text-center text-xs text-ink-3 dark:text-gray-500">
         {language === 'ko'
           ? '개인정보는 뉴스레터 발송 목적으로만 사용되며, 언제든 구독을 해지할 수 있습니다.'
           : 'Your email will only be used for newsletter delivery. You can unsubscribe at any time.'
