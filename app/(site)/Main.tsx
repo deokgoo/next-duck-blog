@@ -1,7 +1,7 @@
 import Link from '@/components/Link';
 import { categoriesData } from '@/data/categoriesData';
-import projectsData from '@/data/projectsData';
 import siteMetadata from '@/data/siteMetadata';
+import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
 import { getHomeStrings } from '@/lib/i18n/home-locale';
 import type { Locale } from '@/lib/i18n/messages';
 import type { Post, LocalizedPost } from '@/lib/types';
@@ -73,12 +73,6 @@ export default function Main({ posts, locale, description }: MainProps) {
               className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-ink/90 dark:bg-white dark:text-black dark:hover:bg-white/90"
             >
               {s.ctaRead}
-            </Link>
-            <Link
-              href="/projects"
-              className="rounded-md bg-white px-4 py-2 text-sm font-medium text-ink shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:text-gray-100 dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
-            >
-              {s.ctaProjects}
             </Link>
           </div>
         </div>
@@ -181,61 +175,38 @@ export default function Main({ posts, locale, description }: MainProps) {
         )}
       </section>
 
-      {/* Projects */}
-      {projectsData.length > 0 && (
-        <section className="mx-auto max-w-5xl px-8 py-14">
-          <div className="mb-6 flex items-baseline justify-between">
-            <h2 className="text-xl font-semibold tracking-[-0.02em]">{s.projects}</h2>
-            <a
-              href={siteMetadata.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-xs text-ink-4 transition-colors hover:text-ink dark:hover:text-white"
-            >
-              {s.projectsMeta}
-            </a>
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {projectsData.map((proj) => (
-              <a
-                key={proj.title}
-                href={proj.href || siteMetadata.github}
-                target={proj.href ? '_blank' : undefined}
-                rel="noopener noreferrer"
-                className="group rounded-xl bg-white p-6 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
-              >
-                <div className="mb-3 text-xl">{proj.icon || '🦆'}</div>
-                <h3 className="text-base font-semibold tracking-[-0.01em]">{proj.title}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-ink-2 dark:text-gray-400">{proj.description}</p>
-                {proj.stack && proj.stack.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {proj.stack.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[10.5px] text-ink-2 dark:bg-white/10 dark:text-gray-400"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* About */}
+      {/* About / Portfolio */}
       <section className="mx-auto max-w-5xl px-8 py-14">
-        <div className="flex flex-col items-start gap-5 rounded-xl bg-white p-7 shadow-v-card dark:bg-transparent dark:shadow-v-card-dark sm:flex-row sm:items-center">
+        <p className="mb-5 text-xs font-medium uppercase tracking-[0.15em] text-ink-3">
+          {s.about}
+        </p>
+        <div className="flex flex-col items-start gap-6 rounded-xl bg-white p-7 shadow-v-card dark:bg-transparent dark:shadow-v-card-dark sm:flex-row sm:items-start">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-ink text-2xl text-white dark:bg-white dark:text-black">
             🦆
           </div>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold tracking-[-0.02em]">{siteMetadata.author}</h3>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-2 dark:text-gray-400">{s.aboutBody}</p>
+            <p className="mt-1 text-sm text-ink-3 dark:text-gray-400">{s.aboutRole}</p>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-2 dark:text-gray-400">
+              {s.aboutBody}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {s.interests.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-black/[0.04] px-2.5 py-1 text-xs text-ink-2 dark:bg-white/10 dark:text-gray-400"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="mx-auto max-w-3xl px-8 py-14">
+        <KoreanNewsletterForm language={locale === 'en' ? 'en' : 'ko'} />
       </section>
     </div>
   );

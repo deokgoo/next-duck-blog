@@ -19,7 +19,9 @@ export interface HomeStrings {
   projects: string;
   projectsMeta: string; // "→ github"
   about: string;
+  aboutRole: string;
   aboutBody: string;
+  interests: string[];
   allPosts: string;
   noPosts: string;
   posts: string; // "posts" 단위
@@ -41,8 +43,10 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     projects: '선정 프로젝트',
     projectsMeta: '→ github',
     about: '소개',
+    aboutRole: '풀스택 개발자 · 서울',
     aboutBody:
-      'Next.js와 TypeScript로 시스템을 만드는 풀스택 개발자입니다. 만드는 시스템과, 만들지 않는 날에 가는 곳을 기록합니다.',
+      'Next.js와 TypeScript로 웹을 만드는 풀스택 개발자입니다. 성능 최적화와 로컬 AI(MLX)에 관심이 많고, 코딩하지 않는 날은 3D 프린팅으로 물건을 만들고 여행으로 에너지를 채웁니다.',
+    interests: ['웹/풀스택', '로컬 AI', '3D 프린팅', '여행', '성능 최적화'],
     allPosts: '전체 글 →',
     noPosts: '아직 게시된 글이 없습니다.',
     posts: 'posts',
@@ -62,8 +66,10 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     projects: 'Selected projects',
     projectsMeta: '→ github',
     about: 'About',
+    aboutRole: 'Full-stack developer · Seoul',
     aboutBody:
-      'Full-stack developer building with Next.js and TypeScript. I write about the systems I ship, and the places I go when I\'m not shipping them.',
+      'Full-stack developer building with Next.js and TypeScript. I care about performance and local AI (MLX), and when I\'m not coding I make things with 3D printing and recharge through travel.',
+    interests: ['Web/Full-stack', 'Local AI', '3D Printing', 'Travel', 'Performance'],
     allPosts: 'All posts →',
     noPosts: 'No posts yet.',
     posts: 'posts',
@@ -83,8 +89,10 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     projects: '選定プロジェクト',
     projectsMeta: '→ github',
     about: '自己紹介',
+    aboutRole: 'フルスタック開発者 · ソウル',
     aboutBody:
-      'Next.jsとTypeScriptでシステムを作るフルスタック開発者です。作るシステムと、作らない日に訪れる場所を記録しています。',
+      'Next.jsとTypeScriptでWebを作るフルスタック開発者です。パフォーマンス最適化とローカルAI(MLX)に関心があり、コードを書かない日は3Dプリントで物を作り、旅行でエネルギーを充電しています。',
+    interests: ['Web/フルスタック', 'ローカルAI', '3Dプリント', '旅行', 'パフォーマンス'],
     allPosts: 'すべての記事 →',
     noPosts: 'まだ記事がありません。',
     posts: '記事',
