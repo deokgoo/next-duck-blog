@@ -112,7 +112,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
       </head>
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
-      <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-gray-950 dark:text-white">
+      <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-black dark:text-white">
         <ThemeProviders>
           <AuthProvider>
             <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />

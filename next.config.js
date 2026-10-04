@@ -39,8 +39,10 @@ function generateAdsText() {
   }
 }
 
-// Next.js 구성 로드 시 ads.txt 생성
-generateAdsText();
+// Next.js 구성 로드 시 ads.txt 생성 (로컬 dev 제외 — production build/start에서만)
+if (process.env.NODE_ENV !== 'development') {
+  generateAdsText();
+}
 
 const ContentSecurityPolicy = `
   default-src 'self';

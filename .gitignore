@@ -70,3 +70,9 @@ package-lock.json
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# hermes agent scratch
+.hermes/
+
+# planning-with-files scratch
+.planning/
