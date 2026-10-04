@@ -200,6 +200,14 @@ export default function Main({ posts, locale, description }: MainProps) {
                 </span>
               ))}
             </div>
+            {locale === 'ko' && (
+              <Link
+                href="/about"
+                className="mt-5 inline-block text-sm font-medium text-ink-2 underline decoration-ink-3 underline-offset-4 transition-colors hover:text-ink dark:text-gray-400 dark:decoration-gray-600 dark:hover:text-white"
+              >
+                {s.aboutMore}
+              </Link>
+            )}
           </div>
         </div>
       </section>

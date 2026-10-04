@@ -21,6 +21,7 @@ export interface HomeStrings {
   about: string;
   aboutRole: string;
   aboutBody: string;
+  aboutMore: string;
   interests: string[];
   allPosts: string;
   noPosts: string;
@@ -46,6 +47,7 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     aboutRole: 'Engineer',
     aboutBody:
       'Currently, focusing on web development.',
+    aboutMore: '상세보기 →',
     interests: ['Web Development', 'Local AI', '3D Printing', 'Travel', 'Performance'],
     allPosts: '전체 글 →',
     noPosts: '아직 게시된 글이 없습니다.',
@@ -69,6 +71,7 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     aboutRole: 'Engineer',
     aboutBody:
       'Currently, focusing on web development.',
+    aboutMore: 'Read more →',
     interests: ['Web Development', 'Local AI', '3D Printing', 'Travel', 'Performance'],
     allPosts: 'All posts →',
     noPosts: 'No posts yet.',
@@ -92,6 +95,7 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     aboutRole: 'Engineer',
     aboutBody:
       'Currently, focusing on web development.',
+    aboutMore: '詳しく見る →',
     interests: ['Web Development', 'Local AI', '3D Printing', 'Travel', 'Performance'],
     allPosts: 'すべての記事 →',
     noPosts: 'まだ記事がありません。',
