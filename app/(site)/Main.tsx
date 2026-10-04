@@ -1,4 +1,5 @@
 import Link from '@/components/Link';
+import NextImage from 'next/image';
 import { categoriesData } from '@/data/categoriesData';
 import siteMetadata from '@/data/siteMetadata';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
@@ -181,9 +182,13 @@ export default function Main({ posts, locale, description }: MainProps) {
           {s.about}
         </p>
         <div className="flex flex-col items-start gap-6 rounded-xl bg-white p-7 shadow-v-card dark:bg-transparent dark:shadow-v-card-dark sm:flex-row sm:items-start">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-ink text-2xl text-white dark:bg-white dark:text-black">
-            🦆
-          </div>
+          <NextImage
+            src={siteMetadata.image}
+            alt={siteMetadata.author}
+            width={64}
+            height={64}
+            className="h-16 w-16 shrink-0 rounded-full object-cover"
+          />
           <div className="min-w-0">
             <h3 className="text-lg font-semibold tracking-[-0.02em]">{siteMetadata.author}</h3>
             <p className="mt-1 text-sm text-ink-3 dark:text-gray-400">{s.aboutRole}</p>
