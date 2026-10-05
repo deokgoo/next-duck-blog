@@ -1,12 +1,10 @@
 import 'css/tailwind.css';
-import 'pliny/search/algolia.css';
 
 export const revalidate = false; // 수동 캐시 무효화만 사용
 
 import { Space_Grotesk, Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import { Analytics, AnalyticsConfig } from 'pliny/analytics';
-import { SearchProvider, SearchConfig } from 'pliny/search';
 import siteMetadata from '@/data/siteMetadata';
 import { ThemeProviders } from './theme-providers';
 import { AuthProvider } from '@/lib/auth/AuthContext';
@@ -116,9 +114,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProviders>
           <AuthProvider>
             <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
-            <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-              {children}
-            </SearchProvider>
+            {children}
           </AuthProvider>
         </ThemeProviders>
       </body>
