@@ -50,7 +50,7 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
             <PostEngagement slug={slug} />
           </div>
           <AdComponentDisplay />
-          <div className="pb-xl pt-xl text-gray-700 dark:text-gray-300" id="comment">
+          <div className="pb-xl pt-xl text-ink-2 dark:text-gray-400" id="comment">
             <CommentWidget slug={slug} />
           </div>
           {siteMetadata.newsletter?.provider && (

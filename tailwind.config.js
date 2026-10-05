@@ -64,6 +64,11 @@ module.exports = {
         'v-border-dark': '0px 0px 0px 1px rgba(255,255,255,0.14)',
         'v-card-dark': '0px 0px 0px 1px rgba(255,255,255,0.14), 0px 4px 16px rgba(0,0,0,0.3)',
       },
+      // Vercel Minimal: border-color tokens (so border-v-border / divide-v-border compile)
+      borderColor: {
+        'v-border': 'rgba(0,0,0,0.08)',
+        'v-border-dark': 'rgba(255,255,255,0.14)',
+      },
       maxWidth: {
         'container': '1280px',
       },
@@ -78,9 +83,19 @@ module.exports = {
           '75%': { transform: 'scale(1.1)' },
           '100%': { transform: 'scale(1)' },
         },
+        'fade-in-up': {
+          '0%': { opacity: '0', transform: 'translateY(14px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.85' },
+        },
       },
       animation: {
         'like-heart': 'like-heart 0.5s ease-in-out',
+        'fade-in-up': 'fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
       },
       height: {
         'input': '44px',
@@ -94,7 +109,20 @@ module.exports = {
         mono: ['var(--font-fira-code)', 'ui-monospace', 'SFMono-Regular', ...fontFamily.mono],
       },
       colors: {
-        primary: colors.emerald, // 핑크 → 네온 그린
+        // Vercel Minimal: emerald → Vercel 블루. 포스트 상세/about/projects/댓글/태그/소셜
+        // 링크 색이 홈·블로그 목록의 accent(#0a72ef)와 한 번에 통일된다.
+        primary: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#0a72ef',
+          600: '#0857c9',
+          700: '#0646a3',
+          800: '#053a88',
+          900: '#042e6e',
+        },
         gray: colors.gray,
         // Vercel Minimal 디자인 토큰 (메인 페이지 리디자인)
         ink: {
