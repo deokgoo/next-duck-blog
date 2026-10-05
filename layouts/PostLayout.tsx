@@ -42,13 +42,13 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
     <SectionContainer>
       <ScrollTopAndComment />
       <article>
-        <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
+        <div className="xl:divide-y xl:divide-v-border xl:dark:divide-v-border-dark">
           <header className="pt-xl xl:pb-xl">
             <div className="space-y-1 text-center">
               <dl className="space-y-10">
                 <div>
                   <dt className="sr-only">Published on</dt>
-                  <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                  <dd className="font-mono text-xs uppercase tracking-[0.1em] text-ink-3 dark:text-gray-500">
                     <time dateTime={displayDate}>
                       {new Date(displayDate).toLocaleDateString(
                         siteMetadata.locale,
@@ -66,8 +66,8 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
               </div>
             </div>
           </header>
-          <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-xxl dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
-            <dl className="pb-xxxl pt-xl xl:border-b xl:border-gray-200 xl:pt-11 xl:dark:border-gray-700">
+          <div className="grid-rows-[auto_1fr] divide-y divide-v-border pb-xxl dark:divide-v-border-dark xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
+            <dl className="pb-xxxl pt-xl xl:border-b xl:border-v-border xl:pt-11 xl:dark:border-v-border-dark">
               <dt className="sr-only">Authors</dt>
               <dd>
                 <ul className="flex flex-wrap justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
@@ -104,14 +104,14 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                 </ul>
               </dd>
             </dl>
-            <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
+            <div className="divide-y divide-v-border dark:divide-v-border-dark xl:col-span-3 xl:row-span-2 xl:pb-0">
               <div className="prose max-w-none pb-xxl pt-xxxl dark:prose-invert">{children}</div>
               <div className="flex justify-center py-8">
                 <PostEngagement slug={slug} />
               </div>
               <AdComponentDisplay />
               <div
-                className="pb-xl pt-xl text-gray-700 dark:text-gray-300"
+                className="pb-xl pt-xl text-ink-2 dark:text-gray-400"
                 id="comment"
               >
                 <CommentWidget slug={slug} />
@@ -123,10 +123,10 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
               )}
             </div>
             <footer>
-              <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:col-start-1 xl:row-start-2 xl:divide-y">
+              <div className="divide-v-border text-sm font-medium leading-5 dark:divide-v-border-dark xl:col-start-1 xl:row-start-2 xl:divide-y">
                 {tags && (
                   <div className="py-md xl:py-xxl">
-                    <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    <h2 className="text-xs uppercase tracking-wide text-ink-3 dark:text-gray-500">
                       Tags
                     </h2>
                     <div className="flex flex-wrap">
@@ -140,7 +140,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                   <div className="flex justify-between py-md xl:block xl:space-y-8 xl:py-xxl">
                     {prev && prev.path && (
                       <div>
-                        <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <h2 className="text-xs uppercase tracking-wide text-ink-3 dark:text-gray-500">
                           Previous Article
                         </h2>
                         <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
@@ -150,7 +150,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                     )}
                     {next && next.path && (
                       <div>
-                        <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <h2 className="text-xs uppercase tracking-wide text-ink-3 dark:text-gray-500">
                           Next Article
                         </h2>
                         <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">

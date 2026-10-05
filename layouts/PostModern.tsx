@@ -35,7 +35,7 @@ export default function PostModern({ content, authorDetails, next, prev, childre
     <SectionContainer>
       <ScrollTopAndComment />
       <article>
-        <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
+        <div className="xl:divide-y xl:divide-v-border xl:dark:divide-v-border-dark">
           {/* Header */}
           <header className="pt-6 xl:pb-6">
             <div className="space-y-4 text-center">
@@ -45,7 +45,7 @@ export default function PostModern({ content, authorDetails, next, prev, childre
                 ))}
               </div>
               <PageTitle>{title}</PageTitle>
-              <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center justify-center space-x-4 font-mono text-xs uppercase tracking-[0.1em] text-ink-3 dark:text-gray-500">
                 <time dateTime={displayDate}>
                   {new Date(displayDate).toLocaleDateString(siteMetadata.locale, postDateTemplate)}
                 </time>
@@ -55,8 +55,8 @@ export default function PostModern({ content, authorDetails, next, prev, childre
           </header>
 
           {/* Content */}
-          <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
-            <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
+          <div className="grid-rows-[auto_1fr] divide-y divide-v-border pb-8 dark:divide-v-border-dark xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
+            <div className="divide-y divide-v-border dark:divide-v-border-dark xl:col-span-3 xl:row-span-2 xl:pb-0">
               <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">{children}</div>
             </div>
 
@@ -76,8 +76,8 @@ export default function PostModern({ content, authorDetails, next, prev, childre
                       />
                     )}
                     <div>
-                      <div className="text-gray-900 dark:text-gray-100">{author.name}</div>
-                      <div className="text-gray-500 dark:text-gray-400">@{author.twitter}</div>
+                      <div className="text-ink dark:text-gray-100">{author.name}</div>
+                      <div className="text-ink-3 dark:text-gray-500">@{author.twitter}</div>
                     </div>
                   </div>
                 ))}
@@ -86,7 +86,7 @@ export default function PostModern({ content, authorDetails, next, prev, childre
                 <div className="space-y-4">
                   {prev && prev.path && (
                     <div>
-                      <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      <div className="text-xs uppercase tracking-wide text-ink-3 dark:text-gray-500">
                         이전 글
                       </div>
                       <Link
@@ -99,7 +99,7 @@ export default function PostModern({ content, authorDetails, next, prev, childre
                   )}
                   {next && next.path && (
                     <div>
-                      <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      <div className="text-xs uppercase tracking-wide text-ink-3 dark:text-gray-500">
                         다음 글
                       </div>
                       <Link
@@ -128,7 +128,7 @@ export default function PostModern({ content, authorDetails, next, prev, childre
         </div>
       </article>
 
-      <div className="pb-6 pt-6 text-gray-700 dark:text-gray-300" id="comment">
+      <div className="pb-6 pt-6 text-ink-2 dark:text-gray-400" id="comment">
         <CommentWidget slug={slug} />
       </div>
 
