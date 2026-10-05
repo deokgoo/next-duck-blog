@@ -20,8 +20,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
+        # version을 명시하지 않으면 package.json의 packageManager(pnpm@12.6.0)를
+        # 자동으로 사용한다. 로컬과 CI의 pnpm 버전이 항상 일치하도록 한다.
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
