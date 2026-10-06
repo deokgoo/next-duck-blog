@@ -1,16 +1,16 @@
 ---
-title: '36GB 기본형 Mac Studio로 27B 로컬 LLM 살아남기: 동적 모델 스왑(Dynamic Swap) 아키텍처 구축기'
+title: '36GB 기본형 Mac Studio로 27B 로컬 LLM 운영하기: 동적 모델 스왑 아키텍처 구축기'
 date: '2026-10-05'
 tags: ['Local LLM', 'MLX', 'Mac Studio', 'Optimization', 'Apple Silicon', 'Hermes Agent']
 draft: true
-summary: 'M5 Max 36GB 기본형 Mac Studio에서 27B 코딩 모델과 컨텍스트 압축용 3B 모델의 Metal OOM 충돌을 해결하기 위해, 돈 한 푼 안 들이고 프로세스 동적 스왑 매니저를 구축한 최적화 여정.'
+summary: 'M5 Max 36GB Mac Studio에서 27B 코딩 모델과 7B 압축 모델의 Metal OOM을 해결하기 위해, 프로세스 동적 스왑 매니저를 구축하고 16K 토큰 확장까지 적용해 본 이야기입니다.'
 ---
 
-## 1. 시작하며: 현실적인 하드웨어와 로컬 AI의 벽
+## 1. 현실적인 하드웨어와 로컬 AI의 벽
 
-최근 로컬 환경에서 에이전틱 AI(Hermes 등)를 활용한 코딩 파이프라인을 구축해 운영하고 있다. 메인 코딩 모델로는 강력한 추론 성능을 가진 **Qwen 27B(4-bit)** 를 사용한다.
+최근 로컬 환경에서 Hermes 같은 에이전트를 활용해 코딩 파이프라인을 구축해 쓰고 있습니다. 메인 코딩 모델로는 추론 성능이 좋은 Qwen 27B(4-bit)를 사용합니다.
 
-내가 사용하는 머신은 **Mac Studio (M5 Max, 통합 메모리 36GB)** 기본형이다.
+제가 쓰는 머신은 Mac Studio (M5 Max, 통합 메모리 36GB) 기본형입니다.
 
 <br />
 
@@ -23,26 +23,41 @@ Hardware Overview:
 
 <br />
 
-물론 64GB나 128GB로 CTO 주문을 했다면 모든 것이 편안했겠지만, 하드웨어 옵션 비용에 수백만 원을 당장 태울 수는 없는 노릇이다. 개발자란 모름지기 **"주어진 자원의 한계 안에서 최적의 해답을 찾아내는 사람"** 아니던가?
+64GB나 128GB로 CTO 주문을 했다면 편했겠지만, 하드웨어 옵션 비용이 만만치 않았습니다. 개발자로서 주어진 하드웨어 자원 안에서 답을 찾아보고 싶었습니다.
 
-하지만 36GB라는 통합 메모리는 생각보다 타이트했다. 특히 코딩 에이전트와 장시간 세션을 진행할 때 심각한 문제에 직면했다.
+하지만 36GB 통합 메모리는 생각보다 타이트했습니다. 에이전트와 장시간 코딩 세션을 진행하다 보니 메모리 한계에 부딪혔습니다.
 
 ---
 
-## 2. 문제의 발단: 27B + 3B 동시 상주와 Metal OOM
+## 2. 27B와 3B 동시 상주, 그리고 Metal OOM
 
-코딩용 LLM으로 긴 컨텍스트를 유지하고 빠른 응답 속도를 내려면 **프롬프트 캐시(`--prompt-cache-bytes 6GB`)** 는 절대 포기할 수 없는 최소한의 마지노선이었다.
+코딩용 LLM으로 긴 대화를 이어가며 빠른 응답 속도를 얻으려면 프롬프트 캐시(`--prompt-cache-bytes 6GB`)는 필수였습니다.
 
-단순 계산을 해보자:
+메모리를 계산해보면 이렇습니다:
 
-* **Qwen 27B 4bit 가중치**: 약 15 GB
-* **27B 프롬프트 캐시**: 6 GB
-* **시스템 OS + 브라우저 + 개발 도구**: 약 12~14 GB
-* ➡️ **벌써 33~35 GB를 점유**하고 있어 잔여 메모리는 2~3 GB에 불과하다.
+* Qwen 27B 4bit 가중치: 약 15GB
+* 27B 프롬프트 캐시: 6GB
+* 시스템 OS, 브라우저, 개발 도구: 약 12~14GB
+* 합치면 이미 33~35GB를 점유하고 있어서 잔여 메모리가 2~3GB 수준이었습니다.
 
-이 상태에서 대화가 길어져 컨텍스트가 5만 토큰에 육박하면, Hermes 에이전트는 대화창 크기를 줄이기 위해 **컨텍스트 압축(`compaction`)** 을 트리거한다. 이전 대화 기록 수십~수백 턴을 보조 경량 모델(**Qwen 2.5 3B**)에 던져 깔끔한 인수인계 브리핑 문서로 요약하는 작업이다.
+```mermaid
+flowchart TD
+    subgraph RAM["Mac Studio 36GB 통합 메모리 (기존: 동시 상주 시도)"]
+        direction TB
+        M27B["Qwen 27B 가중치 + 6GB 캐시 (21GB 점유)"]
+        OS["macOS 시스템 + 개발 도구 (12~14GB 점유)"]
+        FREE["남은 여유 메모리 (2~3GB)"]
+        M3B["보조 3B 모델 기동 (14K 토큰 요약 시도)"]
+        OOM["Metal 버퍼 부족 ➔ kIOGPUCommandBufferCallbackErrorOutOfMemory"]
 
-그리고 바로 그 순간, 터져버렸다.
+        FREE -.->|할당 불가| M3B
+        M3B --> OOM
+    end
+```
+
+이 상태에서 대화가 길어져 5만 토큰에 가까워지면, Hermes는 컨텍스트를 줄이기 위해 압축(compaction)을 실행합니다. 이전 대화 기록 수십~수백 턴을 보조 모델(당시에는 Qwen 2.5 3B)에 전달해 요약본으로 정리하는 작업입니다.
+
+그리고 바로 여기서 문제가 발생했습니다.
 
 ```text
 2026-10-04 19:33:26 - INFO - Prompt processing progress: 14294/14295
@@ -52,145 +67,187 @@ RuntimeError: [METAL] Command buffer execution failed:
 Insufficient Memory (00000008:kIOGPUCommandBufferCallbackErrorOutOfMemory).
 ```
 
-요약해야 할 이전 대화 분량(약 14,300 토큰)을 3B 모델이 GPU로 한 번에 올리는(Prefill) 순간, 27B가 메모리를 쥐고 있는 상태에서 Metal GPU 버퍼 할당에 실패한 것이다.
+요약해야 할 이전 대화(약 14,300 토큰)를 3B 모델이 GPU에 올리는 순간, 27B가 메모리를 쥐고 있어서 Metal GPU 버퍼 할당에 실패했습니다.
 
-결과는 참담했다. MLX 서버의 생성 스레드가 사망했고, Hermes는 응답을 기다리다 **5분(300초) 타임아웃(Stall-Interrupted)** 에 걸려 작업이 그대로 멈췄다.
+결국 MLX 서버의 생성 스레드가 비정상 종료되었고, Hermes는 응답을 기다리다 5분(300초) 타임아웃에 걸려 작업이 멈췄습니다.
 
 ---
 
-## 3. 임시 방편의 한계: 클라우드 API(Gemini)와 쿼터 고갈
+## 3. 클라우드 API 임시 우회와 쿼터 고갈
 
-"로컬 GPU가 부족하면, 압축 작업만 Gemini Flash 같은 외부 클라우드 API로 넘기면 되지 않을까?"
+처음에는 압축 작업만 Gemini Flash 같은 외부 클라우드 API로 넘겨서 급한 불을 껐습니다. Gemini를 쓰면 Mac 메모리를 쓰지 않으니 10만 토큰도 몇 초 만에 요약해줬습니다.
 
-처음에는 이 방법으로 급한 불을 껐다. Gemini는 Mac 메모리를 1MB도 쓰지 않으니 10만 토큰도 2~3초 만에 요약해 넘겨주었다.
-
-하지만 곧바로 또 다른 현실의 벽을 만났다:
+하지만 얼마 지나지 않아 쿼터 제한을 만났습니다.
 
 ```text
 Gemini HTTP 429 (RESOURCE_EXHAUSTED): You exceeded your current quota.
 * Quota exceeded for metric: generate_content_free_tier_requests
 ```
 
-에이전트 특성상 파일 수정, 테스트, 명령 실행 등을 반복하다 보면 컨텍스트가 수시로 압축 임계치에 도달한다. 무료 API 티어는 몇 번의 턴 만에 순식간에 동나버렸다. 
+에이전트 특성상 파일 수정, 테스트, 명령 실행을 반복하다 보면 컨텍스트가 금방 차서 수시로 압축이 돕니다. 무료 API 티어는 몇 번의 턴 만에 소진되었습니다.
 
-결국 진정한 자립을 위해서는 **100% 로컬 환경에서, 외부 의존성 없이 이 문제를 풀어내야만 했다.**
-
----
-
-## 4. 유레카: "동시 상주"가 아니라 "순차 실행"이다
-
-"27B 캐시 6GB를 줄이지 않으면서, 3B도 죽지 않게 만들 수는 없을까?"
-
-고민을 거듭하다 에이전트의 내부 라이프사이클을 가만히 뜯어보았다. 그리고 중요한 사실 하나를 깨달았다.
-
-> **"두 모델은 동시에 일할 필요가 전혀 없다."**
-
-Hermes가 컨텍스트를 압축할 때의 흐름은 다음과 같다:
-1. 대화가 임계치를 넘으면 **메인 모델(27B)의 턴 진행이 일시 정지**된다.
-2. 압축 모델(3B)이 이전 대화를 요약하는 동안, **27B는 아무 일도 안 하면서 21GB의 메모리만 차지한 채 놀고 있다.**
-3. 3B의 요약이 끝나면 비로소 27B가 그 요약본을 받아 다음 코딩 작업을 시작한다.
-
-즉, **100% 순차적(Sequential)인 작업**이다.
-
-게다가 Apple Silicon의 통합 메모리와 초고속 NVMe SSD는 15GB 크기의 27B 모델을 내리고 다시 올리는 데 **불과 0.6초~1초**밖에 걸리지 않는다.
-
-그렇다면 답은 명확했다:
-> **"압축할 때는 27B를 잠시 내쫓고(메모리 100% 해제), 3B가 36GB 전체를 여유롭게 쓰며 초고속 요약을 마친 뒤, 다시 27B를 불러오면 된다!"**
+결국 외부 의존성을 없애고 100% 로컬 환경으로 문제를 해결해야 했습니다.
 
 ---
 
-## 5. 아키텍처 구축: MLX Dynamic Model Swapper
+## 4. 동시 상주가 아니라 순차 실행
 
-이 아이디어를 바탕으로 Hermes와 MLX 서버 사이에 가벼운 비동기 프록시 매니저(`mlx_manager.py`)를 설계했다.
+27B 캐시 6GB를 유지하면서 보조 모델도 죽지 않게 만들 방법을 고민하다가, 에이전트의 내부 라이프사이클을 다시 살펴봤습니다.
 
-<br />
+생각해보니 두 모델이 동시에 일할 필요가 전혀 없었습니다.
 
+Hermes가 컨텍스트를 압축할 때 흐름을 보면 이렇습니다:
+
+1. 대화가 임계치를 넘으면 메인 모델(27B)의 턴 진행이 멈춥니다.
+2. 보조 모델이 이전 대화를 요약하는 동안 27B는 21GB 메모리만 차지한 채 대기합니다.
+3. 보조 모델의 요약이 끝나면 비로소 27B가 요약본을 받아 다음 코딩 작업을 시작합니다.
+
+완전히 순차적인(Sequential) 작업이었습니다.
+
+게다가 Apple Silicon의 통합 메모리와 SSD 읽기 속도 덕분에 15GB 크기의 27B 모델을 내리고 다시 올리는 데 1초 안팎이면 충분했습니다.
+
+답은 명확했습니다. 압축할 때는 27B를 잠시 내려서 Metal 메모리를 완전히 해제하고, 보조 모델이 36GB 전체를 여유롭게 써서 요약을 마친 뒤, 다시 27B를 불러오면 되는 문제였습니다.
+
+---
+
+## 5. MLX Dynamic Model Swapper 구축
+
+이 아이디어를 바탕으로 Hermes와 MLX 서버 사이에 가벼운 비동기 프록시 매니저를 설계했습니다. 전체 파이썬 구현체는 GitHub 저장소 [deokgoo/mlx-dynamic-swapper](https://github.com/deokgoo/mlx-dynamic-swapper)의 [`mlx_manager.py`](https://github.com/deokgoo/mlx-dynamic-swapper/blob/main/mlx_manager.py)에서 확인하실 수 있습니다.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Agent as Hermes Agent
+    participant P1234 as 포트 1234 (메인 프록시)
+    participant P1235 as 포트 1235 (압축 프록시)
+    participant Swapper as MLX 스와퍼 (mlx_manager.py)
+    participant M27B as Qwen 27B (내부 18234)
+    participant M7B as Qwen 7B (내부 18235)
+
+    Note over Agent,M27B: 평상시 코딩 루프 (단독 점유, 6GB 캐시 유지)
+    Agent->>P1234: POST /v1/chat/completions (코드 생성 요청)
+    P1234->>M27B: 요청 전달
+    M27B-->>Agent: 토큰 스트리밍 반환
+
+    Note over Agent,M7B: 컨텍스트 48K 도달 시 압축 트리거
+    Agent->>P1235: POST /v1/chat/completions (대화 요약 요청)
+    P1235->>Swapper: swap_lock 획득
+    Swapper->>M27B: 27B 프로세스 종료 (Metal 메모리 21GB 100% 반환)
+    Swapper->>M7B: 7B 프로세스 기동 (36GB 메모리 단독 점유)
+    P1235->>M7B: 요약 프롬프트 전달
+    M7B-->>P1235: 최대 16K 토큰 넉넉한 요약문 스트리밍 반환
+    Swapper->>M7B: 7B 프로세스 종료
+    Swapper->>M27B: 27B 프로세스 자동 복원 (~3.5초)
+    Swapper->>P1235: swap_lock 해제
+    P1235-->>Agent: 최종 압축 결과 전달 완료
 ```
-┌────────────────────────────────────────────────────────┐
-│                      Hermes Agent                      │
-└──────────────┬──────────────────────────┬──────────────┘
-               │ (포트 1234: 메인 LLM)     │ (포트 1235: 컨텍스트 압축)
-               ▼                          ▼
-┌────────────────────────────────────────────────────────┐
-│               MLX Dynamic Swapper Manager              │
-│               (~/.mlx-server/mlx_manager.py)           │
-├────────────────────────────────────────────────────────┤
-│  [평소 상태]                                            │
-│    • Qwen 27B 가동 (포트 18234)                        │
-│    • 6GB 프롬프트 캐시 온전히 확보                      │
-│                                                        │
-│  [포트 1235 압축 요청 도착 시: 자동 스왑]              │
-│    1. swap_lock 획득                                   │
-│    2. 27B 프로세스 종료 (Metal 메모리 21GB 즉시 반환)   │
-│    3. 3B 기동 (0.5초 만에 준비 완료)                   │
-│    4. 36GB 단독 점유 상태로 1.5만 토큰 OOM 없이 요약  │
-│    5. 요약 스트리밍 완료 즉시 3B 종료                  │
-│    6. 27B 재기동 (0.6초 만에 캐시 로드)                │
-│    7. swap_lock 해제                                   │
-└────────────────────────────────────────────────────────┘
-```
 
-<br />
+구현하면서 신경 쓴 세 가지 디테일입니다:
 
-### 구현 시 반드시 챙겨야 했던 디테일들
+### 1. SIGSTOP 대신 완전한 프로세스 종료
+처음에는 `SIGSTOP` 시그널로 27B를 일시정지시키면 어떨까 했습니다. 하지만 macOS Metal 프레임워크는 프로세스가 완전히 종료되지 않으면 통합 메모리(GPU 버퍼)를 반환하지 않습니다. 프로세스 그룹 전체를 깔끔하게 종료(`os.killpg`)해서 메모리를 0MB로 만들어야 했습니다.
 
-단순히 끄고 켜는 스크립트만 작성하면 예상치 못한 버그를 만난다. 실제 구현에서 해결한 핵심 포인트들이다:
+### 2. 헬스체크 요청 바이패스
+Hermes는 모델 생존 여부를 확인하기 위해 `GET /v1/models`를 수시로 호출합니다. 헬스체크 요청에도 모델을 교체하면 두 모델이 불필요하게 핑퐁을 치며 뻗게 됩니다. 그래서 헬스체크는 프로세스를 띄우지 않고 미리 캐싱된 JSON 메타데이터를 바로 반환하도록 처리했습니다.
 
-#### 1. SIGSTOP이 아니라 Process Kill이어야 하는 이유
-처음에는 `SIGSTOP` 시그널로 27B를 일시정지시키면 어떨까 생각했다. 하지만 **macOS Metal 프레임워크는 프로세스가 완전히 종료되지 않는 한 통합 메모리(GPU 버퍼)를 반환하지 않는다.** 따라서 프로세스 그룹 전체를 깔끔하게 종료(`os.killpg`)해 메모리를 0MB로 만들어야만 했다.
-
-#### 2. 무의미한 모델 스왑 방지 (Fast-path Health Check)
-Hermes는 주기적으로 모델 생존 여부를 확인하기 위해 `GET /v1/models`를 찌른다. 만약 헬스체크 요청에도 모델을 교체한다면 계속해서 27B와 3B가 핑퐁을 치며 뻗게 된다. 
-따라서 헬스체크는 프로세스를 띄우지 않고 **미리 캐싱된 JSON 메타데이터를 즉시 리턴**하도록 바이패스했다.
-
-#### 3. 동시성 락(`swap_lock`)으로 502 에러 원천 차단
-3B가 요약하는 몇 초 사이에 사용자의 추가 입력이 들어올 수 있다. 이때 27B 포트로 들어온 요청이 "서버 없음(502 Bad Gateway)" 에러를 받으면 Hermes는 "로컬 서버가 죽었다"고 착각해 외부 Fallback(Gemini)으로 탈출해 버린다.
-이를 막기 위해 **3B 요약과 27B 복구가 끝날 때까지 1234 포트로 들어온 요청을 안전하게 대기(Queue)** 시키는 비동기 락을 걸었다.
+### 3. 동시성 락(swap_lock)으로 502 에러 방지
+보조 모델이 요약하는 몇 초 사이에 사용자의 추가 입력이 들어올 수 있습니다. 이때 27B 포트로 들어온 요청이 502 Bad Gateway 에러를 받으면 Hermes는 로컬 서버가 죽었다고 판단해 외부 API로 탈출해 버립니다. 요약과 27B 복구가 끝날 때까지 1234 포트로 들어온 요청을 안전하게 대기시키는 비동기 락을 걸었습니다.
 
 ---
 
-## 6. 검증: 실제로 얼마나 걸릴까?
+## 6. 실제 소요 시간 검증
 
-모든 세팅을 마친 뒤, 실제 Hermes API 호출을 통해 전 과정을 벤치마크했다.
+세팅을 마치고 실제 Hermes API 호출로 전체 소요 시간을 확인해봤습니다.
 
 ```text
-[MLX Manager] Compaction requested! Stopping 27B and starting 3B...
+[MLX Manager] Compaction requested! Stopping 27B and starting compaction model...
 [MLX Manager] Stopping 27B-Main (PID: 71725) to release Metal memory...
 [MLX Manager] 27B-Main stopped. Metal memory 100% freed.
-[MLX Manager] Starting 3B on internal port 18235...
-[MLX Manager] 3B compaction server is ready with full VRAM!
+[MLX Manager] Starting compaction model on internal port 18235...
+[MLX Manager] Compaction server is ready with full VRAM!
 [MLX Manager] Compaction stream complete! Restoring 27B model...
-[MLX Manager] Stopping 3B-Compaction (PID: 72184) to release Metal memory...
-[MLX Manager] 3B-Compaction stopped. Metal memory 100% freed.
+[MLX Manager] Stopping compaction model (PID: 72184) to release Metal memory...
+[MLX Manager] Compaction model stopped. Metal memory 100% freed.
 [MLX Manager] Starting 27B on internal port 18234...
 [MLX Manager] 27B server is ready for inference!
 [MLX Manager] 27B model restored successfully!
 ```
 
-* **3B 기동 ➡️ 대용량 요약 생성 ➡️ 종료**: **3.26초**
-* **27B 재기동 ➡️ 캐시 복원 ➡️ 추론 준비**: **3.14초**
+* 보조 모델 기동 ➔ 대용량 요약 생성 ➔ 종료: 약 3.2초
+* 27B 재기동 ➔ 캐시 복원 ➔ 추론 준비: 약 3.1초
 
-개발자가 체감하는 대기시간은 불과 **6초 남짓**이다. 그 짧은 시간 동안 21GB가 증발했다가 다시 나타나며, 지긋지긋하던 Metal OOM 에러는 영구히 박멸되었다.
+실제 체감 대기시간은 약 6초 정도였습니다. 6초 만에 21GB 메모리가 완전히 비워졌다가 복구되면서 Metal OOM 문제가 해결되었습니다.
 
-터미널에서 `mlx status`를 쳐보면 실시간 상태도 직관적으로 확인된다:
+터미널에서 `mlx status`를 쳐보면 실시간 상태도 직관적으로 확인됩니다:
 
 ```text
-MLX Dynamic Swapper: ONLINE (Manager PID: 83773)
+MLX Dynamic Swapper: ONLINE (Manager PID: 61292)
   Main Endpoint:       http://127.0.0.1:1234/v1
   Compaction Endpoint: http://127.0.0.1:1235/v1
 
   Active Model:       Qwen3.8-27B-4bit (Main Coding Model)
-  Status:             Running (PID: 11143, RAM: 14,668MB, Prompt Cache: 6GB)
+  Status:             Running (PID: 40025, RAM: 14,668MB, Prompt Cache: 6GB)
   Path:               /Users/deokgoo/.mlx-models/Qwen3.8-27B-4bit
-  Auto-Swap Mode:     Active (27B unloads on compaction, 3B runs, then 27B restores)
+  Auto-Swap Mode:     Active (27B unloads on compaction, 7B runs, then 27B restores)
 ```
 
 ---
 
-## 7. 마치며: 제약은 아키텍처적 사고를 낳는다
+## 7. 3B에서 7B 업그레이드와 16K 토큰 확장
 
-물론 128GB Mac Studio를 쓰면 이런 고민 없이 모델 서너 개를 동시에 띄워놓고 편하게 쓸 수 있다. 
+처음 구축했던 3B 모델은 빠르고 가벼웠지만, 100턴이 넘어가는 복잡한 코딩 세션에서는 코드 변경점과 미해결 버그를 정밀하게 요약해내는 데 아쉬움이 있었습니다.
 
-하지만 금전적 이유든 환경적 이유든, **주어진 하드웨어 스펙이 제한적일 때 무작정 하드웨어 탓만 할 필요는 없다.** 문제의 근본 원인을 추적하고 시스템과 애플리케이션의 라이프사이클을 면밀히 분석하면, 생각보다 훨씬 우아하고 가벼운 아키텍처로 돌파할 수 있는 길이 열린다.
+27B가 완전히 언로드되면 약 30GB의 여유 VRAM이 남기 때문에, 보조 요약 모델을 성능이 더 좋은 Qwen 2.5 7B로 교체했습니다. 7B 모델(가중치 약 4.5GB)도 36GB 단독 점유 상태에서는 전혀 무리가 없었습니다.
 
-기본형 36GB Mac Studio에서 27B 대형 모델과 압축 파이프라인을 100% 로컬로 쾌적하게 굴리고 싶은 분들에게 이 글이 작은 힌트가 되기를 바란다.
+하지만 실전 세션에서 예상치 못한 장애를 만났습니다.
+
+### 15분 먹통 장애와 원인 분석
+
+메시지 237개와 도구 실행 100회가 누적되면서 전체 컨텍스트가 12.5만 토큰에 달했습니다. Hermes는 48,000 토큰 임계치에서 정상적으로 7B 모델에 압축을 요청했습니다.
+
+그런데 압축이 완료되지 않고, 다음 턴에서 시스템 전체가 15분(900초) 동안 멈췄다가 죽어버리는 현상이 발생했습니다.
+
+로그를 추적해보니 세 가지 문제가 연쇄적으로 일어났습니다:
+
+1. **4,096 토큰 출력 한도 잘림 (`finish_reason: length`)**  
+   `config.yaml`에 `mlx_compaction`의 `extra_body.max_tokens`가 기본 4,096으로 설정되어 있었습니다. 100턴 이상의 도구 실행 결과와 에러 로그를 꼼꼼하게 정리하던 7B 모델이 4,096번째 토큰에서 출력이 잘려버렸습니다.
+2. **Hermes의 안전 가드로 인한 강제 취소**  
+   Hermes 내부에는 요약문이 중간에 잘려 불완전한 상태로 저장되면 과거 컨텍스트가 왜곡되므로, finish_reason이 length인 요약은 무조건 에러로 처리하는 방어 로직(`_call_summary_llm`)이 있었습니다. 이로 인해 압축이 실패 처리되고 쿨다운 타이머가 작동했습니다.
+3. **쿨다운 중 압축 스킵과 27B 메인 모델 Metal OOM**  
+   쿨다운이 14초 남아있던 시점에 새 프롬프트가 들어오자, 사전 압축이 건너뛰어지며 71,748 토큰 전체가 27B 메인 모델로 그대로 들어갔습니다. 27B가 7.1만 토큰의 거대한 KV 캐시를 잡는 순간 macOS GPU VRAM이 부족해지며 `kIOGPUCommandBufferCallbackErrorOutOfMemory`가 발생했습니다.
+
+### 7B 출력 토큰 16,384 확장으로 해결
+
+원인을 찾고 나니 해결 방법은 간단했습니다.
+
+27B를 내려서 30GB VRAM을 7B 혼자 쓰고 있는데, 출력 토큰을 4,096에 묶어둘 이유가 없었습니다.
+
+* `config.yaml`: `mlx_compaction.extra_body.max_tokens`를 **16,384**로 상향
+* `mlx_manager.py`: 7B 기동 인자 `--max-tokens`를 **16,384**로 상향
+
+7B 모델은 3.3만 토큰의 프롬프트를 한 번에 읽고 8,000~10,000 토큰 이상의 요약문을 출력해도 메모리를 총 10GB 안쪽으로 씁니다. 이제 요약문이 길어져도 끊김 없이 완주하며, 메인 27B 모델로 컨텍스트 폭탄이 넘어가는 현상을 방지했습니다.
+
+---
+
+### 최종 환경 파라미터 요약
+
+| 구분 | 메인 코딩 모델 | 보조 압축 요약 모델 |
+| :--- | :--- | :--- |
+| **모델명** | `Qwen3.8-27B-4bit` | `Qwen2.5-7B-Instruct-4bit` |
+| **엔드포인트** | `http://127.0.0.1:1234/v1` | `http://127.0.0.1:1235/v1` |
+| **컨텍스트 윈도우** | 65,536 토큰 (64K) | 최대 64K 토큰 입력 감당 |
+| **1회 최대 생성 한도** | 8,192 토큰 | 16,384 토큰 (요약 잘림 방지) |
+| **프롬프트 캐시** | 6GB 고정 (응답 가속) | 캐시 없음 (0GB, 일회성 요약) |
+| **압축 트리거 기준** | 48,000 토큰 도달 시 자동 실행 | - |
+| **보존 턴 규칙** | 시스템 3턴 + 최근 10턴 원본 유지 | 중간 턴을 이전 대비 약 20%로 압축 |
+| **스왑 소요 시간** | 복원 로드 약 3.5초 | 기동 로드 약 1.5초 |
+
+---
+
+## 8. 제약이 가져다준 아키텍처적 고민
+
+128GB Mac Studio를 썼다면 모델 서너 개를 동시에 띄워놓고 편하게 썼을 겁니다.
+
+하지만 주어진 하드웨어 스펙이 제한적이라고 해서 무작정 장비 탓만 할 필요는 없다고 생각합니다. 시스템과 애플리케이션의 라이프사이클을 뜯어보고 흐름을 맞추면, 가벼운 아키텍처로도 충분히 풀어낼 수 있습니다.
+
+기본형 36GB Mac Studio에서 27B 대형 모델과 압축 파이프라인을 100% 로컬로 굴려보려는 분들께 참고가 됐으면 합니다.
