@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 기본 라우트 (높은 우선순위)
   // /search는 noindex 페이지라 sitemap에 포함하지 않는다
-  const routes = ['', 'blog', 'projects', 'about'].map((route) => ({
+  const routes = ['', 'blog', 'projects', 'about', 'architecture'].map((route) => ({
     url: `${siteUrl}/${cleanSlug(route)}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: 'daily' as const,
