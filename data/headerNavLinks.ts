@@ -8,7 +8,6 @@ const headerNavLinks: NavLink[] = [
   { href: '/', title: 'Home' },
   { href: '/blog/dev', title: 'Blog' },
   { href: '/admin/blog-ideas', title: 'Ideas', adminOnly: true },
-  { href: '/search', title: 'Search' },
   { href: '/projects', title: 'Projects' },
   { href: '/architecture', title: 'Architecture' },
   { href: '/about', title: 'About' },
