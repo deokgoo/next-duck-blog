@@ -88,9 +88,9 @@ export async function generateMetadata(props: {
     alternates: {
       canonical: postUrl,
       languages: {
-        'ko': postUrl,
-        ...(hasEn && { 'en': `${siteMetadata.siteUrl}/en/blog/${category}/${slug}` }),
-        ...(hasJp && { 'ja': `${siteMetadata.siteUrl}/jp/blog/${category}/${slug}` }),
+        ko: postUrl,
+        ...(hasEn && { en: `${siteMetadata.siteUrl}/en/blog/${category}/${slug}` }),
+        ...(hasJp && { ja: `${siteMetadata.siteUrl}/jp/blog/${category}/${slug}` }),
         'x-default': postUrl,
       },
     },
@@ -110,7 +110,7 @@ export async function generateMetadata(props: {
       card: 'summary_large_image',
       title: post.title,
       description: post.summary,
-      images: [resolved.includes('http') ? resolved : siteMetadata.siteUrl + resolved],
+      images: [resolved.includes('http') ? resolved : siteMetadata.socialBanner],
     },
   };
 }
@@ -191,29 +191,55 @@ export default async function Page(props: {
     return resolved.includes('http') ? resolved : `${siteMetadata.siteUrl}${resolved}`;
   })();
 
-  // Structured Data (JSON-LD)
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    datePublished: new Date(post.date).toISOString(),
-    dateModified: new Date(post.lastmod || post.date).toISOString(),
-    description: post.summary,
-    url: postUrl,
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': postUrl,
+  // Structured Data (JSON-LD) — Google 리치 결과(기사 카드 + 브레드크럼)용
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      datePublished: new Date(post.date).toISOString(),
+      dateModified: new Date(post.lastmod || post.date).toISOString(),
+      description: post.summary,
+      url: postUrl,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': postUrl,
+      },
+      image: ogImageUrl,
+      publisher: {
+        '@type': 'Person',
+        name: siteMetadata.author,
+      },
+      author: authorDetails.map((author) => ({
+        '@type': 'Person',
+        name: author.name,
+      })),
     },
-    image: ogImageUrl,
-    publisher: {
-      '@type': 'Person',
-      name: siteMetadata.author,
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: '홈',
+          item: siteMetadata.siteUrl,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: category.charAt(0).toUpperCase() + category.slice(1),
+          item: `${siteMetadata.siteUrl}/blog/${category}`,
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: post.title,
+          item: postUrl,
+        },
+      ],
     },
-    author: authorDetails.map((author) => ({
-      '@type': 'Person',
-      name: author.name,
-    })),
-  };
+  ];
 
   const Layout = layouts[post.layout || defaultLayout];
 
