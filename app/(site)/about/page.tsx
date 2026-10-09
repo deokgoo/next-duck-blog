@@ -20,7 +20,11 @@ import rehypePrismPlus from 'rehype-prism-plus';
 
 export const revalidate = false;
 
-export const metadata = genPageMetadata({ title: 'About' });
+export const metadata = genPageMetadata({
+  title: 'About',
+  path: '/about',
+  description: 'Duck Blog을 운영하는 개발자 소개입니다.',
+});
 
 export default async function Page() {
   // Read local MDX file

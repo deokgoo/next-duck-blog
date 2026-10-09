@@ -9,7 +9,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
-  return genPageMetadata({ title: `${category.charAt(0).toUpperCase() + category.slice(1)} Posts (日本語)` });
+  return genPageMetadata({
+    title: `${category.charAt(0).toUpperCase() + category.slice(1)} Posts (日本語)`,
+    path: `/jp/blog/${category}`,
+    locale: 'ja_JP',
+  });
 }
 
 export default async function JpBlogCategoryPage({
