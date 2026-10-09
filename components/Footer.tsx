@@ -44,6 +44,8 @@ export default async function Footer() {
           <div>{`© ${new Date().getFullYear()}`}</div>
           <div>{` • `}</div>
           <Link href="/">{title}</Link>
+          <div>{` • `}</div>
+          <Link href="/architecture">Architecture</Link>
         </div>
       </div>
     </footer>
