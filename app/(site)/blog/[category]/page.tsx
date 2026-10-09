@@ -44,6 +44,7 @@ export async function generateMetadata(props: { params: Promise<{ category: stri
   return genPageMetadata({
     title,
     description: getCategoryDescription(category),
+    path: `/blog/${category}`,
   });
 }
 

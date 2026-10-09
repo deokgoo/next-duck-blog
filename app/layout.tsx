@@ -8,6 +8,7 @@ import { Analytics, AnalyticsConfig } from 'pliny/analytics';
 import siteMetadata from '@/data/siteMetadata';
 import { ThemeProviders } from './theme-providers';
 import { AuthProvider } from '@/lib/auth/AuthContext';
+import { LocaleLangSync } from '@/components/LocaleLangSync';
 import { Metadata } from 'next';
 import { getAuthorBySlug } from '@/lib/firestore';
 
@@ -40,7 +41,10 @@ const firaCode = localFont({
 export async function generateMetadata(): Promise<Metadata> {
   const authorData = await getAuthorBySlug('default');
 
-  const title = authorData?.blogTitle || siteMetadata.title;
+  // Firestore blogTitle에 " | 서픽스"가 남아있을 수 있어(과거 값)
+  // 파이프 이후는 제거하고, 없으면 siteMetadata.title로 폴백한다.
+  const rawTitle = authorData?.blogTitle || siteMetadata.title;
+  const title = rawTitle.split('|')[0].trim() || siteMetadata.title;
   const description = authorData?.blogDescription || siteMetadata.description;
   const socialBanner = authorData?.socialBanner || siteMetadata.socialBanner;
 
@@ -48,33 +52,24 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(siteMetadata.siteUrl),
     title: {
       default: title,
-      template: `%s | ${title}`,
+      template: '%s',
     },
     description: description,
     openGraph: {
       title: title,
       description: description,
-      url: './',
+      // url은 각 페이지가 스스로 설정 (root에서 두면 모든 페이지에 루트 URL 유입)
       siteName: title,
       images: [socialBanner],
-      locale: 'ko_KR',
+      // locale은 각 페이지(로케일)가 스스로 설정 — root에서 ko_KR을 두면
+      // /en, /jp 페이지에 한국어 locale이 유입된다
       type: 'website',
     },
+    // canonical/hreflang/robots는 각 페이지가 스스로 설정한다.
+    // (root layout에 두면 모든 페이지에 홈 값이 유입되는 bug)
     alternates: {
-      canonical: siteMetadata.siteUrl,
       types: {
         'application/rss+xml': `${siteMetadata.siteUrl}/feed.xml`,
-      },
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
       },
     },
     twitter: {
@@ -108,9 +103,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID && (
           <meta name="google-adsense-account" content={process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID} />
         )}
+        {process.env.GOOGLE_SITE_VERIFICATION_ID && (
+          <meta name="google-site-verification" content={process.env.GOOGLE_SITE_VERIFICATION_ID} />
+        )}
       </head>
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-black dark:text-white">
+        <LocaleLangSync />
         <ThemeProviders>
           <AuthProvider>
             <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
