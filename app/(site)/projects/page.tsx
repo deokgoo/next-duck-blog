@@ -2,7 +2,11 @@ import projectsData from '@/data/projectsData';
 import Card from '@/components/Card';
 import { genPageMetadata } from 'app/seo';
 
-export const metadata = genPageMetadata({ title: 'Projects' });
+export const metadata = genPageMetadata({
+  title: 'Projects',
+  path: '/projects',
+  description: 'Duck Blog에서 진행 중인 프로젝트들을 소개합니다.',
+});
 
 export default function Projects() {
   return (

@@ -27,6 +27,9 @@ public/sitemap.xml
 *.xml
 # rss feed
 /public/feed.xml
+# app/feed.xml/ 라우트 디렉터리는 *.xml 규칙에서 제외 (route.ts 커밋 필요)
+!app/feed.xml/
+!app/feed.xml/**
 
 # misc
 .DS_Store

@@ -81,6 +81,10 @@ export async function generateLocalePostMetadata(
   }));
 
   const koUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
+  // 각 언어 페이지는 self canonical (번역본이 ko를 canonical로 가리키면
+  // 번역본 인덱싱이 약화됨). x-default만 ko(원문)로.
+  // (SupportedLocale은 'en' | 'jp' — ko 원문은 (site) 라우트가 담당)
+  const selfUrl = `${siteMetadata.siteUrl}/${locale}/blog/${category}/${slug}`;
   const hasEn = !!post.translations?.en;
   const hasJp = !!post.translations?.jp;
 
@@ -88,7 +92,7 @@ export async function generateLocalePostMetadata(
     title: localizedPost.title,
     description: localizedPost.summary,
     alternates: {
-      canonical: koUrl,
+      canonical: selfUrl,
       languages: {
         ko: koUrl,
         ...(hasEn && { en: `${siteMetadata.siteUrl}/en/blog/${category}/${slug}` }),
@@ -100,11 +104,11 @@ export async function generateLocalePostMetadata(
       title: localizedPost.title,
       description: localizedPost.summary,
       siteName: siteMetadata.title,
-      locale: locale === 'en' ? 'en_US' : 'ja_JP',
+      locale: locale === 'en' ? 'en_US' : locale === 'jp' ? 'ja_JP' : 'ko_KR',
       type: 'article',
       publishedTime: publishedAt,
       modifiedTime: modifiedAt,
-      url: `${siteMetadata.siteUrl}/${locale}/blog/${category}/${slug}`,
+      url: selfUrl,
       images: ogImages,
       authors: authors.length > 0 ? authors : [siteMetadata.author],
     },
