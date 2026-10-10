@@ -35,9 +35,32 @@ export interface LayoutThumbnailPickerProps {
   onLayoutChange: (layout: string) => void;
 }
 
-function PostLayoutThumbnail() {
+function PostLayoutThumbnail({ bannerImageUrl }: { bannerImageUrl?: string }) {
   return (
     <div className="flex h-full w-full flex-col gap-1 p-1.5">
+      {/* 상단 배너 이미지 영역 */}
+      {bannerImageUrl ? (
+        <div
+          className="h-8 w-full rounded-sm bg-cover bg-center"
+          style={{ backgroundImage: `url(${bannerImageUrl})` }}
+        />
+      ) : (
+        <div className="flex h-8 w-full items-center justify-center rounded-sm bg-gray-300 dark:bg-gray-600">
+          <svg
+            className="h-3 w-3 text-gray-400 dark:text-gray-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+      )}
       {/* 상단 제목 */}
       <div className="h-2 w-3/4 rounded-sm bg-gray-400 dark:bg-gray-500" />
       {/* 좌측 사이드바 + 우측 본문 */}
@@ -59,9 +82,32 @@ function PostLayoutThumbnail() {
   );
 }
 
-function PostSimpleThumbnail() {
+function PostSimpleThumbnail({ bannerImageUrl }: { bannerImageUrl?: string }) {
   return (
     <div className="flex h-full w-full flex-col gap-1 p-1.5">
+      {/* 상단 배너 이미지 영역 */}
+      {bannerImageUrl ? (
+        <div
+          className="h-8 w-full rounded-sm bg-cover bg-center"
+          style={{ backgroundImage: `url(${bannerImageUrl})` }}
+        />
+      ) : (
+        <div className="flex h-8 w-full items-center justify-center rounded-sm bg-gray-300 dark:bg-gray-600">
+          <svg
+            className="h-3 w-3 text-gray-400 dark:text-gray-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+      )}
       {/* 상단 날짜 */}
       <div className="h-1 w-1/4 rounded-sm bg-gray-300 dark:bg-gray-600" />
       {/* 제목 */}
@@ -116,9 +162,32 @@ function PostBannerThumbnail({ bannerImageUrl }: { bannerImageUrl?: string }) {
   );
 }
 
-function PostModernThumbnail() {
+function PostModernThumbnail({ bannerImageUrl }: { bannerImageUrl?: string }) {
   return (
     <div className="flex h-full w-full flex-col gap-1 p-1.5">
+      {/* 상단 배너 이미지 영역 */}
+      {bannerImageUrl ? (
+        <div
+          className="h-8 w-full rounded-sm bg-cover bg-center"
+          style={{ backgroundImage: `url(${bannerImageUrl})` }}
+        />
+      ) : (
+        <div className="flex h-8 w-full items-center justify-center rounded-sm bg-gray-300 dark:bg-gray-600">
+          <svg
+            className="h-3 w-3 text-gray-400 dark:text-gray-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+      )}
       {/* 상단 태그 */}
       <div className="flex gap-0.5">
         <div className="h-1 w-4 rounded-sm bg-gray-300 dark:bg-gray-600" />
@@ -190,9 +259,7 @@ export default function LayoutThumbnailPicker({
                 }`}
               >
                 {ThumbnailComponent && (
-                  <ThumbnailComponent
-                    bannerImageUrl={option.value === 'PostBanner' ? bannerImageUrl : undefined}
-                  />
+                  <ThumbnailComponent bannerImageUrl={bannerImageUrl} />
                 )}
               </div>
               {/* 레이아웃 이름 */}

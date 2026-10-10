@@ -33,10 +33,12 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { slug, date, title, tags, createdAt } = content;
+  const { slug, date, title, tags, createdAt, images } = content;
   const displayDate = createdAt || date;
   const path = `blog/${slug}`;
   const basePath = 'blog';
+
+  const bannerSrc = Array.isArray(images) ? images[0] : images;
 
   return (
     <SectionContainer>
@@ -66,6 +68,17 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
               </div>
             </div>
           </header>
+          {bannerSrc && (
+            <div className="w-full overflow-hidden">
+              <Image
+                src={bannerSrc}
+                alt={title}
+                width={1200}
+                height={675}
+                className="w-full object-cover"
+              />
+            </div>
+          )}
           <div className="grid-rows-[auto_1fr] divide-y divide-v-border pb-xxl dark:divide-v-border-dark xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
             <dl className="pb-xxxl pt-xl xl:border-b xl:border-v-border xl:pt-11 xl:dark:border-v-border-dark">
               <dt className="sr-only">Authors</dt>

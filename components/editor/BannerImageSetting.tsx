@@ -7,7 +7,6 @@ import { useAuth } from '@/lib/auth/AuthContext';
 export interface BannerImageSettingProps {
   imageUrl: string;
   slug: string;
-  isPostBanner: boolean;
   onImageChange: (url: string) => void;
 }
 
@@ -19,7 +18,6 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 export default function BannerImageSetting({
   imageUrl,
   slug,
-  isPostBanner,
   onImageChange,
 }: BannerImageSettingProps) {
   const { user } = useAuth();
@@ -162,11 +160,7 @@ export default function BannerImageSetting({
 
   return (
     <div
-      className={`space-y-3 rounded-lg border p-3 transition-all ${
-        isPostBanner
-          ? 'border-blue-300 bg-blue-50/50 dark:border-blue-700 dark:bg-blue-950/30'
-          : 'border-gray-200 dark:border-gray-700'
-      }`}
+      className="space-y-3 rounded-lg border border-blue-300 bg-blue-50/50 p-3 transition-all dark:border-blue-700 dark:bg-blue-950/30"
     >
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
         배너 이미지
