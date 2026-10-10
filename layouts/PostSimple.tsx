@@ -5,6 +5,7 @@ import CommentWidget from '@/components/comments/CommentWidget';
 import Link from '@/components/Link';
 import PageTitle from '@/components/PageTitle';
 import SectionContainer from '@/components/SectionContainer';
+import Image from '@/components/Image';
 import siteMetadata from '@/data/siteMetadata';
 import ScrollTopAndComment from '@/components/ScrollTopAndComment';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
@@ -17,8 +18,9 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, next, prev, children }: LayoutProps) {
-  const { slug, date, title, createdAt } = content;
+  const { slug, date, title, createdAt, images } = content;
   const displayDate = createdAt || date;
+  const bannerSrc = Array.isArray(images) ? images[0] : images;
 
   return (
     <SectionContainer>
@@ -42,6 +44,17 @@ export default function PostLayout({ content, next, prev, children }: LayoutProp
               </div>
             </div>
           </header>
+          {bannerSrc && (
+            <div className="w-full overflow-hidden">
+              <Image
+                src={bannerSrc}
+                alt={title}
+                width={1200}
+                height={675}
+                className="w-full object-cover"
+              />
+            </div>
+          )}
           <div className="grid-rows-[auto_1fr] divide-y divide-v-border pb-8 dark:divide-v-border-dark xl:divide-y-0">
             <div className="divide-y divide-v-border dark:divide-v-border-dark xl:col-span-3 xl:row-span-2 xl:pb-0">
               <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">{children}</div>

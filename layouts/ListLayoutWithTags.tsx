@@ -7,6 +7,7 @@ import { CoreContent } from '@/lib/types';
 import type { Post as Blog } from '@/lib/types';
 import Link from '@/components/Link';
 import Tag from '@/components/Tag';
+import Image from '@/components/Image';
 import siteMetadata from '@/data/siteMetadata';
 
 const POSTS_PER_PAGE = 10;
@@ -101,43 +102,57 @@ export default function ListLayoutWithTags({
         ) : (
           <ul className="flex flex-col gap-4">
             {displayPosts.map((post, i) => {
-              const { slug, date, title, summary, tags, createdAt, category } = post;
+              const { slug, date, title, summary, tags, createdAt, category, images } = post;
               const displayDate = createdAt || date;
               const path = `blog/${category || 'dev'}/${slug}`;
+              const thumbSrc = Array.isArray(images) ? images[0] : images;
               return (
                 <li key={slug}>
                   <Link
                     href={`/${path}`}
-                    className="group block rounded-xl bg-white p-6 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark sm:p-7"
+                    className="group block overflow-hidden rounded-xl bg-white shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
                   >
-                    <div className="flex items-center justify-between gap-4">
-                      <span
-                        className={`text-[11px] font-medium uppercase tracking-[0.1em] ${tagColor(i)}`}
-                      >
-                        {category || 'dev'}
-                      </span>
-                      <time
-                        dateTime={displayDate}
-                        className="shrink-0 font-mono text-xs text-ink-4"
-                      >
-                        {formatDate(displayDate, siteMetadata.locale)}
-                      </time>
-                    </div>
-                    <h2 className="mt-3 text-xl font-semibold leading-snug tracking-[-0.02em] transition-colors group-hover:text-accent sm:text-2xl">
-                      {title}
-                    </h2>
-                    {summary && (
-                      <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-ink-2 dark:text-gray-400">
-                        {summary}
-                      </p>
-                    )}
-                    {tags && tags.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-1.5">
-                        {tags.map((tag) => (
-                          <Tag key={tag} text={tag} />
-                        ))}
+                    {thumbSrc && (
+                      <div className="aspect-[16/9] w-full overflow-hidden">
+                        <Image
+                          src={thumbSrc}
+                          alt={title}
+                          width={800}
+                          height={450}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                        />
                       </div>
                     )}
+                    <div className="p-6 sm:p-7">
+                      <div className="flex items-center justify-between gap-4">
+                        <span
+                          className={`text-[11px] font-medium uppercase tracking-[0.1em] ${tagColor(i)}`}
+                        >
+                          {category || 'dev'}
+                        </span>
+                        <time
+                          dateTime={displayDate}
+                          className="shrink-0 font-mono text-xs text-ink-4"
+                        >
+                          {formatDate(displayDate, siteMetadata.locale)}
+                        </time>
+                      </div>
+                      <h2 className="mt-3 text-xl font-semibold leading-snug tracking-[-0.02em] transition-colors group-hover:text-accent sm:text-2xl">
+                        {title}
+                      </h2>
+                      {summary && (
+                        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-ink-2 dark:text-gray-400">
+                          {summary}
+                        </p>
+                      )}
+                      {tags && tags.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-1.5">
+                          {tags.map((tag) => (
+                            <Tag key={tag} text={tag} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </Link>
                 </li>
               );

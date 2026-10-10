@@ -26,10 +26,11 @@ interface LayoutProps {
 }
 
 export default function PostModern({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { slug, date, title, tags, readingTime, createdAt } = content;
+  const { slug, date, title, tags, readingTime, createdAt, images } = content;
   const displayDate = createdAt || date;
   const path = `blog/${slug}`;
   const basePath = 'blog';
+  const bannerSrc = Array.isArray(images) ? images[0] : images;
 
   return (
     <SectionContainer>
@@ -53,6 +54,18 @@ export default function PostModern({ content, authorDetails, next, prev, childre
               </div>
             </div>
           </header>
+
+          {bannerSrc && (
+            <div className="w-full overflow-hidden">
+              <Image
+                src={bannerSrc}
+                alt={title}
+                width={1200}
+                height={675}
+                className="w-full object-cover"
+              />
+            </div>
+          )}
 
           {/* Content */}
           <div className="grid-rows-[auto_1fr] divide-y divide-v-border pb-8 dark:divide-v-border-dark xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
