@@ -4,15 +4,28 @@ import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from '@/components/Link';
 import Tag from '@/components/Tag';
+import Image from '@/components/Image';
 import { Post } from '@/lib/types';
 import { Search, X, Calendar } from 'lucide-react';
 
 interface SearchResult extends Omit<Post, 'content'> {}
 
 function PostCard({ post }: { post: SearchResult }) {
+  const thumbSrc = Array.isArray(post.images) ? post.images[0] : post.images;
   return (
-    <article className="group rounded-xl bg-white p-6 shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark">
-      <div className="flex flex-col gap-2">
+    <article className="group overflow-hidden rounded-xl bg-white shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark">
+      {thumbSrc && (
+        <div className="aspect-[16/9] w-full overflow-hidden">
+          <Image
+            src={thumbSrc}
+            alt={post.title}
+            width={800}
+            height={450}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+        </div>
+      )}
+      <div className="flex flex-col gap-2 p-6">
         <div className="flex items-center gap-2 font-mono text-xs text-ink-4">
           <Calendar className="h-3 w-3" />
           <time dateTime={post.date}>

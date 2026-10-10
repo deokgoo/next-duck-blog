@@ -152,25 +152,38 @@ export default function Main({ posts, locale, description }: MainProps) {
               <Reveal className="lg:col-span-3" y={20}>
                 <Link
                   href={postHref(featured)}
-                  className="group relative block h-full rounded-xl bg-white p-7 shadow-v-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card dark:bg-transparent dark:shadow-v-card-dark lg:col-span-3"
+                  className="group relative block h-full overflow-hidden rounded-xl bg-white shadow-v-card transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card dark:bg-transparent dark:shadow-v-card-dark lg:col-span-3"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-accent">
-                      {categoriesData[featured.category || 'dev']?.title || 'Development'}
-                    </span>
-                    <span className="font-mono text-xs text-ink-4 opacity-0 transition-opacity group-hover:opacity-100">
-                      Read article →
-                    </span>
-                  </div>
-                  <h3 className="mt-3 text-2xl font-semibold leading-snug tracking-[-0.02em] transition-colors group-hover:text-accent">
-                    {featured.title}
-                  </h3>
-                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-ink-2 dark:text-gray-400">
-                    {featured.summary}
-                  </p>
-                  <div className="mt-5 font-mono text-xs text-ink-4">
-                    {formatDate(featured.createdAt || featured.date, locale)}
-                    {featured.readingTime ? ` · ${featured.readingTime.minutes} min` : ''}
+                  {Array.isArray(featured.images) && featured.images[0] ? (
+                    <div className="aspect-[16/9] w-full overflow-hidden">
+                      <NextImage
+                        src={featured.images[0]}
+                        alt={featured.title}
+                        width={800}
+                        height={450}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                      />
+                    </div>
+                  ) : null}
+                  <div className="p-7">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-accent">
+                        {categoriesData[featured.category || 'dev']?.title || 'Development'}
+                      </span>
+                      <span className="font-mono text-xs text-ink-4 opacity-0 transition-opacity group-hover:opacity-100">
+                        Read article →
+                      </span>
+                    </div>
+                    <h3 className="mt-3 text-2xl font-semibold leading-snug tracking-[-0.02em] transition-colors group-hover:text-accent">
+                      {featured.title}
+                    </h3>
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-ink-2 dark:text-gray-400">
+                      {featured.summary}
+                    </p>
+                    <div className="mt-5 font-mono text-xs text-ink-4">
+                      {formatDate(featured.createdAt || featured.date, locale)}
+                      {featured.readingTime ? ` · ${featured.readingTime.minutes} min` : ''}
+                    </div>
                   </div>
                 </Link>
               </Reveal>
@@ -178,26 +191,42 @@ export default function Main({ posts, locale, description }: MainProps) {
 
             {/* List */}
             <div className="flex flex-col gap-3 lg:col-span-2">
-              {recentList.map((p, i) => (
-                <Reveal key={p.slug} delay={80 + i * 80} y={16}>
-                  <Link
-                    href={postHref(p)}
-                    className="group block rounded-lg bg-white p-5 shadow-v-border transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
-                  >
-                    <span
-                      className={`text-[10.5px] font-medium uppercase tracking-[0.1em] ${tagColor(i)}`}
+              {recentList.map((p, i) => {
+                const thumbSrc = Array.isArray(p.images) ? p.images[0] : p.images;
+                return (
+                  <Reveal key={p.slug} delay={80 + i * 80} y={16}>
+                    <Link
+                      href={postHref(p)}
+                      className="group block overflow-hidden rounded-lg bg-white shadow-v-border transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
                     >
-                      {categoriesData[p.category || 'dev']?.title || 'Development'}
-                    </span>
-                    <h3 className="mt-2 line-clamp-2 text-[15px] font-medium leading-snug tracking-[-0.01em] transition-colors group-hover:text-accent">
-                      {p.title}
-                    </h3>
-                    <div className="mt-3 font-mono text-[11px] text-ink-4">
-                      {formatDate(p.createdAt || p.date, locale)}
-                    </div>
-                  </Link>
-                </Reveal>
-              ))}
+                      {thumbSrc ? (
+                        <div className="aspect-[16/9] w-full overflow-hidden">
+                          <NextImage
+                            src={thumbSrc}
+                            alt={p.title}
+                            width={400}
+                            height={225}
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                          />
+                        </div>
+                      ) : null}
+                      <div className="p-5">
+                        <span
+                          className={`text-[10.5px] font-medium uppercase tracking-[0.1em] ${tagColor(i)}`}
+                        >
+                          {categoriesData[p.category || 'dev']?.title || 'Development'}
+                        </span>
+                        <h3 className="mt-2 line-clamp-2 text-[15px] font-medium leading-snug tracking-[-0.01em] transition-colors group-hover:text-accent">
+                          {p.title}
+                        </h3>
+                        <div className="mt-3 font-mono text-[11px] text-ink-4">
+                          {formatDate(p.createdAt || p.date, locale)}
+                        </div>
+                      </div>
+                    </Link>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
         )}
