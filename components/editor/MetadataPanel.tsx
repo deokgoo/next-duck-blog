@@ -60,7 +60,6 @@ export default function MetadataPanel({
   }, [user]);
 
   const bannerImageUrl = metadata.images?.[0] || '';
-  const isPostBanner = metadata.layout === 'PostBanner';
 
   const handleBannerImageChange = (url: string) => {
     const newImages = url
@@ -339,14 +338,13 @@ export default function MetadataPanel({
           <BannerImageSetting
             imageUrl={bannerImageUrl}
             slug={metadata.slug || ''}
-            isPostBanner={isPostBanner}
             onImageChange={handleBannerImageChange}
           />
 
-          {/* PostBanner 선택 + 배너 이미지 미설정 시 안내 메시지 */}
-          {isPostBanner && !bannerImageUrl && (
+          {/* 배너 이미지 미설정 시 안내 메시지 (모든 레이아웃에 배너 표시) */}
+          {!bannerImageUrl && (
             <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-              PostBanner 레이아웃을 선택하셨습니다. 배너 이미지를 설정하면 포스트 상단에 표시됩니다.
+              배너 이미지를 설정하면 포스트 상단에 표시됩니다.
             </div>
           )}
 
