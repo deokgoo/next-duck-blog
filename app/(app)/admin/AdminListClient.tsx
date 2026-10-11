@@ -21,11 +21,8 @@ export default function AdminListClient() {
   const isHandlingDelete = useRef(false);
   const instanceId = useRef(Math.random().toString(36).substring(7));
 
-  // Engagement stats
-  const [engagementStats, setEngagementStats] = useState<Record<string, { baseLikes: number; likes: number; total: number }>>({});
-  const [editingBaseLikes, setEditingBaseLikes] = useState<string | null>(null);
-  const [baseLikesInput, setBaseLikesInput] = useState('');
-  const [savingBaseLikes, setSavingBaseLikes] = useState(false);
+  // Engagement stats (read-only)
+  const [engagementStats, setEngagementStats] = useState<Record<string, { likes: number }>>({});
 
   useEffect(() => {
     setMounted(true);
@@ -63,11 +60,8 @@ export default function AdminListClient() {
     if (!user || posts.length === 0) return;
     const fetchEngagement = async () => {
       try {
-        const token = await user.getIdToken();
         const slugs = posts.map((p) => p.slug).join(',');
-        const res = await fetch(`/api/engagement/admin/stats?slugs=${encodeURIComponent(slugs)}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(`/api/engagement/stats?slugs=${encodeURIComponent(slugs)}`);
         if (res.ok) {
           const data = await res.json();
           setEngagementStats(data.stats || {});
@@ -78,40 +72,6 @@ export default function AdminListClient() {
     };
     fetchEngagement();
   }, [user, posts]);
-
-  const handleSaveBaseLikes = async (slug: string) => {
-    if (!user) return;
-    const value = parseInt(baseLikesInput, 10);
-    if (isNaN(value) || value < 0) return;
-
-    setSavingBaseLikes(true);
-    try {
-      const token = await user.getIdToken();
-      const res = await fetch('/api/engagement/admin/base-likes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ slug, baseLikes: value }),
-      });
-      if (res.ok) {
-        setEngagementStats((prev) => ({
-          ...prev,
-          [slug]: {
-            baseLikes: value,
-            likes: prev[slug]?.likes ?? 0,
-            total: value + (prev[slug]?.likes ?? 0),
-          },
-        }));
-        setEditingBaseLikes(null);
-      }
-    } catch (error) {
-      console.error('Error saving baseLikes:', error);
-    } finally {
-      setSavingBaseLikes(false);
-    }
-  };
 
   const openDeleteModal = (e: React.MouseEvent, slug: string) => {
     e.preventDefault();
@@ -367,52 +327,9 @@ export default function AdminListClient() {
                     </div>
                   </td>
                   <td className="px-6 py-5 whitespace-nowrap">
-                    {editingBaseLikes === post.slug ? (
-                      <div className="flex items-center gap-1">
-                        <input
-                          type="number"
-                          min="0"
-                          value={baseLikesInput}
-                          onChange={(e) => setBaseLikesInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleSaveBaseLikes(post.slug);
-                            if (e.key === 'Escape') setEditingBaseLikes(null);
-                          }}
-                          className="w-16 rounded border border-gray-300 px-1.5 py-0.5 text-xs dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
-                          autoFocus
-                          disabled={savingBaseLikes}
-                        />
-                        <button
-                          onClick={() => handleSaveBaseLikes(post.slug)}
-                          disabled={savingBaseLikes}
-                          className="text-[10px] font-bold text-green-600 hover:text-green-700 dark:text-green-400"
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={() => setEditingBaseLikes(null)}
-                          className="text-[10px] font-bold text-gray-400 hover:text-gray-600"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setEditingBaseLikes(post.slug);
-                          setBaseLikesInput(String(engagementStats[post.slug]?.baseLikes ?? 0));
-                        }}
-                        className="group/likes flex flex-col items-start gap-0.5 hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1.5 py-0.5 -mx-1.5 transition-colors"
-                        title="클릭하여 기본 좋아요 수 편집"
-                      >
-                        <span className="text-sm font-bold text-pink-500">
-                          ♥ {engagementStats[post.slug]?.total ?? 0}
-                        </span>
-                        <span className="text-[10px] text-gray-400 group-hover/likes:text-gray-600 dark:group-hover/likes:text-gray-300">
-                          base: {engagementStats[post.slug]?.baseLikes ?? 0} + real: {engagementStats[post.slug]?.likes ?? 0}
-                        </span>
-                      </button>
-                    )}
+                    <span className="text-sm font-bold text-pink-500">
+                      ♥ {engagementStats[post.slug]?.likes ?? 0}
+                    </span>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-wrap gap-1.5">
