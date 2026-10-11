@@ -42,7 +42,6 @@ export async function incrementLikes(slug: string): Promise<number> {
  * 여러 포스트의 engagement 통계를 배치로 조회한다.
  * Firestore getAll()을 사용하여 한 번의 호출로 다수 문서를 읽는다.
  * 존재하지 않는 문서는 { likes: 0 }을 기본값으로 반환한다.
- * baseLikes(어드민 설정 기본값) + likes(실제 사용자 좋아요)를 합산하여 반환한다.
  */
 export async function getEngagementStats(
   slugs: string[]
@@ -60,33 +59,14 @@ export async function getEngagementStats(
     const snapshot = snapshots[i]
     if (snapshot.exists) {
       const data = snapshot.data()
-      const baseLikes = data?.baseLikes ?? 0
       const likes = data?.likes ?? 0
-      result[slugs[i]] = { likes: baseLikes + likes }
+      result[slugs[i]] = { likes }
     } else {
       result[slugs[i]] = { likes: 0 }
     }
   }
 
   return result
-}
-
-// ── Admin: baseLikes 설정 ──
-
-/**
- * 포스트의 baseLikes(기본 좋아요 수)를 설정한다.
- * 이 값은 실제 사용자 좋아요(likes)와 합산되어 표시된다.
- */
-export async function setBaseLikes(slug: string, baseLikes: number): Promise<void> {
-  const docRef = db.collection('post-engagement').doc(slug)
-
-  await docRef.set(
-    {
-      baseLikes,
-      updatedAt: FieldValue.serverTimestamp(),
-    },
-    { merge: true }
-  )
 }
 
 // ── Rate Limiting ──
