@@ -10,6 +10,7 @@ import {
   isPostPublishedAndReady,
 } from '@/lib/firestore';
 import { sortPosts, coreContent, allAuthors } from '@/lib/types';
+import { getRelatedPosts } from '@/lib/related';
 import type { Authors } from '@/lib/types';
 import PostSimple from '@/layouts/PostSimple';
 import PostLayout from '@/layouts/PostLayout';
@@ -184,6 +185,10 @@ export default async function Page(props: {
   );
   const mainContent = coreContent(post);
 
+  // 관련 포스트: 전체 발행 포스트에서 카테고리/태그 기반 매칭
+  const allPublished = (await getAllPosts()).filter(isPostPublishedAndReady);
+  const relatedPosts = getRelatedPosts(post, allPublished, 3);
+
   const postUrl = `${siteMetadata.siteUrl}/blog/${category}/${slug}`;
 
   const ogImageUrl = (() => {
@@ -249,7 +254,7 @@ export default async function Page(props: {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Layout content={mainContent} authorDetails={authorDetails} next={next} prev={prev}>
+      <Layout content={mainContent} authorDetails={authorDetails} next={next} prev={prev} relatedPosts={relatedPosts}>
         <MDXRemote
           source={post.content}
           components={components}

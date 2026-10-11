@@ -15,6 +15,7 @@ interface LayoutProps {
   children: ReactNode;
   next?: { path: string; title: string };
   prev?: { path: string; title: string };
+  relatedPosts?: Blog[];
 }
 
 export default function PostLayout({ content, next, prev, children }: LayoutProps) {
@@ -47,6 +48,7 @@ export default function PostLayout({ content, next, prev, children }: LayoutProp
           {bannerSrc && (
             <div className="w-full overflow-hidden">
               <Image
+                bare
                 src={bannerSrc}
                 alt={title}
                 width={1200}

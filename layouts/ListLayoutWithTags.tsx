@@ -113,8 +113,9 @@ export default function ListLayoutWithTags({
                     className="group block overflow-hidden rounded-xl bg-white shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
                   >
                     {thumbSrc && (
-                      <div className="aspect-[16/9] w-full overflow-hidden">
+                      <div className="aspect-[16/9] max-h-[320px] w-full overflow-hidden">
                         <Image
+                          bare
                           src={thumbSrc}
                           alt={title}
                           width={800}
