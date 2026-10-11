@@ -12,6 +12,7 @@ import AdComponentDisplay from '@/components/AdComponentDisplay';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
 import PostEngagement from '@/components/engagement/PostEngagement';
 import PostHeaderEngagement from '@/components/engagement/PostHeaderEngagement';
+import RelatedPosts from '@/components/RelatedPosts';
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`;
 const discussUrl = (path) =>
@@ -29,10 +30,11 @@ interface LayoutProps {
   authorDetails: CoreContent<Authors>[];
   next?: { path: string; title: string };
   prev?: { path: string; title: string };
+  relatedPosts?: Blog[];
   children: ReactNode;
 }
 
-export default function PostLayout({ content, authorDetails, next, prev, children }: LayoutProps) {
+export default function PostLayout({ content, authorDetails, next, prev, relatedPosts, children }: LayoutProps) {
   const { slug, date, title, tags, createdAt, images } = content;
   const displayDate = createdAt || date;
   const path = `blog/${slug}`;
@@ -71,6 +73,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
           {bannerSrc && (
             <div className="w-full overflow-hidden">
               <Image
+                bare
                 src={bannerSrc}
                 alt={title}
                 width={1200}
@@ -122,6 +125,11 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
               <div className="flex justify-center py-8">
                 <PostEngagement slug={slug} />
               </div>
+              {relatedPosts && relatedPosts.length > 0 && (
+                <div className="pb-8 pt-4">
+                  <RelatedPosts posts={relatedPosts} />
+                </div>
+              )}
               <AdComponentDisplay />
               <div
                 className="pb-xl pt-xl text-ink-2 dark:text-gray-400"

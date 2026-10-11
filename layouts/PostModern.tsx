@@ -22,6 +22,7 @@ interface LayoutProps {
   authorDetails: CoreContent<Authors>[];
   next?: { path: string; title: string };
   prev?: { path: string; title: string };
+  relatedPosts?: Blog[];
   children: ReactNode;
 }
 
