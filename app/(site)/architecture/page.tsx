@@ -68,6 +68,16 @@ function Card({
   );
 }
 
+/** 섹션 하단의 "왜 이렇게 했는가" 설명 블록 */
+function WhyNote({ children }: { children: ReactNode }) {
+  return (
+    <div className="mt-6 rounded-xl border-l-2 border-accent bg-accent/[0.04] px-5 py-4 dark:bg-accent/[0.06]">
+      <div className="mb-1.5 font-mono text-[11px] font-medium tracking-tight text-accent">WHY</div>
+      <p className="text-[13px] leading-relaxed text-ink-2 dark:text-gray-400">{children}</p>
+    </div>
+  );
+}
+
 function Table({ head, rows }: { head: string[]; rows: (string | ReactNode)[][] }) {
   return (
     <div className="overflow-x-auto rounded-xl shadow-v-card dark:shadow-v-card-dark">
@@ -156,6 +166,30 @@ function ArchitectureDiagram() {
 }
 
 /* ─────────────────────────────────────────────────────────────
+ * 문서 링크 (레포지토리 docs/ 폴더)
+ * ───────────────────────────────────────────────────────────── */
+
+const DOCS_BASE = 'https://github.com/deokgoo/next-duck-blog/blob/main/docs';
+
+const docs = [
+  {
+    title: '캐싱 전략',
+    file: 'caching-strategy.md',
+    desc: '페이지별 캐싱 매트릭스, CRUD 무효화 매트릭스, cache tag 매핑표, use cache 마이그레이션 가이드',
+  },
+  {
+    title: 'SEO 구성',
+    file: 'SEO.md',
+    desc: '타이틀·lang·canonical·hreflang·sitemap·IndexNow·JSON-LD — SEO 오딧 반영 최종 구성과 운영 체크리스트',
+  },
+  {
+    title: '어드민 구성',
+    file: 'admin.md',
+    desc: '2중 접근 제어, 페이지 구성, API 맵, 글 저장 시 데이터 흐름',
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────
  * 페이지
  * ───────────────────────────────────────────────────────────── */
 
@@ -178,8 +212,8 @@ export default function ArchitecturePage() {
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base text-ink-2 dark:text-gray-400 animate-fade-in-up [animation-delay:200ms] md:text-lg">
             Duck Blog는 Next.js 16 + Vercel + Firebase로 구축된 개인 블로그입니다.
-            캐싱, SEO, 보안, 분석, 광고, 콘텐츠 관리까지 — 각 레이어가 왜 이렇게 설계되었는지
-            이 페이지에서 정리했습니다.
+            각 선택은 "최신이라서"가 아니라, 이 블로그의 워크로드에서
+            어떤 이득을 얻는지 알고 고른 것입니다.
           </p>
         </div>
       </section>
@@ -199,6 +233,13 @@ export default function ArchitecturePage() {
             <Card mono="Rendering" title="next-mdx-remote" desc="MDX + GFM + KaTeX + Prism. 수학 공식과 코드 하이라이팅을 지원합니다." />
             <Card mono="Deploy" title="Vercel" desc="main 브랜치 push 시 자동 배포. Edge 네트워크에서 정적 서빙." />
           </div>
+          <WhyNote>
+            블로그는 읽기 집중 워크로드입니다. 그래서 RDBMS 대신 Firestore(운영 부담 0,
+            서버리스와 궁합이 좋음), 정적 생성 대신 MDX(코드·수학 공식 지원),
+            별도 CMS 대신 Firestore 문서(배포 없이 발행)를 골랐습니다.
+            Next.js 16의 Server Components는 Firestore SDK를 클라이언트 번들에서
+            제외시켜 포스트 페이지 JS 크기를 줄여줍니다.
+          </WhyNote>
         </Section>
 
         {/* 02 — 아키텍처 */}
@@ -208,6 +249,12 @@ export default function ArchitecturePage() {
           lead="브라우저 요청이 Edge에서 콘텐츠까지 거쳐 다시 돌아오는 경로입니다. 대부분 요청은 캐시에서 바로 응답됩니다."
         >
           <ArchitectureDiagram />
+          <WhyNote>
+            이 블로그의 트래픽은 "한 번 발행된 글을 수백 번 읽는" 패턴입니다.
+            그래서 2번째 요청부터는 Vercel Edge에서 정적 HTML을 바로 서빙하고,
+            서버리스 함수는 빌드 시와 무효화 시에만 실행됩니다.
+            결과적으로 읽기 요청의 서버 비용이 사실상 0에 가깝습니다.
+          </WhyNote>
         </Section>
 
         {/* 03 — 캐싱 */}
@@ -232,10 +279,14 @@ export default function ArchitecturePage() {
               ]}
             />
           </div>
-          <p className="mt-4 text-[12px] leading-relaxed text-ink-3 dark:text-gray-500">
-            모든 무효화는 fire-and-forget(try/catch)이라 재검증 실패가 CRUD 응답을 막지 않습니다.
-            전체 매트릭스는 docs/caching-strategy.md에 있습니다.
-          </p>
+          <WhyNote>
+            왜 3계층인가 — 각 계층이 다른 문제를 해결합니다. Request Cache는
+            포스트 페이지가 같은 데이터를 3번 조회해도 Firestore는 1번만 호출되게 하고,
+            Data Cache는 Firestore SDK가 Next.js fetch 캐시의 대상이 아니라는 한계를
+            메우며, Route Cache는 렌더링 자체를 없앱니다.
+            TTL 기반 재검증을 버린 이유: 불필요한 Firestore 호출을 유발하고,
+            변경 직후에도 TTL까지 지연되기 때문입니다. "변경 시에만"이 이 워크로드에서 정확합니다.
+          </WhyNote>
         </Section>
 
         {/* 04 — SEO */}
@@ -252,9 +303,12 @@ export default function ArchitecturePage() {
             <Card mono="JSON-LD" title="구조화 데이터" desc="포스트: BlogPosting + BreadcrumbList, 홈: Organization. script 태그로 렌더링합니다." />
             <Card mono="IndexNow" title="실시간 인덱싱" desc="포스트 저장/상태 변경 시 IndexNow에 URL을 제출해 검색 반영을 앞당깁니다." />
           </div>
-          <p className="mt-4 text-[12px] leading-relaxed text-ink-3 dark:text-gray-500">
-            RSS(feed.xml), robots.txt, GSC/Naver 검증, OG Image 폴백까지 — 전체 구성은 docs/SEO.md에 문서화되어 있습니다.
-          </p>
+          <WhyNote>
+            오딧 전에는 root layout이 모든 페이지에 한국어 서픽스를 붙이고,
+            /en·/jp에도 lang="ko-KR"을 내는 치명적 문제가 있었습니다.
+            페이지별 위임(self canonical, 로케일별 lang)으로 정리했고,
+            IndexNow로 Bing 인덱싱 대기 시간을 수 주에서 수 분으로 줄였습니다.
+          </WhyNote>
         </Section>
 
         {/* 05 — 호스팅 & 보안 */}
@@ -274,9 +328,11 @@ export default function ArchitecturePage() {
               ['Permissions-Policy', '불필요한 브라우저 기능 비활성', '표면 축소'],
             ]}
           />
-          <p className="mt-4 text-[12px] leading-relaxed text-ink-3 dark:text-gray-500">
-            ads.txt는 빌드 시 env에서 자동 생성되고, GSC HTML 검증 파일과 IndexNow 키 파일은 rewrite로 API 라우트에 연결됩니다.
-          </p>
+          <WhyNote>
+            개인 블로그도 XSS·클릭재킹 표적이 될 수 있습니다. Edge에서 헤더를
+            일괄 적용하면 개별 페이지에서 누락될 일이 없고, CSP allowlist는
+            광고·트래킹 스크립트만 정확히 허용해 공격 표면을 최소화합니다.
+          </WhyNote>
         </Section>
 
         {/* 06 — 분석 & 광고 */}
@@ -289,6 +345,11 @@ export default function ArchitecturePage() {
             <Card mono="Analytics" title="Google Analytics" desc="gtag.js를 lazyOnload로 로드해 렌더링 블로킹을 방지합니다. logEvent() 헬퍼로 이벤트를 추적합니다." />
             <Card mono="Ads" title="Google AdSense" desc="디스플레이(6079435296) + 인아티클(4907054773) 슬롯. 1초 지연 push로 AdBlocker 대응, CSP에 광고 도메인만 허용합니다." />
           </div>
+          <WhyNote>
+            광고 스크립트는 LCP를 망가뜨리는 주범입니다. lazyOnload + 지연 push로
+            핵심 콘텐츠 렌더링이 끝난 뒤에 로드되도록 했고, env가 없으면
+            스크립트 자체가 삽입되지 않아 개발·미설정 환경에서 제로 오버헤드입니다.
+          </WhyNote>
         </Section>
 
         {/* 07 — 콘텐츠 관리 */}
@@ -305,6 +366,12 @@ export default function ArchitecturePage() {
             <Card mono="Engagement" title="좋아요" desc="post-engagement 컬렉션, FieldValue.increment으로 원자적 증가." />
             <Card mono="Tests" title="vitest" desc="rateLimit, comments, engagement, 캐싱, 문서 구조 — property 테스트 포함." />
           </div>
+          <WhyNote>
+            콘텐츠와 코드를 분리하면 글 한 편을 발행할 때마다 배포(빌드·캐시 무효화
+            대기)를 할 필요가 없습니다. 저장 API가 Firestore에 쓰고 revalidation을
+            트리거하는 순간 모든 캐시가 갱신됩니다. 화이트리스트는 클라이언트에
+            노출되므로 실제 방어는 서버 토큰 검증이 담당합니다.
+          </WhyNote>
         </Section>
 
         {/* 08 — i18n */}
@@ -322,6 +389,11 @@ export default function ArchitecturePage() {
               ['Projects', '✓', '—', '—', 'ko 전용'],
             ]}
           />
+          <WhyNote>
+            쿼리 파라미터(?lang=en) 대신 /en·/jp 라우트를 쓰는 이유: 각 언어가
+            독립 URL을 가지면 검색엔진이 각각 인덱싱하고 hreflang 관리가 명확해집니다.
+            번역이 없는 포스트는 해당 언어에서 숨겨져, 반쪽짜리 페이지가 노출되지 않습니다.
+          </WhyNote>
         </Section>
 
         {/* 09 — 사이트 구조 */}
@@ -342,30 +414,38 @@ export default function ArchitecturePage() {
               ['/admin/*', '콘텐츠 관리 (인증 필요)', 'Shell only'],
             ]}
           />
+          <WhyNote>
+            검색과 어드민만 force-dynamic(Shell only)입니다. 검색은 사용 패턴이
+            예측 불가능해 캐싱 대신 항상 최신 결과를 반환하고, 어드민은 인증이
+            필요한 동적 영역이라 정적 캐시를 쓰지 않습니다. 나머지는 전부 정적입니다.
+          </WhyNote>
         </Section>
 
-        {/* CTA */}
-        <section className="border-t border-v-border py-14 dark:border-v-border-dark md:py-20">
-          <Reveal>
-            <div className="rounded-xl bg-white p-8 text-center shadow-v-card dark:bg-white/[0.03] dark:shadow-v-card-dark md:p-10">
-              <h2 className="text-xl font-semibold tracking-[-0.02em] md:text-2xl">
-                더 깊은 내용은 레포지토리에서
-              </h2>
-              <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-2 dark:text-gray-400">
-                이 페이지는 요약본입니다. 캐싱 매트릭스, SEO 운영 체크리스트,
-                use cache 마이그레이션 가이드까지 — 전체 문서는
-                <a
-                  href="https://github.com/deokgoo/next-duck-blog"
-                  className="text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
-                >
-                  {' '}
-                  GitHub
-                </a>
-                의 docs/ 폴더에 있습니다.
-              </p>
-            </div>
-          </Reveal>
-        </section>
+        {/* 10 — 상세 문서 */}
+        <Section
+          no="10"
+          title="상세 문서"
+          lead="이 페이지는 요약본입니다. 각 영역의 전체 설계 문서는 레포지토리 docs/ 폴더에 있습니다."
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {docs.map((d) => (
+              <a
+                key={d.file}
+                href={`${DOCS_BASE}/${d.file}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group rounded-xl bg-white p-5 shadow-v-card transition-colors hover:bg-accent/[0.04] dark:bg-white/[0.03] dark:shadow-v-card-dark dark:hover:bg-accent/[0.06]"
+              >
+                <div className="font-mono text-[11px] font-medium tracking-tight text-accent">{d.file}</div>
+                <h3 className="mt-2 text-sm font-semibold text-ink group-hover:text-accent dark:text-gray-100">
+                  {d.title}
+                </h3>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-ink-2 dark:text-gray-400">{d.desc}</p>
+                <p className="mt-3 font-mono text-[11px] text-ink-3 dark:text-gray-500">GitHub에서 보기 →</p>
+              </a>
+            ))}
+          </div>
+        </Section>
       </div>
     </div>
   );
