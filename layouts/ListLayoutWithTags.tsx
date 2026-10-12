@@ -11,6 +11,7 @@ import Image from '@/components/Image';
 import siteMetadata from '@/data/siteMetadata';
 
 const POSTS_PER_PAGE = 10;
+const MAX_VISIBLE_TAGS = 8;
 
 interface ListLayoutProps {
   posts: CoreContent<Blog>[];
@@ -30,6 +31,11 @@ export default function ListLayoutWithTags({
   const tagCounts = tags;
   const tagKeys = Object.keys(tagCounts);
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a]);
+
+  // 태그가 많으면 상위 N개만 노출, 나머지는 접기
+  const [showAllTags, setShowAllTags] = useState(false);
+  const visibleTags = showAllTags ? sortedTags : sortedTags.slice(0, MAX_VISIBLE_TAGS);
+  const hiddenTagCount = sortedTags.length - MAX_VISIBLE_TAGS;
 
   // Infinite scroll state
   const [displayCount, setDisplayCount] = useState(POSTS_PER_PAGE);
@@ -79,8 +85,8 @@ export default function ListLayoutWithTags({
 
         {/* Tags — horizontal wrapping chips (mobile/PC 동일) */}
         {sortedTags.length > 0 && (
-          <div className="mb-10 flex flex-wrap gap-2">
-            {sortedTags.map((t) => {
+          <div className="mb-10 flex flex-wrap items-center gap-2">
+            {visibleTags.map((t) => {
               const tagHref = `/search?q=${encodeURIComponent(t)}`;
               return (
                 <Link
@@ -93,6 +99,15 @@ export default function ListLayoutWithTags({
                 </Link>
               );
             })}
+            {hiddenTagCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowAllTags((v) => !v)}
+                className="rounded-full px-3 py-1 text-xs font-medium text-ink-3 underline-offset-2 transition-colors hover:text-ink hover:underline dark:text-gray-500 dark:hover:text-gray-200"
+              >
+                {showAllTags ? '접기' : `+${hiddenTagCount} 더 보기`}
+              </button>
+            )}
           </div>
         )}
 
