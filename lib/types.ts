@@ -107,3 +107,25 @@ export const allAuthors: Authors[] = [
     body: { code: '' },
   },
 ];
+
+/**
+ * Post의 썸네일(첫 번째 이미지) URL을 반환합니다.
+ * images가 string이면 그 자체를, string[]이면 첫 번째 요소를 반환합니다.
+ * images가 없거나 유효하지 않으면 undefined를 반환합니다.
+ */
+export function getPostThumbnail(post: Post): string | undefined {
+  if (!post.images) return undefined;
+  
+  if (typeof post.images === 'string') {
+    return post.images.trim() || undefined;
+  }
+  
+  if (Array.isArray(post.images)) {
+    const firstImage = post.images[0];
+    if (firstImage && typeof firstImage === 'string') {
+      return firstImage.trim() || undefined;
+    }
+  }
+  
+  return undefined;
+}

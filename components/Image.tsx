@@ -64,7 +64,9 @@ const Image = ({ alt, src, bare, ...rest }: ImageComponentProps) => {
     }
   }, [currentSrc]);
 
-  const resolvedSrc = failed ? FALLBACK_IMAGE : currentSrc;
+  // src가 undefined, null, 또는 빈 문자열인 경우 즉시 폴백 이미지 사용
+  const isSrcValid = src && typeof src === 'string' && src.trim() !== '';
+  const resolvedSrc = !isSrcValid || failed ? FALLBACK_IMAGE : currentSrc;
 
   const imgElement =
     !rest.width && !rest.height && !rest.fill ? (
