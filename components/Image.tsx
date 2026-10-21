@@ -43,20 +43,23 @@ const Image = ({ alt, src, bare = true, ...rest }: ImageComponentProps) => {
   // NextImage는 src가 undefined일 때 렌더링하지 않거나 에러를 던질 수 있으므로
   const shouldUseFallbackImg = !isSrcValid || failed;
 
+  const { className: customClassName, ...otherProps } = rest;
+
   // 공통 클래스: 
   // 1. w-full: 부모 컨테이너를 가득 채우지만, max-w-full로 과도한 확장 방지
   // 2. object-cover: 이미지 비율을 유지하면서 컨테이너를 가득 채우도록 자름
   // 3. max-h-[400px]: MDX 콘텐츠 내에서 이미지가 너무 크게 표시되는 것을 방지
   // 4. cursor-pointer: 클릭 가능함을 나타내지만 돋보기 아이콘은 제거
-  const commonClasses = "w-full max-w-full max-h-[400px] object-cover cursor-pointer";
+  const defaultClasses = "w-full max-w-full max-h-[400px] object-cover cursor-pointer";
+  const finalClasses = customClassName ? `${defaultClasses} ${customClassName}` : defaultClasses;
 
   const imgElement = shouldUseFallbackImg ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       alt={alt}
       src={FALLBACK_IMAGE}
-      {...(rest as any)}
-      className={commonClasses}
+      {...(otherProps as any)}
+      className={finalClasses}
       // onClick={handleOpen} // 클릭 시 확대 기능 제거
     />
   ) : !rest.width && !rest.height && !rest.fill ? (
@@ -64,8 +67,8 @@ const Image = ({ alt, src, bare = true, ...rest }: ImageComponentProps) => {
     <img
       alt={alt}
       src={resolvedSrc as string}
-      {...(rest as any)}
-      className={commonClasses}
+      {...(otherProps as any)}
+      className={finalClasses}
       onError={handleError}
       // onClick={handleOpen} // 클릭 시 확대 기능 제거
     />
@@ -73,8 +76,8 @@ const Image = ({ alt, src, bare = true, ...rest }: ImageComponentProps) => {
     <NextImage
       alt={alt}
       src={resolvedSrc}
-      {...rest}
-      className={commonClasses}
+      {...otherProps}
+      className={finalClasses}
       onError={handleError}
       // onClick={handleOpen} // 클릭 시 확대 기능 제거
     />
