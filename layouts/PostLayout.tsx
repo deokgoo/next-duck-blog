@@ -72,31 +72,56 @@ export default function PostLayout({ content, authorDetails, next, prev, related
             <dl className="pb-xxxl pt-xl xl:border-b xl:border-v-border xl:pt-11 xl:dark:border-v-border-dark">
               <dt className="sr-only">Authors</dt>
               <dd>
-                <ul className="flex flex-wrap justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
+                <ul className="flex flex-wrap justify-center gap-6 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
                   {authorDetails.map((author) => (
-                    <li className="flex items-center space-x-2" key={author.name}>
+                    <li
+                      className="flex flex-col items-center text-center xl:items-start xl:text-left"
+                      key={author.name}
+                    >
                       {author.avatar && (
-                        <Image
-                          src={author.avatar}
-                          width={38}
-                          height={38}
-                          alt="avatar"
-                          className="h-10 w-10 rounded-full"
-                        />
+                        <div className="relative mb-3 h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-v-border shadow-subtle dark:ring-v-border-dark sm:h-20 sm:w-20">
+                          <Image
+                            src={author.avatar}
+                            width={80}
+                            height={80}
+                            alt={author.name}
+                            className="h-full w-full rounded-full object-cover"
+                          />
+                        </div>
                       )}
-                      <dl className="whitespace-nowrap text-sm font-medium leading-5">
+                      <dl className="whitespace-nowrap leading-5">
                         <dt className="sr-only">Name</dt>
-                        <dd className="text-gray-900 dark:text-gray-100">{author.name}</dd>
-                        <dt className="sr-only">Twitter</dt>
-                        <dd>
+                        <dd className="text-base font-semibold tracking-tight text-ink dark:text-gray-100">
+                          {author.name}
+                        </dd>
+                        {(author.occupation || author.company) && (
+                          <dd className="mt-1 text-xs text-ink-3 dark:text-gray-400">
+                            {[author.occupation, author.company].filter(Boolean).join(' · ')}
+                          </dd>
+                        )}
+                        <dt className="sr-only">Social links</dt>
+                        <dd className="mt-2 flex items-center justify-center gap-3 xl:justify-start">
                           {author.twitter && (
                             <Link
                               href={author.twitter}
-                              className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                              className="text-xs font-mono text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                              target="_blank"
+                              rel="noopener noreferrer"
                             >
                               {author.twitter
                                 .replace('https://twitter.com/', '@')
                                 .replace('https://x.com/', '@')}
+                            </Link>
+                          )}
+                          {author.github && (
+                            <Link
+                              href={author.github}
+                              className="text-xs font-mono text-ink-3 hover:text-ink dark:text-gray-400 dark:hover:text-gray-200"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label="GitHub"
+                            >
+                              GitHub
                             </Link>
                           )}
                         </dd>
