@@ -33,6 +33,16 @@ function fallbackAuthor(slug: string): Authors {
   };
 }
 
+// 데이터 매핑 시 images 필드가 없으면 빈 배열로 초기화하여 타입 안정성 확보
+function normalizePostData(data: any): Post {
+  const post = data as Post;
+  // images가 없거나 유효하지 않으면 빈 배열로 설정
+  if (!post.images || (Array.isArray(post.images) && post.images.length === 0) || (typeof post.images === 'string' && post.images.trim() === '')) {
+    post.images = [];
+  }
+  return post;
+}
+
 // Pattern: cache(unstable_cache(fn)) — non-parameterized
 // - React cache(): single render pass dedup
 // - unstable_cache(): cross-request caching with tag-based invalidation
@@ -46,7 +56,7 @@ export const getAllPosts = cache(
       try {
         const snapshot = await db.collection('posts').orderBy('date', 'desc').get();
         return snapshot.docs
-          .map((doc) => doc.data() as Post)
+          .map((doc) => normalizePostData(doc.data()))
           .filter((post) => post.status !== 'deleted');
       } catch (error) {
         console.error('Error fetching all posts:', error);
@@ -66,7 +76,7 @@ export const getPostBySlug = cache((slug: string) =>
       try {
         const snapshot = await db.collection('posts').where('slug', '==', slug).limit(1).get();
         if (snapshot.empty) return null;
-        const post = snapshot.docs[0].data() as Post;
+        const post = normalizePostData(snapshot.docs[0].data());
         return post.status === 'deleted' ? null : post;
       } catch (error) {
         console.error(`Error fetching post by slug "${slug}":`, error);

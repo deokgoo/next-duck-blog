@@ -123,10 +123,7 @@ export default function ListLayoutWithTags({
               const thumbSrc = Array.isArray(images) ? images[0] : images;
               return (
                 <li key={slug}>
-                  <Link
-                    href={`/${path}`}
-                    className="group block overflow-hidden rounded-xl bg-white shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark"
-                  >
+                  <article className="group relative block overflow-hidden rounded-xl bg-white shadow-v-border transition-shadow hover:shadow-v-card dark:bg-transparent dark:shadow-v-border-dark dark:hover:shadow-v-card-dark">
                     {thumbSrc && (
                       <div className="aspect-[16/9] max-h-[320px] w-full overflow-hidden">
                         <Image
@@ -154,7 +151,12 @@ export default function ListLayoutWithTags({
                         </time>
                       </div>
                       <h2 className="mt-3 text-xl font-semibold leading-snug tracking-[-0.02em] transition-colors group-hover:text-accent sm:text-2xl">
-                        {title}
+                        <Link
+                          href={`/${path}`}
+                          className="after:absolute after:inset-0 after:content-['']"
+                        >
+                          {title}
+                        </Link>
                       </h2>
                       {summary && (
                         <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-ink-2 dark:text-gray-400">
@@ -162,14 +164,14 @@ export default function ListLayoutWithTags({
                         </p>
                       )}
                       {tags && tags.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-1.5">
+                        <div className="relative z-10 mt-4 flex flex-wrap gap-1.5">
                           {tags.map((tag) => (
                             <Tag key={tag} text={tag} />
                           ))}
                         </div>
                       )}
                     </div>
-                  </Link>
+                  </article>
                 </li>
               );
             })}

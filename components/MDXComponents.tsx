@@ -20,6 +20,7 @@ import CodeComparison from './CodeComparison';
 import Mermaid from './Mermaid';
 import KoreanNewsletterForm from './KoreanNewsletterForm';
 import YouTube from './YouTube';
+import LightboxImage from './LightboxImage';
 
 const PreWithMermaid = (props) => {
   const { children, className, ...rest } = props;
@@ -43,7 +44,7 @@ const PreWithMermaid = (props) => {
 
 export const components: MDXComponents = {
   Image,
-  img: Image,
+  img: LightboxImage,
   DoubleImage,
   TOCInline,
   a: CustomLink,
