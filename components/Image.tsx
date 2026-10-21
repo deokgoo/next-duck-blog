@@ -5,45 +5,12 @@ import { useState, useCallback, useEffect } from 'react';
 
 const FALLBACK_IMAGE = '/static/images/logo.png';
 
-// ImageLightbox는 더 이상 사용하지 않음 (요청에 따라 클릭 시 확대 기능 제거)
-// function ImageLightbox({
-//   src,
-//   alt,
-//   onClose,
-// }: {
-//   src: string;
-//   alt: string;
-//   onClose: () => void;
-// }) {
-//   return (
-//     <div
-//       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-//       onClick={onClose}
-//     >
-//       <button
-//         onClick={onClose}
-//         className="absolute right-4 top-4 text-3xl text-white hover:text-gray-300"
-//         aria-label="닫기"
-//       >
-//         ✕
-//       </button>
-//       {/* eslint-disable-next-line @next/next/no-img-element */}
-//       <img
-//         src={src}
-//         alt={alt}
-//         className="max-h-[90vh] max-w-[90vw] rounded object-contain"
-//         onClick={(e) => e.stopPropagation()}
-//       />
-//     </div>
-//   );
-// }
-
 interface ImageComponentProps extends ImageProps {
   /** figure/figcaption 래퍼를 생략 (썸네일 등 레이아웃 제어용) */
   bare?: boolean;
 }
 
-const Image = ({ alt, src, bare, ...rest }: ImageComponentProps) => {
+const Image = ({ alt, src, bare = true, ...rest }: ImageComponentProps) => {
   // 클릭 시 확대 보기(Lightbox) 기능을 제거했으므로 isOpen 상태는 더 이상 필요 없음
   // const [isOpen, setIsOpen] = useState(false);
   
@@ -117,12 +84,13 @@ const Image = ({ alt, src, bare, ...rest }: ImageComponentProps) => {
       {bare ? (
         imgElement
       ) : alt ? (
-        <figure className="my-4 flex flex-col items-center">
+        // <figure> 대신 <div>를 사용하여 <p> 태그 안에서의 중첩 오류 방지
+        <div className="my-4 flex flex-col items-center">
           {imgElement}
           <figcaption className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">
             {alt}
           </figcaption>
-        </figure>
+        </div>
       ) : (
         imgElement
       )}
