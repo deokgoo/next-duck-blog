@@ -58,6 +58,7 @@ const Image = ({ alt, src, bare, ...rest }: ImageComponentProps) => {
   const handleClose = useCallback(() => setIsOpen(false), []);
 
   const handleError = useCallback(() => {
+    // 이미 폴백 이미지인 경우 제외하고, 에러 발생 시 폴백 이미지로 전환
     if (currentSrc !== FALLBACK_IMAGE) {
       setFailed(true);
       setCurrentSrc(FALLBACK_IMAGE);
