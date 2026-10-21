@@ -20,6 +20,7 @@ import CodeComparison from './CodeComparison';
 import Mermaid from './Mermaid';
 import KoreanNewsletterForm from './KoreanNewsletterForm';
 import YouTube from './YouTube';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const PreWithMermaid = (props) => {
   const { children, className, ...rest } = props;
@@ -41,9 +42,81 @@ const PreWithMermaid = (props) => {
   return <Pre {...props} />;
 };
 
+// Lightbox Component
+const Lightbox: React.FC<{ src: string; alt: string; onClose: () => void }> = ({ src, alt, onClose }) => {
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    // Prevent body scroll when lightbox is open
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [handleKeyDown]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-w-5xl max-h-[90vh] w-auto h-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+        />
+        <button
+          className="absolute -top-10 -right-2 text-white text-2xl hover:text-gray-300 transition-colors"
+          onClick={onClose}
+          aria-label="Close lightbox"
+        >
+          &times;
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Custom Image Component with Lightbox
+const LightboxImage: React.FC<React.ImgHTMLAttributes<HTMLImageElement>> = (props) => {
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const { src, alt, ...rest } = props;
+
+  if (!src) return null;
+
+  const handleClick = () => {
+    setIsLightboxOpen(true);
+  };
+
+  return (
+    <>
+      <img
+        {...rest}
+        src={src}
+        alt={alt}
+        className="cursor-zoom-in rounded-lg transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg"
+        onClick={handleClick}
+      />
+      {isLightboxOpen && <Lightbox src={src} alt={alt || ''} onClose={() => setIsLightboxOpen(false)} />}
+    </>
+  );
+};
+
 export const components: MDXComponents = {
   Image,
-  img: Image,
+  img: LightboxImage,
   DoubleImage,
   TOCInline,
   a: CustomLink,
