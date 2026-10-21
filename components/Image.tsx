@@ -68,27 +68,39 @@ const Image = ({ alt, src, bare, ...rest }: ImageComponentProps) => {
   const isSrcValid = src && typeof src === 'string' && src.trim() !== '';
   const resolvedSrc = !isSrcValid || failed ? FALLBACK_IMAGE : currentSrc;
 
-  const imgElement =
-    !rest.width && !rest.height && !rest.fill ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        alt={alt}
-        src={resolvedSrc as string}
-        {...(rest as any)}
-        className="cursor-zoom-in"
-        onClick={handleOpen}
-        onError={handleError}
-      />
-    ) : (
-      <NextImage
-        alt={alt}
-        src={resolvedSrc}
-        {...rest}
-        className="cursor-zoom-in"
-        onClick={handleOpen}
-        onError={handleError}
-      />
-    );
+  // src가 유효하지 않거나 실패한 경우, NextImage 대신 <img> 태그를 사용하여 폴백 이미지 렌더링
+  // NextImage는 src가 undefined일 때 렌더링하지 않거나 에러를 던질 수 있으므로
+  const shouldUseFallbackImg = !isSrcValid || failed;
+
+  const imgElement = shouldUseFallbackImg ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      alt={alt}
+      src={FALLBACK_IMAGE}
+      {...(rest as any)}
+      className="cursor-zoom-in"
+      onClick={handleOpen}
+    />
+  ) : !rest.width && !rest.height && !rest.fill ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      alt={alt}
+      src={resolvedSrc as string}
+      {...(rest as any)}
+      className="cursor-zoom-in"
+      onClick={handleOpen}
+      onError={handleError}
+    />
+  ) : (
+    <NextImage
+      alt={alt}
+      src={resolvedSrc}
+      {...rest}
+      className="cursor-zoom-in"
+      onClick={handleOpen}
+      onError={handleError}
+    />
+  );
 
   return (
     <>
