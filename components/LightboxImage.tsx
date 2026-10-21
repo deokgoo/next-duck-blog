@@ -69,7 +69,7 @@ export default function LightboxImage(props: React.ImgHTMLAttributes<HTMLImageEl
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const { src, alt, className, ...rest } = props;
 
-  if (!src) return null;
+  if (!src || typeof src !== 'string') return null;
 
   const handleClick = () => {
     setIsLightboxOpen(true);
