@@ -76,7 +76,7 @@ export default function LightboxImage(props: React.ImgHTMLAttributes<HTMLImageEl
   };
 
   const defaultClasses =
-    'cursor-zoom-in rounded-lg max-h-[450px] w-full max-w-full object-cover transition-transform duration-200 hover:scale-[1.01] hover:shadow-lg';
+    'cursor-zoom-in rounded-lg h-auto max-h-[700px] w-auto max-w-full object-contain mx-auto block transition-transform duration-200 hover:scale-[1.01] hover:shadow-lg';
   const finalClasses = className ? `${defaultClasses} ${className}` : defaultClasses;
 
   return (

@@ -46,12 +46,22 @@ const Image = ({ alt, src, bare = true, ...rest }: ImageComponentProps) => {
   const { className: customClassName, ...otherProps } = rest;
 
   // 공통 클래스: 
-  // 1. w-full: 부모 컨테이너를 가득 채우지만, 커스텀 w- 클래스가 지정된 경우 생략
-  // 2. object-cover: 이미지 비율을 유지하면서 컨테이너를 가득 채우도록 자름
-  // 3. max-h-[400px]: MDX 콘텐츠 내에서 이미지가 너무 크게 표시되는 것을 방지 (커스텀 h- 지정 시 오버라이드 가능)
-  // 4. cursor-pointer: 클릭 가능함을 나타내지만 돋보기 아이콘은 제거
+  // 1. w-auto max-w-full h-auto: 원본 가로세로 비율 유지 (커스텀 w- 지정 시 생략)
+  // 2. object-contain: 이미지가 잘리지 않고 전체가 선명하게 표시되도록 설정 (커스텀 object- 지정 시 오버라이드)
+  // 3. max-h-[700px]: 너무 긴 이미지가 화면을 지나치게 차지하지 않도록 높이 상한선 지정 (커스텀 max-h- 지정 시 오버라이드)
+  // 4. mx-auto block: 가운데 정렬
   const hasCustomWidth = customClassName && /(?:^|\s)(?:w-|size-)/.test(customClassName);
-  const defaultClasses = `${hasCustomWidth ? '' : 'w-full max-w-full '}max-h-[400px] object-cover cursor-pointer`;
+  const hasCustomFit = customClassName && /(?:^|\s)object-/.test(customClassName);
+  const hasCustomMaxHeight = customClassName && /(?:^|\s)max-h-/.test(customClassName);
+
+  const defaultClasses = [
+    hasCustomWidth ? '' : 'w-auto max-w-full',
+    'h-auto',
+    hasCustomMaxHeight ? '' : 'max-h-[700px]',
+    hasCustomFit ? '' : 'object-contain',
+    'mx-auto block cursor-pointer',
+  ].filter(Boolean).join(' ');
+
   const finalClasses = customClassName ? `${defaultClasses} ${customClassName}`.trim() : defaultClasses;
 
   const imgElement = shouldUseFallbackImg ? (
