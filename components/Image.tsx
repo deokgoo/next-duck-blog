@@ -46,11 +46,11 @@ const Image = ({ alt, src, bare = true, ...rest }: ImageComponentProps) => {
   const { className: customClassName, ...otherProps } = rest;
 
   // 공통 클래스: 
-  // 1. w-full: 부모 컨테이너를 가득 채우지만, max-w-full로 과도한 확장 방지
-  // 2. object-cover: 이미지 비율을 유지하면서 컨테이너를 가득 채우도록 자름
-  // 3. max-h-[400px]: MDX 콘텐츠 내에서 이미지가 너무 크게 표시되는 것을 방지
-  // 4. cursor-pointer: 클릭 가능함을 나타내지만 돋보기 아이콘은 제거
-  const defaultClasses = "w-full max-w-full max-h-[400px] object-cover cursor-pointer";
+  // 1. w-auto max-w-full h-auto: 원본 가로세로 비율 유지 (과도한 늘림 방지)
+  // 2. object-contain: 이미지가 잘리지 않고 전체가 선명하게 표시되도록 설정
+  // 3. max-h-[700px]: 너무 긴 이미지가 화면을 지나치게 차지하지 않도록 높이 상한선 지정
+  // 4. mx-auto block: 가운데 정렬
+  const defaultClasses = "h-auto max-h-[700px] w-auto max-w-full object-contain mx-auto block cursor-pointer";
   const finalClasses = customClassName ? `${defaultClasses} ${customClassName}` : defaultClasses;
 
   const imgElement = shouldUseFallbackImg ? (
