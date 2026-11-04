@@ -46,12 +46,23 @@ const Image = ({ alt, src, bare = true, ...rest }: ImageComponentProps) => {
   const { className: customClassName, ...otherProps } = rest;
 
   // 공통 클래스: 
-  // 1. w-auto max-w-full h-auto: 원본 가로세로 비율 유지 (과도한 늘림 방지)
-  // 2. object-contain: 이미지가 잘리지 않고 전체가 선명하게 표시되도록 설정
-  // 3. max-h-[700px]: 너무 긴 이미지가 화면을 지나치게 차지하지 않도록 높이 상한선 지정
+  // 1. w-auto max-w-full h-auto: 원본 가로세로 비율 유지 (커스텀 w- 지정 시 생략)
+  // 2. object-contain: 이미지가 잘리지 않고 전체가 선명하게 표시되도록 설정 (커스텀 object- 지정 시 오버라이드)
+  // 3. max-h-[700px]: 너무 긴 이미지가 화면을 지나치게 차지하지 않도록 높이 상한선 지정 (커스텀 max-h- 지정 시 오버라이드)
   // 4. mx-auto block: 가운데 정렬
-  const defaultClasses = "h-auto max-h-[700px] w-auto max-w-full object-contain mx-auto block cursor-pointer";
-  const finalClasses = customClassName ? `${defaultClasses} ${customClassName}` : defaultClasses;
+  const hasCustomWidth = customClassName && /(?:^|\s)(?:w-|size-)/.test(customClassName);
+  const hasCustomFit = customClassName && /(?:^|\s)object-/.test(customClassName);
+  const hasCustomMaxHeight = customClassName && /(?:^|\s)max-h-/.test(customClassName);
+
+  const defaultClasses = [
+    hasCustomWidth ? '' : 'w-auto max-w-full',
+    'h-auto',
+    hasCustomMaxHeight ? '' : 'max-h-[700px]',
+    hasCustomFit ? '' : 'object-contain',
+    'mx-auto block cursor-pointer',
+  ].filter(Boolean).join(' ');
+
+  const finalClasses = customClassName ? `${defaultClasses} ${customClassName}`.trim() : defaultClasses;
 
   const imgElement = shouldUseFallbackImg ? (
     // eslint-disable-next-line @next/next/no-img-element

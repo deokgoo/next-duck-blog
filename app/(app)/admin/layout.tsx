@@ -1,6 +1,6 @@
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Metadata } from 'next';
-import AdminNav from './AdminNav';
+import AdminShell from './AdminShell';
 
 export const metadata: Metadata = {
   robots: {
@@ -13,8 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50/50 dark:bg-[#0b1120]">
-        <AdminNav />
-        <main>{children}</main>
+        <AdminShell>{children}</AdminShell>
       </div>
     </ProtectedRoute>
   );
