@@ -1,4 +1,7 @@
 {
+  "git": {
+    "deploymentEnabled": false
+  },
   "ignoreCommand": "node scripts/vercel-ignore-build.mjs",
   "installCommand": "pnpm install --frozen-lockfile",
   "rewrites": [
