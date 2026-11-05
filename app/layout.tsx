@@ -106,6 +106,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {process.env.GOOGLE_SITE_VERIFICATION_ID && (
           <meta name="google-site-verification" content={process.env.GOOGLE_SITE_VERIFICATION_ID} />
         )}
+        {process.env.NEXT_PUBLIC_NAVER_WEBMASTER_ID && (
+          <meta name="naver-site-verification" content={process.env.NEXT_PUBLIC_NAVER_WEBMASTER_ID} />
+        )}
       </head>
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-black dark:text-white">
