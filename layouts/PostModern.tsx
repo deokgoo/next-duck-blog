@@ -82,9 +82,9 @@ export default function PostModern({ content, authorDetails, next, prev, childre
                       <div className="text-base font-semibold tracking-tight text-ink dark:text-gray-100">
                         {author.name}
                       </div>
-                      {(author.occupation || author.company) && (
+                      {author.occupation && (
                         <div className="mt-0.5 text-xs text-ink-3 dark:text-gray-400">
-                          {[author.occupation, author.company].filter(Boolean).join(' · ')}
+                          {author.occupation}
                         </div>
                       )}
                       {author.twitter && (

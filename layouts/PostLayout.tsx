@@ -94,9 +94,9 @@ export default function PostLayout({ content, authorDetails, next, prev, related
                         <dd className="text-base font-semibold tracking-tight text-ink dark:text-gray-100">
                           {author.name}
                         </dd>
-                        {(author.occupation || author.company) && (
+                        {author.occupation && (
                           <dd className="mt-1 text-xs text-ink-3 dark:text-gray-400">
-                            {[author.occupation, author.company].filter(Boolean).join(' · ')}
+                            {author.occupation}
                           </dd>
                         )}
                         <dt className="sr-only">Social links</dt>
