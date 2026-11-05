@@ -1,7 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
+import { verifyAuth } from '@/lib/auth/serverAuth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Debug endpoint: admin auth (Firebase ID token) required
+  const auth = await verifyAuth(request);
+  if (!auth) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const results: Record<string, unknown> = {
     env: {
       FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || '(not set)',

@@ -220,3 +220,61 @@ describe('Property 6: Like rate limiting by IP', () => {
     )
   })
 })
+
+/**
+ * Search rate limiting (sliding window)
+ * For a given IP: at most 30 requests allowed within a 60-second window.
+ */
+describe('Search rate limiting (sliding window)', () => {
+  beforeEach(() => {
+    rateLimitDocs = {}
+    setCalls = []
+  })
+
+  it('allows the first 30 requests within the window and rejects the 31st', async () => {
+    const { checkSearchRateLimit } = await import('../engagement')
+    const ip = '203.0.113.7'
+
+    for (let i = 0; i < 30; i++) {
+      const { allowed } = await checkSearchRateLimit(ip)
+      expect(allowed).toBe(true)
+    }
+
+    const { allowed } = await checkSearchRateLimit(ip)
+    expect(allowed).toBe(false)
+
+    // After 30 writes, the rejected request must not write again
+    const totalWrites = setCalls.length
+    expect(totalWrites).toBe(30)
+    await checkSearchRateLimit(ip)
+    expect(setCalls.length).toBe(totalWrites)
+  })
+
+  it('allows requests again once window entries expire (with pruning)', async () => {
+    const { checkSearchRateLimit } = await import('../engagement')
+    const ip = '203.0.113.7'
+
+    // Pre-populate 30 timestamps all outside the 60s window
+    const old = Date.now() - 120 * 1000
+    rateLimitDocs[`${ip}`] = {
+      ip,
+      timestamps: Array.from({ length: 30 }, (_, i) => old + i),
+      updatedAt: new Date().toISOString(),
+    }
+
+    const { allowed } = await checkSearchRateLimit(ip)
+    expect(allowed).toBe(true)
+
+    // Expired timestamps should be pruned; only the new one stored
+    const stored = (rateLimitDocs[`${ip}`] as any).timestamps as number[]
+    expect(stored).toHaveLength(1)
+  })
+
+  it('allows different IPs independently', async () => {
+    const { checkSearchRateLimit } = await import('../engagement')
+    const { allowed: a1 } = await checkSearchRateLimit('198.51.100.1')
+    expect(a1).toBe(true)
+    const { allowed: a2 } = await checkSearchRateLimit('198.51.100.2')
+    expect(a2).toBe(true)
+  })
+})
