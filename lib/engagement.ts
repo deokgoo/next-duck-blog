@@ -105,3 +105,53 @@ export async function checkRateLimit(ip: string, slug: string, action: 'like'): 
 
   return true
 }
+
+/**
+ * 검색 요청 IP 기반 rate limit 확인 (슬라이딩 윈도우 방식)
+ * 60초 내 동일 IP에서 최대 30개 요청 허용
+ * 만료된 타임스탬프는 자동 정리
+ */
+export async function checkSearchRateLimit(ip: string): Promise<{ allowed: boolean }> {
+  // Firestore 미 초기화 환경(로컬 등)에서는 제한을 건너뜀
+  if (!db) return { allowed: true }
+
+  const docRef = db.collection('search-rate-limits').doc(ip)
+  const now = Date.now()
+  const windowMs = 60 * 1000 // 60초
+  const maxRequests = 30
+
+  const snapshot = await docRef.get()
+
+  let timestamps: number[] = []
+
+  if (snapshot.exists) {
+    const data = snapshot.data()
+    timestamps = data?.timestamps ?? []
+  }
+
+  // 윈도우 밖의 만료된 타임스탬프 제거
+  const validTimestamps = timestamps.filter((ts) => now - ts < windowMs)
+
+  // 윈도우 내 요청이 30개 이상이면 거부
+  if (validTimestamps.length >= maxRequests) {
+    // 만료된 타임스탬프가 있었다면 정리하여 저장
+    if (validTimestamps.length !== timestamps.length) {
+      await docRef.set({
+        ip,
+        timestamps: validTimestamps,
+        updatedAt: new Date().toISOString(),
+      })
+    }
+    return { allowed: false }
+  }
+
+  // 현재 타임스탬프 추가 후 저장
+  validTimestamps.push(now)
+  await docRef.set({
+    ip,
+    timestamps: validTimestamps,
+    updatedAt: new Date().toISOString(),
+  })
+
+  return { allowed: true }
+}
