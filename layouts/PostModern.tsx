@@ -65,45 +65,51 @@ export default function PostModern({ content, authorDetails, next, prev, childre
             <aside className="text-sm font-medium leading-5 xl:col-start-4 xl:row-start-1">
               <div className="sticky top-8 space-y-8">
                 {/* Author Info */}
-                {authorDetails.map((author) => (
-                  <div key={author.name} className="flex flex-col items-start">
-                    {author.avatar && (
-                      <div className="relative mb-3 h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-v-border shadow-subtle dark:ring-v-border-dark">
-                        <Image
-                          src={author.avatar}
-                          width={56}
-                          height={56}
-                          alt={author.name}
-                          className="h-full w-full rounded-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div>
-                      <div className="text-base font-semibold tracking-tight text-ink dark:text-gray-100">
-                        {author.name}
-                      </div>
-                      {author.occupation && (
-                        <div className="mt-0.5 text-xs text-ink-3 dark:text-gray-400">
-                          {author.occupation}
+                {authorDetails.map((author) => {
+                  const isSocialVisible = (kind: string) =>
+                    !author.visibleSocials || author.visibleSocials.length === 0 || author.visibleSocials.includes(kind);
+                  const isPlaceholderTwitter = !author.twitter || author.twitter.endsWith('/Twitter') || author.twitter.endsWith('/x');
+
+                  return (
+                    <div key={author.name} className="flex flex-col items-start">
+                      {author.avatar && (
+                        <div className="relative mb-3 h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-v-border shadow-subtle dark:ring-v-border-dark">
+                          <Image
+                            src={author.avatar}
+                            width={56}
+                            height={56}
+                            alt={author.name}
+                            className="h-full w-full rounded-full object-cover"
+                          />
                         </div>
                       )}
-                      {author.twitter && (
-                        <div className="mt-1">
-                          <Link
-                            href={author.twitter}
-                            className="text-xs font-mono text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {author.twitter
-                              .replace('https://twitter.com/', '@')
-                              .replace('https://x.com/', '@')}
-                          </Link>
+                      <div>
+                        <div className="text-base font-semibold tracking-tight text-ink dark:text-gray-100">
+                          {author.name}
                         </div>
-                      )}
+                        {author.occupation && (
+                          <div className="mt-0.5 text-xs text-ink-3 dark:text-gray-400">
+                            {author.occupation}
+                          </div>
+                        )}
+                        {author.twitter && !isPlaceholderTwitter && isSocialVisible('twitter') && (
+                          <div className="mt-1">
+                            <Link
+                              href={author.twitter}
+                              className="text-xs font-mono text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {author.twitter
+                                .replace('https://twitter.com/', '@')
+                                .replace('https://x.com/', '@')}
+                            </Link>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Navigation */}
                 <div className="space-y-4">

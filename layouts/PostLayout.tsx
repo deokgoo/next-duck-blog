@@ -73,61 +73,67 @@ export default function PostLayout({ content, authorDetails, next, prev, related
               <dt className="sr-only">Authors</dt>
               <dd>
                 <ul className="flex flex-wrap justify-center gap-6 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
-                  {authorDetails.map((author) => (
-                    <li
-                      className="flex flex-col items-center text-center xl:items-start xl:text-left"
-                      key={author.name}
-                    >
-                      {author.avatar && (
-                        <div className="relative mb-3 h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-v-border shadow-subtle dark:ring-v-border-dark sm:h-20 sm:w-20">
-                          <Image
-                            src={author.avatar}
-                            width={80}
-                            height={80}
-                            alt={author.name}
-                            className="h-full w-full rounded-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <dl className="whitespace-nowrap leading-5">
-                        <dt className="sr-only">Name</dt>
-                        <dd className="text-base font-semibold tracking-tight text-ink dark:text-gray-100">
-                          {author.name}
-                        </dd>
-                        {author.occupation && (
-                          <dd className="mt-1 text-xs text-ink-3 dark:text-gray-400">
-                            {author.occupation}
-                          </dd>
+                  {authorDetails.map((author) => {
+                    const isSocialVisible = (kind: string) =>
+                      !author.visibleSocials || author.visibleSocials.length === 0 || author.visibleSocials.includes(kind);
+                    const isPlaceholderTwitter = !author.twitter || author.twitter.endsWith('/Twitter') || author.twitter.endsWith('/x');
+
+                    return (
+                      <li
+                        className="flex flex-col items-center text-center xl:items-start xl:text-left"
+                        key={author.name}
+                      >
+                        {author.avatar && (
+                          <div className="relative mb-3 h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-v-border shadow-subtle dark:ring-v-border-dark sm:h-20 sm:w-20">
+                            <Image
+                              src={author.avatar}
+                              width={80}
+                              height={80}
+                              alt={author.name}
+                              className="h-full w-full rounded-full object-cover"
+                            />
+                          </div>
                         )}
-                        <dt className="sr-only">Social links</dt>
-                        <dd className="mt-2 flex items-center justify-center gap-3 xl:justify-start">
-                          {author.twitter && (
-                            <Link
-                              href={author.twitter}
-                              className="text-xs font-mono text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {author.twitter
-                                .replace('https://twitter.com/', '@')
-                                .replace('https://x.com/', '@')}
-                            </Link>
+                        <dl className="whitespace-nowrap leading-5">
+                          <dt className="sr-only">Name</dt>
+                          <dd className="text-base font-semibold tracking-tight text-ink dark:text-gray-100">
+                            {author.name}
+                          </dd>
+                          {author.occupation && (
+                            <dd className="mt-1 text-xs text-ink-3 dark:text-gray-400">
+                              {author.occupation}
+                            </dd>
                           )}
-                          {author.github && (
-                            <Link
-                              href={author.github}
-                              className="text-xs font-mono text-ink-3 hover:text-ink dark:text-gray-400 dark:hover:text-gray-200"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label="GitHub"
-                            >
-                              GitHub
-                            </Link>
-                          )}
-                        </dd>
-                      </dl>
-                    </li>
-                  ))}
+                          <dt className="sr-only">Social links</dt>
+                          <dd className="mt-2 flex items-center justify-center gap-3 xl:justify-start">
+                            {author.twitter && !isPlaceholderTwitter && isSocialVisible('twitter') && (
+                              <Link
+                                href={author.twitter}
+                                className="text-xs font-mono text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {author.twitter
+                                  .replace('https://twitter.com/', '@')
+                                  .replace('https://x.com/', '@')}
+                              </Link>
+                            )}
+                            {author.github && isSocialVisible('github') && (
+                              <Link
+                                href={author.github}
+                                className="text-xs font-mono text-ink-3 hover:text-ink dark:text-gray-400 dark:hover:text-gray-200"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="GitHub"
+                              >
+                                GitHub
+                              </Link>
+                            )}
+                          </dd>
+                        </dl>
+                      </li>
+                    );
+                  })}
                 </ul>
               </dd>
             </dl>
