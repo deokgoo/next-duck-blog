@@ -81,7 +81,7 @@ export default function Main({ posts, locale, description }: MainProps) {
 
           <div className="mt-8 flex items-center justify-center gap-3 animate-fade-in-up [animation-delay:280ms]">
             <Link
-              href={`${localePrefix}/blog/dev`}
+              href={`${localePrefix}/blog`}
               className="group inline-flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-medium text-white transition-all hover:bg-ink/90 hover:shadow-sm dark:bg-white dark:text-black dark:hover:bg-white/90"
             >
               <span>{s.ctaRead}</span>
@@ -135,7 +135,7 @@ export default function Main({ posts, locale, description }: MainProps) {
           <div className="mb-6 flex items-baseline justify-between">
             <h2 className="text-xl font-semibold tracking-[-0.02em]">{s.recent}</h2>
             <Link
-              href={`${localePrefix}/blog/dev`}
+              href={`${localePrefix}/blog`}
               className="font-mono text-xs text-ink-4 transition-colors hover:text-ink dark:hover:text-white"
             >
               {s.recentMeta}

@@ -6,7 +6,7 @@ interface NavLink {
 
 const headerNavLinks: NavLink[] = [
   { href: '/', title: 'Home' },
-  { href: '/blog/dev', title: 'Blog' },
+  { href: '/blog', title: 'Blog' },
   { href: '/admin/blog-ideas', title: 'Ideas', adminOnly: true },
   { href: '/projects', title: 'Projects' },
   { href: '/architecture', title: 'Architecture' },

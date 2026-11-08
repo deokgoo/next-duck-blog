@@ -46,7 +46,7 @@ export async function generateMetadata(props: {
   // SEO Redirect Fallback Check
   const posts = await getAllPosts();
   const validSet = new Set(posts.map((p) => p.category || 'dev'));
-  ['dev', 'travel', 'hobby', 'life'].forEach((c) => validSet.add(c));
+  ['architecture', 'ai', 'web', 'career', 'dev'].forEach((c) => validSet.add(c));
   const VALID_CATEGORIES = Array.from(validSet);
 
   const isOldRoute = !VALID_CATEGORIES.includes(category);

@@ -8,7 +8,6 @@ import PageTitle from '@/components/PageTitle';
 import SectionContainer from '@/components/SectionContainer';
 import siteMetadata from '@/data/siteMetadata';
 import ScrollTopAndComment from '@/components/ScrollTopAndComment';
-import AdComponentDisplay from '@/components/AdComponentDisplay';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
 import PostEngagement from '@/components/engagement/PostEngagement';
 import PostHeaderEngagement from '@/components/engagement/PostHeaderEngagement';
@@ -50,7 +49,6 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
           <div className="flex justify-center py-8">
             <PostEngagement slug={slug} />
           </div>
-          <AdComponentDisplay />
           <div className="pb-xl pt-xl text-ink-2 dark:text-gray-400" id="comment">
             <CommentWidget slug={slug} />
           </div>

@@ -8,7 +8,6 @@ import Image from '@/components/Image';
 import Tag from '@/components/Tag';
 import siteMetadata from '@/data/siteMetadata';
 import ScrollTopAndComment from '@/components/ScrollTopAndComment';
-import AdComponentDisplay from '@/components/AdComponentDisplay';
 import KoreanNewsletterForm from '@/components/KoreanNewsletterForm';
 import PostEngagement from '@/components/engagement/PostEngagement';
 import PostHeaderEngagement from '@/components/engagement/PostHeaderEngagement';
@@ -147,7 +146,6 @@ export default function PostLayout({ content, authorDetails, next, prev, related
                   <RelatedPosts posts={relatedPosts} />
                 </div>
               )}
-              <AdComponentDisplay />
               <div
                 className="pb-xl pt-xl text-ink-2 dark:text-gray-400"
                 id="comment"

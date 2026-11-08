@@ -8,7 +8,7 @@ export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디
 export const metadata = genPageMetadata({
   title: 'Blog',
   path: '/blog',
-  description: '개발, 여행, 취미, 일상까지 — 모든 글을 한 곳에서 볼 수 있습니다.',
+  description: '대규모 웹 아키텍처, 로컬 AI 최적화, 프론트엔드 심층 기술과 실전 엔지니어링 기록.',
 });
 
 export default async function BlogPage() {
