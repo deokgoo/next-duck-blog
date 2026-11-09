@@ -30,11 +30,11 @@ export interface HomeStrings {
 
 export const homeStrings: Record<Locale, HomeStrings> = {
   ko: {
-    overline: '엔지니어 · 작가 · 미래의 사업가',
+    overline: '프론트엔드 · 아키텍처 · 프로덕트 엔지니어',
     heroTitle: '엔지니어의',
     heroTitleAccent: '서브루틴 (Subroutine)',
     heroSubtitle:
-      '엔지니어의 블로그 — 기술 심화, 여행, 그리고 가끔의 라이프 에세이.',
+      '대규모 웹 시스템 아키텍처, 로컬 AI 최적화, 그리고 실전 프로덕트 엔지니어링 기록.',
     ctaRead: '블로그 읽기',
     ctaProjects: '프로젝트',
     categories: '카테고리',
@@ -54,11 +54,11 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     posts: 'posts',
   },
   en: {
-    overline: 'Engineer · Writer · Future Entrepreneur',
+    overline: 'Frontend · Architecture · Product Engineer',
     heroTitle: 'Notes on building',
-    heroTitleAccent: 'software & living well',
+    heroTitleAccent: 'software & systems',
     heroSubtitle:
-      "A developer's blog — engineering deep-dives, travel, and the occasional life essay.",
+      "A product engineer's log — system architecture, local AI optimization, and real-world software engineering.",
     ctaRead: 'Read the blog',
     ctaProjects: 'Projects',
     categories: 'Categories',
@@ -78,11 +78,11 @@ export const homeStrings: Record<Locale, HomeStrings> = {
     posts: 'posts',
   },
   jp: {
-    overline: 'エンジニア · 作家 · 未来の起業家',
-    heroTitle: 'ソフトウェアを',
-    heroTitleAccent: '作り、暮らす記録',
+    overline: 'フロントエンド · アーキテクチャ · プロダクトエンジニア',
+    heroTitle: 'エンジニアの',
+    heroTitleAccent: 'サブルーチン (Subroutine)',
     heroSubtitle:
-      'エンジニアのブログ — 技術の深掘り、旅行、そしてときどきのライフエッセイ。',
+      '大規模Webシステムアーキテクチャ、ローカルAI最適化、そして実践的なプロダクトエンジニアリングの記録。',
     ctaRead: 'ブログを読む',
     ctaProjects: 'プロジェクト',
     categories: 'カテゴリ',

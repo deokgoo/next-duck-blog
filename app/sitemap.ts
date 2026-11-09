@@ -17,6 +17,53 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 1.0,
   }));
 
+  // 4대 핵심 엔지니어링 카테고리 허브 페이지 (우선순위 0.9)
+  const categories = ['architecture', 'ai', 'web', 'career'];
+  const categoryRoutes: MetadataRoute.Sitemap = categories.map((cat) => {
+    const koUrl = `${siteUrl}/blog/${cat}`;
+    const catHreflang = {
+      ko: koUrl,
+      en: `${siteUrl}/en/blog/${cat}`,
+      ja: `${siteUrl}/jp/blog/${cat}`,
+      'x-default': koUrl,
+    };
+    return {
+      url: koUrl,
+      lastModified: new Date().toISOString().split('T')[0],
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+      alternates: { languages: catHreflang },
+    };
+  });
+
+  // EN/JP 카테고리 허브 페이지
+  const localeCategoryRoutes: MetadataRoute.Sitemap = [];
+  for (const cat of categories) {
+    const koUrl = `${siteUrl}/blog/${cat}`;
+    const catHreflang = {
+      ko: koUrl,
+      en: `${siteUrl}/en/blog/${cat}`,
+      ja: `${siteUrl}/jp/blog/${cat}`,
+      'x-default': koUrl,
+    };
+    localeCategoryRoutes.push(
+      {
+        url: `${siteUrl}/en/blog/${cat}`,
+        lastModified: new Date().toISOString().split('T')[0],
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+        alternates: { languages: catHreflang },
+      },
+      {
+        url: `${siteUrl}/jp/blog/${cat}`,
+        lastModified: new Date().toISOString().split('T')[0],
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+        alternates: { languages: catHreflang },
+      }
+    );
+  }
+
   // EN/JP 홈 페이지 — 홈 3개 언어는 hreflang으로 연결
   const homeHreflang = {
     ko: siteUrl,
@@ -106,5 +153,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  return [...routes, ...localeRoutes, ...blogRoutes, ...localePostRoutes] as MetadataRoute.Sitemap;
+  return [
+    ...routes,
+    ...categoryRoutes,
+    ...localeRoutes,
+    ...localeCategoryRoutes,
+    ...blogRoutes,
+    ...localePostRoutes,
+  ] as MetadataRoute.Sitemap;
 }
