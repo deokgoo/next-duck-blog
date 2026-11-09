@@ -16,7 +16,8 @@
  *
  * 그 외(=아래 SKIP_PREFIXES)만 변경된 커밋은 빌드 스킵.
  *
- * 주의: data/blog/*.mdx는 Firestore 스냅샷이라 빌드 입력이 아니지만,
+ * 주의: data/blog/*.mdx는 Firestore 스냅샷이라 빌드 입력이 아니므로
+ *       git에서 제거했으며(2026-11-09), 원천 데이터는 Firestore다.
  *       data/authors/default.mdx는 about 페이지가 빌드 시 읽으므로
  *       data/ 전체를 "앱 관련"으로 보수적으로 취급한다.
  *       (포스트 발행은 admin UI → Firestore + revalidate로 처리되므로
@@ -33,12 +34,11 @@ const SKIP_PREFIXES = [
   '.kiro/',
   '.hermes/',
   '.github/',
-  // data/blog/*.mdx는 Firestore 스냅샷일 뿐 — 빌드 입력이 아님.
-  // 포스트 콘텐츠는 Firestore(getAllPosts/getPostBySlug)에서 오고,
-  // pageExtensions의 md/mdx도 data/ 디렉토리에 적용되지 않는다.
-  // 발행은 admin UI → Firestore + revalidate로 처리되므로 mdx 커밋만으로는
-  // 배포 사이트가 변하지 않는다. (data/authors, data/siteMetadata 등
-  //  나머지 data/는 빌드 시 읽으므로 앱 관련으로 유지)
+  // data/blog/은 더 이상 git에 추적되지 않음(2026-11-09 제거).
+  // 포스트 콘텐츠는 Firestore(getAllPosts/getPostBySlug)에서 오므로
+  // 만에 하나 data/blog/ 파일이 다시 커밋되어도 빌드를 스킵한다.
+  // (data/authors, data/siteMetadata 등 나머지 data/는 빌드 시
+  //  읽으므로 앱 관련으로 유지)
   'data/blog/',
 ];
 
