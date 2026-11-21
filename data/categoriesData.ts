@@ -23,6 +23,12 @@ export const categoriesData = {
     color: '#10b981', // emerald
     icon: 'Compass',
   },
+  study: {
+    title: 'Study & Notes',
+    description: 'CS 기초, 알고리즘, 새로운 기술 스택 학습 및 핵심 개념 정리',
+    color: '#f59e0b', // amber
+    icon: 'BookOpen',
+  },
 };
 
 export type CategoryKey = keyof typeof categoriesData;

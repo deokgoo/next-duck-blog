@@ -13,7 +13,7 @@ export const revalidate = false; // 영구 캐시 — revalidatePath()로 온디
 const getValidCategories = async () => {
   const posts = await getAllPosts();
   const cats = new Set(posts.map((p) => p.category || 'dev'));
-  ['architecture', 'ai', 'web', 'career', 'dev'].forEach((c) => cats.add(c));
+  ['architecture', 'ai', 'web', 'career', 'study', 'dev'].forEach((c) => cats.add(c));
   return Array.from(cats);
 };
 
@@ -24,6 +24,7 @@ const getCategoryDescription = (category: string): string => {
     ai: 'Mac Studio 로컬 LLM 운영, AI 에이전트 워크플로우, 프롬프트 엔지니어링 및 개발 자동화 실전기를 다룹니다.',
     web: 'React/Next.js 생태계, Web Components (Lit), HLS 스트리밍, 브라우저 인터널 및 프론트엔드 심층 기술을 소개합니다.',
     career: '기술 의사결정의 이유(Why), 채용 및 기술 면접 기준, 8년 차 프로덕트 엔지니어의 경험과 회고를 기록합니다.',
+    study: 'CS 기초 지식, 알고리즘, 신규 기술 스택 및 개념 학습 내용을 체계적으로 정리합니다.',
     dev: '소프트웨어 엔지니어링 실무 경험과 개발 도구, 코드 설계 가이드를 다룹니다.',
     react: 'React, Next.js, 상태관리 등 React 생태계의 최신 기술과 실전 팁을 다룹니다.',
     js: 'JavaScript, TypeScript의 핵심 개념과 실무 활용법, ES6+ 최신 문법을 소개합니다.',

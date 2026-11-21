@@ -8,7 +8,7 @@ type SupportedLocale = 'en' | 'jp';
 const getValidCategories = async () => {
   const posts = await getAllPosts();
   const cats = new Set(posts.map((p) => p.category || 'dev'));
-  ['dev', 'travel', 'hobby', 'life'].forEach((c) => cats.add(c));
+  ['architecture', 'ai', 'web', 'career', 'study', 'dev', 'travel', 'hobby', 'life'].forEach((c) => cats.add(c));
   return Array.from(cats);
 };
 

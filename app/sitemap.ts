@@ -17,8 +17,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 1.0,
   }));
 
-  // 4대 핵심 엔지니어링 카테고리 허브 페이지 (우선순위 0.9)
-  const categories = ['architecture', 'ai', 'web', 'career'];
+  // 5대 핵심 엔지니어링 카테고리 허브 페이지 (우선순위 0.9)
+  const categories = ['architecture', 'ai', 'web', 'career', 'study'];
   const categoryRoutes: MetadataRoute.Sitemap = categories.map((cat) => {
     const koUrl = `${siteUrl}/blog/${cat}`;
     const catHreflang = {
